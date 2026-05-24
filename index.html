@@ -1750,52 +1750,66 @@ function flattenBookings() {
 function renderTimelineItem(item, fbId) {
   var isFb = !!fbId;
   var sent = item.sent || false;
-  var sentBadge = sent
-    ? '<span class="timeline-card-badge badge-confirmed" style="cursor:pointer" onclick="toggleSent('' + fbId + '', true)">✅ Enviado</span>'
-    : (isFb ? '<span class="timeline-card-badge badge-pending" style="cursor:pointer" onclick="toggleSent('' + fbId + '', false)">📤 Não enviado</span>' : '');
 
-  var statusClass = item.status || 'todo';
-  var badgeLabel = statusClass === 'confirmed' ? '✓ Confirmado' : statusClass === 'flight' ? '✈️ Voo' : statusClass === 'pending' ? '⏳ Pendente' : '📋 Reservar';
-  var badgeHtml = isFb ? sentBadge : '<span class="timeline-card-badge badge-' + statusClass + '">' + badgeLabel + '</span>';
-
-  var metaHtml = (item.meta || []).map(function(m) {
-    return '<div class="timeline-meta-item"><span>' + m.icon + '</span><span>' + m.text + '</span></div>';
-  }).join('');
-
-  var linkHtml = item.link ? '<a class="timeline-card-link" href="' + item.link + '" target="_blank" rel="noopener">' + (item.linkLabel || '→ Ver') + '</a>' : '';
-
-  // Attachments for Firebase items
-  var attachHtml = '';
-  if (isFb && item.fileUrl) {
-    var isImg = item.fileType && item.fileType.startsWith('image/');
-    var isPdf = item.fileType && item.fileType.includes('pdf');
-    if (isImg) {
-      attachHtml = '<div class="timeline-card-attachments"><a href="' + item.fileUrl + '" target="_blank"><img class="attach-thumb" src="' + item.fileUrl + '"></a><a class="attach-link" href="' + item.fileUrl + '" target="_blank">🖼️ Ver arquivo</a></div>';
+  // Badge
+  var badgeHtml;
+  if (isFb) {
+    if (sent) {
+      badgeHtml = '<span class="timeline-card-badge badge-confirmed" style="cursor:pointer" onclick="toggleSent(\"' + fbId + '\", true)">✅ Enviado</span>';
     } else {
-      attachHtml = '<div class="timeline-card-attachments"><a class="attach-link" href="' + item.fileUrl + '" target="_blank">' + (isPdf ? '📋' : '📎') + ' ' + (item.fileName || 'arquivo') + '</a></div>';
+      badgeHtml = '<span class="timeline-card-badge badge-pending" style="cursor:pointer" onclick="toggleSent(\"' + fbId + '\", false)">📤 Não enviado</span>';
     }
+  } else {
+    var statusClass = item.status || 'todo';
+    var badgeLabel = statusClass === 'confirmed' ? '✓ Confirmado' : statusClass === 'flight' ? '✈️ Voo' : statusClass === 'pending' ? '⏳ Pendente' : '📋 Reservar';
+    badgeHtml = '<span class="timeline-card-badge badge-' + statusClass + '">' + badgeLabel + '</span>';
   }
 
-  // Edit/delete controls for Firebase items
-  var actionsHtml = isFb ? (
-    '<div class="timeline-card-actions">' +
-    '<button class="tl-action-btn edit" onclick="editReservation('' + fbId + '')">✏️ Editar</button>' +
-    '<button class="tl-action-btn delete" onclick="deleteReservation('' + fbId + '')">🗑️ Apagar</button>' +
-    '</div>'
-  ) : '';
-
+  var dotClass = isFb ? (sent ? 'confirmed' : 'pending') : (item.status || 'todo');
   var icon = item.icon || (item.category ? item.category.split(' ')[0] : '📎');
   var title = item.title || '';
   var detail = item.detail || (item.notes ? item.notes : '');
   if (isFb && item.date) detail = '📅 ' + item.date + (detail ? ' · ' + detail : '');
 
-  return '<div class="timeline-item" id="tlitem-' + (fbId||'') + '">' +
-    '<div class="timeline-dot-wrap"><div class="timeline-dot ' + (isFb ? (sent ? 'confirmed' : 'pending') : statusClass) + '"></div></div>' +
+  var metaHtml = '';
+  if (item.meta && item.meta.length) {
+    metaHtml = '<div class="timeline-card-meta">';
+    item.meta.forEach(function(m) {
+      metaHtml += '<div class="timeline-meta-item"><span>' + m.icon + '</span><span>' + m.text + '</span></div>';
+    });
+    metaHtml += '</div>';
+  }
+
+  var linkHtml = item.link ? '<a class="timeline-card-link" href="' + item.link + '" target="_blank" rel="noopener">' + (item.linkLabel || '→ Ver') + '</a>' : '';
+
+  var attachHtml = '';
+  if (isFb && item.fileUrl) {
+    var isImg = item.fileType && item.fileType.startsWith('image/');
+    var isPdf = item.fileType && item.fileType.includes('pdf');
+    attachHtml = '<div class="timeline-card-attachments">';
+    if (isImg) {
+      attachHtml += '<a href="' + item.fileUrl + '" target="_blank"><img class="attach-thumb" src="' + item.fileUrl + '"></a>';
+      attachHtml += '<a class="attach-link" href="' + item.fileUrl + '" target="_blank">🖼️ Ver arquivo</a>';
+    } else {
+      attachHtml += '<a class="attach-link" href="' + item.fileUrl + '" target="_blank">' + (isPdf ? '📋' : '📎') + ' ' + (item.fileName || 'arquivo') + '</a>';
+    }
+    attachHtml += '</div>';
+  }
+
+  var actionsHtml = '';
+  if (isFb) {
+    actionsHtml = '<div class="timeline-card-actions">' +
+      '<button class="tl-action-btn edit" onclick="editReservation(\"' + fbId + '\")">✏️ Editar</button>' +
+      '<button class="tl-action-btn delete" onclick="deleteReservation(\"' + fbId + '\")">🗑️ Apagar</button>' +
+      '</div>';
+  }
+
+  return '<div class="timeline-item" id="tlitem-' + (fbId || '') + '">' +
+    '<div class="timeline-dot-wrap"><div class="timeline-dot ' + dotClass + '"></div></div>' +
     '<div class="timeline-card">' +
     '<div class="timeline-card-top"><span class="timeline-card-title">' + icon + ' ' + title + '</span>' + badgeHtml + '</div>' +
     (detail ? '<div class="timeline-card-detail">' + detail + '</div>' : '') +
-    (metaHtml ? '<div class="timeline-card-meta">' + metaHtml + '</div>' : '') +
-    linkHtml + attachHtml + actionsHtml +
+    metaHtml + linkHtml + attachHtml + actionsHtml +
     '</div></div>';
 }
 
