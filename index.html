@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 2.10
+     Version : 2.11
      Date    : 2026-05-23
      Changes : API key via Firebase (não hardcoded),
                setup modal para API key,
@@ -803,7 +803,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <section class="chat-section" id="chatbot" style="padding:0 16px;box-sizing:border-box;">
     <div class="manga-divider"><div class="divider-line"></div><span class="divider-symbol">🤖</span><div class="divider-line"></div></div>
     <h2 class="section-heading">🤖 Trip Assistant</h2>
-    <p class="section-sub">Pergunte qualquer coisa sobre a viagem — sugestões, mudanças, dúvidas</p>
+    <p class="section-sub">Pergunte qualquer coisa sobre a viagem — sugestões, mudanças, dúvidas &nbsp;·&nbsp; <span id="keyStatusIndicator" style="font-family:var(--font-mono);font-size:10px;cursor:pointer;color:rgba(200,180,150,0.4)" onclick="showApikeyModal()">⚙️ API Key</span></p>
     <div class="chat-wrapper">
       <div class="chat-messages" id="chatMessages">
         <div class="chat-bubble assistant">Oi! 👋 Sou o assistente da <strong>3Boys Japan Trip 2026</strong>. Conheço toda a viagem — itinerário, hotéis, custos, restaurantes. Pode perguntar qualquer coisa! 🗾</div>
@@ -829,7 +829,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v2.10 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v2.11 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -1560,6 +1560,7 @@ async function loadApiKey() {
     if (doc.exists && doc.data().key) {
       ANTHROPIC_KEY = doc.data().key;
       console.log('✅ API key loaded from Firebase');
+      updateKeyStatusIndicator(true);
       return true;
     }
   } catch(e) {
@@ -1567,7 +1568,20 @@ async function loadApiKey() {
   }
   // No key found — show setup modal
   document.getElementById('apikeyModal').classList.add('active');
+  updateKeyStatusIndicator(false);
   return false;
+}
+
+function updateKeyStatusIndicator(hasKey) {
+  var el = document.getElementById('keyStatusIndicator');
+  if (!el) return;
+  if (hasKey) {
+    el.textContent = '🔑 Key ativa · Alterar';
+    el.style.color = 'rgba(39,174,96,0.6)';
+  } else {
+    el.textContent = '⚠️ API Key não configurada · Clique aqui';
+    el.style.color = '#e74c3c';
+  }
 }
 
 async function saveApiKey() {
@@ -1586,17 +1600,20 @@ async function saveApiKey() {
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-6-20251001', max_tokens: 10, messages: [{ role: 'user', content: 'hi' }] })
+      body: JSON.stringify({ model: 'claude-haiku-4-5-20251001', max_tokens: 10, messages: [{ role: 'user', content: 'hi' }] })
     });
+    if (res.status === 401) throw new Error('API key inválida ou revogada. Gere uma nova em console.anthropic.com');
+    if (res.status === 403) throw new Error('Sem permissão. Verifique se a key tem acesso à API.');
     var data = await res.json();
-    if (data.error) {
-      throw new Error(data.error.message || data.error.type);
+    if (data.error && data.error.type !== 'overloaded_error') {
+      throw new Error(data.error.message || 'Erro: ' + data.error.type);
     }
     // Save to Firebase
     status.textContent = '⏳ Salvando no Firebase...';
     await initFirebase();
     await db.collection('config').doc('anthropic').set({ key: key, updatedAt: new Date().toISOString() });
     ANTHROPIC_KEY = key;
+    updateKeyStatusIndicator(true);
     status.style.color = '#2ecc71';
     status.textContent = '✅ API key salva e ativa!';
     setTimeout(function() {
@@ -1631,6 +1648,18 @@ function openUploadForDay(dayNum, dayDate) {
 }
 
 function openUploadModal() { document.getElementById('uploadModal').classList.add('active'); }
+
+function showApikeyModal() {
+  document.getElementById('apikeyModal').classList.add('active');
+  // Show masked current key if exists
+  var hint = document.getElementById('currentKeyHint');
+  var masked = document.getElementById('currentKeyMasked');
+  if (ANTHROPIC_KEY && hint && masked) {
+    var k = ANTHROPIC_KEY;
+    masked.textContent = k.slice(0, 12) + '...' + k.slice(-4);
+    hint.style.display = 'block';
+  }
+}
 
 function closeUploadModal() {
   editingFbId = null; currentUploadDay = null; currentUploadDate = null;
@@ -2087,7 +2116,7 @@ function loadLeafletAndMap() {
 </div>
 
 <!-- Settings button (gear) -->
-<button class="apikey-settings-btn" onclick="document.getElementById('apikeyModal').classList.add('active')" title="Configurar API Key">⚙️</button>
+<button class="apikey-settings-btn" onclick="showApikeyModal()" title="Configurar API Key">⚙️</button>
 
 </body>
 </html>
