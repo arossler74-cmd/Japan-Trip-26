@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 3.0
+     Version : 3.1
      Date    : 2026-05-23
      Changes : API key via Firebase (não hardcoded),
                setup modal para API key,
@@ -829,7 +829,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v3.0 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v3.1 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -2554,16 +2554,55 @@ DICAS GERAIS (podem ser atualizadas pelas reservas):
 VOCÊ TEM PODER DE EDITAR O ITINERÁRIO EM TEMPO REAL:
 Quando o usuário pedir mudanças (hotel diferente, nova data, atividade nova), responda E inclua no final:
 
-ITINERARY_PATCH: [{"dayNum": 5, "hotel": "Mitsui Garden Kyoto Sanjo", "city": "Kyoto", "note": "Hotel atualizado conforme reserva"}, {"dayNum": 6, "hotel": "Mitsui Garden Kyoto Sanjo"}]
+ITINERARY_PATCH: [{"dayNum": 5, "hotel": "Mitsui Garden Kyoto Sanjo"}, {"dayNum": 6, "hotel": "Mitsui Garden Kyoto Sanjo"}, {"dayNum": 7, "hotel": "Mitsui Garden Kyoto Sanjo"}]
 
-Regras do patch:
-- dayNum: 1=Jul23, 2=Jul24, 3=Jul25, 4=Jul26, 5=Jul27, 6=Jul28, 7=Jul29, 8=Jul30, 9=Jul31, 10=Ago1, 11=Ago2
-- Campos: dayNum, hotel, city, theme, note, morning(array), afternoon(array), night(array), transport(array)
-- Use "days": [5,6,7,8] para atualizar múltiplos dias com o mesmo hotel
-- SEMPRE inclua o patch quando houver mudança — é isso que atualiza o app E salva no Firebase
-- As RESERVAS SALVAS abaixo têm prioridade sobre qualquer dado do itinerário base`;
+REGRAS CRÍTICAS DO PATCH:
+- SEMPRE use exatamente "ITINERARY_PATCH:" (sem código markdown, sem backticks)
+- dayNum: 1=Jul23, 2=Jul24, 3=Jul25, 4=Jul26, 5=Jul27, 6=Jul28, 7=Jul29, 8=Jul30, 9=Jul31, 10=Ago1, 11=Ago2  
+- Para múltiplos dias iguais: [{"dayNum":5,"hotel":"X"},{"dayNum":6,"hotel":"X"},{"dayNum":7,"hotel":"X"}]
+- Campos disponíveis: dayNum, hotel, city, theme, note, morning(array), afternoon(array), night(array), transport(array)
+- NUNCA use markdown ou backticks no patch — o app lê texto puro
+- O patch deve estar SEMPRE no final da resposta
+- SEMPRE inclua patch quando houver qualquer mudança no itinerário`;
 
 var chatHistory = [];
+var CHAT_HISTORY_KEY = 'chatHistory';
+
+async function saveChatHistory() {
+  try {
+    await initFirebase();
+    // Keep last 30 messages only
+    var toSave = chatHistory.slice(-30);
+    await db.collection('config').doc('chatHistory').set({
+      messages: JSON.stringify(toSave),
+      updatedAt: new Date().toISOString()
+    });
+  } catch(e) { /* silent fail */ }
+}
+
+async function loadChatHistory() {
+  try {
+    await initFirebase();
+    var doc = await db.collection('config').doc('chatHistory').get();
+    if (doc.exists && doc.data().messages) {
+      var saved = JSON.parse(doc.data().messages);
+      if (saved && saved.length > 0) {
+        chatHistory = saved;
+        // Render saved messages in chat
+        var msgs = document.getElementById('chatMessages');
+        // Keep the welcome message, add history
+        saved.forEach(function(msg) {
+          var div = document.createElement('div');
+          div.className = 'chat-bubble ' + msg.role;
+          div.innerHTML = msg.content.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+          msgs.appendChild(div);
+        });
+        msgs.scrollTop = msgs.scrollHeight;
+        console.log('✅ Chat history restored (' + saved.length + ' messages)');
+      }
+    }
+  } catch(e) { console.warn('Could not load chat history:', e.message); }
+}
 
 function chatKeydown(e) { if (e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();} }
 function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
@@ -2646,37 +2685,67 @@ function applyItineraryPatches(patches) {
 }
 
 // Parse Claude response for JSON patches
-function extractAndApplyPatches(text) {
-  var match = null;
-  // Look for ITINERARY_PATCH: [...] pattern (safe, no backticks in regex)
-  var patchIdx = text.indexOf('ITINERARY_PATCH:');
-  if (patchIdx !== -1) {
-    var patchStr = text.slice(patchIdx + 16).trim();
+function extractJsonFromText(text) {
+  // Try multiple patterns to find patch JSON
+  var candidates = [];
+
+  // Pattern 1: ITINERARY_PATCH: [...]
+  var idx1 = text.indexOf('ITINERARY_PATCH:');
+  if (idx1 !== -1) candidates.push(text.slice(idx1 + 16).trim());
+
+  // Pattern 2: code block markers (find [ or { after them)
+  var codeBlocks = text.split('\n');
+  var inBlock = false;
+  var blockContent = '';
+  for (var li = 0; li < codeBlocks.length; li++) {
+    var line = codeBlocks[li].trim();
+    if (!inBlock && (line === '```json' || line === '```' || line === '```patch')) {
+      inBlock = true; blockContent = '';
+    } else if (inBlock && line === '```') {
+      candidates.push(blockContent.trim());
+      inBlock = false; blockContent = '';
+    } else if (inBlock) {
+      blockContent += line + '\n';
+    }
+  }
+
+  // Try each candidate
+  for (var ci = 0; ci < candidates.length; ci++) {
+    var str = candidates[ci];
+    // Find first [ or {
     var jsonStart = -1;
-    for (var si = 0; si < patchStr.length; si++) {
-      if (patchStr[si] === '[' || patchStr[si] === '{') { jsonStart = si; break; }
+    for (var si = 0; si < str.length; si++) {
+      if (str[si] === '[' || str[si] === '{') { jsonStart = si; break; }
     }
-    if (jsonStart !== -1) {
-      patchStr = patchStr.slice(jsonStart);
-      var depth = 0, endIdx = 0;
-      var opener = patchStr[0], closer = opener === '[' ? ']' : '}';
-      for (var ci = 0; ci < patchStr.length; ci++) {
-        if (patchStr[ci] === opener) depth++;
-        else if (patchStr[ci] === closer) { depth--; if (depth === 0) { endIdx = ci + 1; break; } }
+    if (jsonStart === -1) continue;
+    str = str.slice(jsonStart);
+
+    // Find matching end bracket
+    var depth = 0, end = 0;
+    var opener = str[0], closer = opener === '[' ? ']' : '}';
+    for (var di = 0; di < str.length; di++) {
+      if (str[di] === opener) depth++;
+      else if (str[di] === closer) { depth--; if (depth === 0) { end = di + 1; break; } }
+    }
+    if (end === 0) continue;
+
+    try {
+      var parsed = JSON.parse(str.slice(0, end));
+      // Check if it looks like an itinerary patch
+      var arr = Array.isArray(parsed) ? parsed : [parsed];
+      if (arr[0] && (arr[0].dayNum !== undefined || arr[0].days !== undefined || arr[0].hotel !== undefined)) {
+        return arr;
       }
-      if (endIdx > 0) match = [null, patchStr.slice(0, endIdx)];
-    }
+    } catch(e) {}
   }
-  if (!match) return false;
-  try {
-    var patches = JSON.parse(match[1]);
-    if (!Array.isArray(patches)) patches = [patches];
-    applyItineraryPatches(patches);
-    return true;
-  } catch(e) {
-    console.warn('Could not parse itinerary patch:', e);
-    return false;
-  }
+  return null;
+}
+
+function extractAndApplyPatches(text) {
+  var patches = extractJsonFromText(text);
+  if (!patches) return false;
+  applyItineraryPatches(patches);
+  return true;
 }
 
 // Cache of Firebase reservations for chat context
@@ -2780,6 +2849,7 @@ async function sendChat() {
     if (data.error) throw new Error(data.error.message);
     var reply = data.content&&data.content[0]?data.content[0].text:'Desculpe, tente novamente.';
     chatHistory.push({role:'assistant',content:reply});
+    saveChatHistory(); // persist to Firebase
     thinking.remove();
     // Remove patch block from visible chat message
     // Remove patch from display
@@ -2808,6 +2878,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadApiKey();
   loadFirebaseReservations();
   loadItineraryFromFirebase();
+  loadChatHistory();
   buildMustDo();
   buildCosts();
   setupObserver();
