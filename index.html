@@ -643,6 +643,42 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
 .tl-action-btn.edit:hover { background:rgba(201,168,76,0.25); }
 .tl-action-btn.delete { background:rgba(192,57,43,0.1); color:#e74c3c; border:1px solid rgba(192,57,43,0.3); }
 .tl-action-btn.delete:hover { background:rgba(192,57,43,0.25); }
+
+/* ====== PER-DAY RESERVATIONS PANEL ====== */
+.day-reserv-panel { margin: 16px 0 4px; border-top: 1px solid rgba(201,168,76,0.15); padding-top: 14px; }
+.day-reserv-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
+.day-reserv-title { font-family:var(--font-mono); font-size:10px; letter-spacing:.12em; text-transform:uppercase; color:rgba(200,180,150,0.5); }
+.day-reserv-badges { display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+.reserv-count-badge { font-family:var(--font-mono); font-size:9px; padding:2px 8px; border-radius:2px; letter-spacing:.06em; }
+.rcb-confirmed { background:rgba(39,174,96,.15); color:#2ecc71; border:1px solid rgba(39,174,96,.25); }
+.rcb-pending { background:rgba(201,168,76,.12); color:var(--gold); border:1px solid rgba(201,168,76,.25); }
+.add-reserv-btn { font-family:var(--font-mono); font-size:9px; letter-spacing:.08em; text-transform:uppercase; background:rgba(0,212,255,0.07); border:1px solid rgba(0,212,255,0.25); color:var(--neon); padding:4px 10px; border-radius:2px; cursor:pointer; transition:all .2s; white-space:nowrap; }
+.add-reserv-btn:hover { background:rgba(0,212,255,0.18); }
+.day-reserv-list { display:flex; flex-direction:column; gap:6px; }
+.reserv-item { display:flex; align-items:flex-start; gap:10px; background:rgba(201,168,76,0.04); border:1px solid rgba(201,168,76,0.12); border-radius:3px; padding:10px 12px; transition:border-color .2s; }
+.reserv-item:hover { border-color:rgba(201,168,76,0.3); }
+.reserv-item-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; margin-top:4px; }
+.ri-dot-sent { background:#27ae60; }
+.ri-dot-pending { background:var(--gold); }
+.reserv-item-body { flex:1; min-width:0; }
+.reserv-item-top { display:flex; align-items:flex-start; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+.reserv-item-title { font-family:var(--font-mono); font-size:11px; font-weight:700; color:var(--text-main); }
+.reserv-item-badge { font-family:var(--font-mono); font-size:8px; letter-spacing:.08em; text-transform:uppercase; padding:2px 6px; border-radius:2px; cursor:pointer; transition:all .2s; white-space:nowrap; flex-shrink:0; }
+.rib-sent { background:rgba(39,174,96,.12); color:#2ecc71; border:1px solid rgba(39,174,96,.25); }
+.rib-pending { background:rgba(201,168,76,.1); color:var(--gold); border:1px solid rgba(201,168,76,.25); }
+.reserv-item-detail { font-size:11px; color:rgba(200,180,150,0.55); margin-top:3px; line-height:1.5; }
+.reserv-item-actions { display:flex; gap:6px; align-items:center; margin-top:6px; flex-wrap:wrap; }
+.ri-action { font-family:var(--font-mono); font-size:9px; padding:3px 8px; border-radius:2px; border:none; cursor:pointer; transition:all .2s; }
+.ri-action.file { background:rgba(0,212,255,0.08); color:var(--neon); border:1px solid rgba(0,212,255,0.2); text-decoration:none; display:inline-flex; align-items:center; }
+.ri-action.edit { background:rgba(201,168,76,0.08); color:var(--gold); border:1px solid rgba(201,168,76,0.2); }
+.ri-action.del { background:rgba(192,57,43,0.08); color:#e74c3c; border:1px solid rgba(192,57,43,0.2); }
+.ri-action:hover { opacity:.8; transform:translateY(-1px); }
+.reserv-empty { font-family:var(--font-mono); font-size:10px; color:rgba(200,180,150,0.3); padding:8px 0; letter-spacing:.05em; }
+/* Badge on episode header */
+.ep-reserv-badge { display:inline-flex; align-items:center; gap:3px; font-family:var(--font-mono); font-size:8px; letter-spacing:.06em; padding:2px 7px; border-radius:2px; margin-left:6px; }
+.erb-has { background:rgba(39,174,96,.15); color:#2ecc71; border:1px solid rgba(39,174,96,.2); }
+.erb-pending { background:rgba(201,168,76,.12); color:var(--gold); border:1px solid rgba(201,168,76,.2); }
+
 </style>
 </head>
 <body>
@@ -715,121 +751,8 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   </section>
 
 
-  <div style="padding:0 16px;box-sizing:border-box;">
-    <div class="manga-divider"><div class="divider-line"></div><span class="divider-symbol">🎫</span><div class="divider-line"></div></div>
-  </div>
 
-  <section class="reserv-section" id="reservations" style="padding:0 16px;box-sizing:border-box;">
-    <h2 class="section-heading">🎫 Bookings & Reservations</h2>
-    <p class="section-sub">Timeline · Jul 23 – Aug 2, 2026 · 3Boys Japan</p>
-    <div class="upload-bar">
-      <button class="upload-btn" onclick="openUploadModal()">📎 + Add Reservation / Receipt</button>
-      <span class="upload-status" id="uploadStatus">Tap to upload a ticket, PDF, QR code, or screenshot</span>
-    </div>
-    <div class="reserv-legend">
-      <div class="reserv-legend-item"><div class="reserv-legend-dot" style="background:#27ae60"></div>Confirmed</div>
-      <div class="reserv-legend-item"><div class="reserv-legend-dot" style="background:#c9a84c"></div>Pending</div>
-      <div class="reserv-legend-item"><div class="reserv-legend-dot" style="background:#00d4ff"></div>Flight</div>
-      <div class="reserv-legend-item"><div class="reserv-legend-dot" style="background:rgba(200,180,150,0.2);border:1px solid rgba(200,180,150,0.3)"></div>To Book</div>
-    </div>
-    <div class="timeline-wrapper">
-      <div class="timeline-line"></div>
-      <div id="timelineContainer"></div>
-    </div>
-  </section>
-
-  <div style="padding:0 16px;box-sizing:border-box;">
-    <div class="manga-divider"><div class="divider-line"></div><span class="divider-symbol">¥</span><div class="divider-line"></div></div>
-  </div>
-
-  <section class="costs-section" id="custos" style="padding:0 16px;box-sizing:border-box;">
-    <h2 class="section-heading">💴 Trip Costs</h2>
-    <p class="section-sub">Estimates in USD · 6 people · 3 rooms · Jul–Aug 2026</p>
-    <div class="cost-cards" id="costCards"></div>
-    <div class="costs-table-wrapper">
-      <table class="costs-table" aria-label="Cost breakdown">
-        <thead>
-          <tr>
-            <th>Category</th>
-            <th>Details</th>
-            <th>Basis</th>
-            <th>Total (USD)</th>
-            <th>JPY</th>
-          </tr>
-        </thead>
-        <tbody id="costsTbody"></tbody>
-        <tfoot>
-          <tr class="total-row">
-            <td colspan="3"><strong>ESTIMATED TOTAL</strong></td>
-            <td><span class="amt-usd" id="tableTotalUsd">—</span><span class="amt-jpy" id="tableTotalJpy">—</span></td>
-            <td>—</td>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-    <p class="cost-note">⚠️ Indicative values subject to change. Estimated rate: 1 USD = 155 JPY (Jul/2026). Breakfast included. Lunches are free choice.</p>
-  </section>
-
-  <!-- UPLOAD MODAL -->
-  <div class="upload-modal-overlay" id="uploadModal">
-    <div class="upload-modal">
-      <h3>📎 Add Reservation</h3>
-      <p style="font-family:var(--font-mono);font-size:11px;color:rgba(200,180,150,0.55);margin:0 0 16px">Drop, clique, ou cole (Ctrl+V) um screenshot — Claude extrai os detalhes automaticamente 🤖</p>
-
-      <!-- DROP ZONE FIRST -->
-      <div class="upload-drop-zone" id="dropZone">
-        <div class="drop-icon">📄</div>
-        <div style="font-family:var(--font-mono);font-size:12px;color:rgba(200,180,150,0.7);margin-top:8px">Drop, click or <strong style="color:var(--neon)">Ctrl+V</strong> para colar screenshot</div>
-        <p>PDF · PNG · JPG · Screenshot — max 10MB</p>
-        <input type="file" id="uploadFileInput" accept="image/*,.pdf,.png,.jpg,.jpeg,.webp" style="display:none">
-        <img class="upload-preview" id="uploadPreview">
-      </div>
-
-      <!-- AI STATUS -->
-      <div id="aiExtractStatus" style="display:none;font-family:var(--font-mono);font-size:11px;color:var(--neon);padding:8px 0;text-align:center;letter-spacing:.05em">
-        ✦ Claude analisando o documento...
-      </div>
-
-      <!-- AUTO-POPULATED FIELDS -->
-      <div id="uploadFields" style="display:none">
-        <div class="upload-field">
-          <label>Title *</label>
-          <input type="text" id="uploadTitle" placeholder="e.g. teamLab Borderless — 6 tickets">
-        </div>
-        <div class="upload-field">
-          <label>Category</label>
-          <select id="uploadCategory">
-            <option value="✈️ Flight">✈️ Flight</option>
-            <option value="🏨 Hotel">🏨 Hotel</option>
-            <option value="🎟️ Activity / Ticket" selected>🎟️ Activity / Ticket</option>
-            <option value="🚅 Transport">🚅 Transport</option>
-            <option value="🍽️ Restaurant">🍽️ Restaurant</option>
-            <option value="🥃 Experience">🥃 Experience</option>
-            <option value="📄 Other">📄 Other</option>
-          </select>
-        </div>
-        <div class="upload-field">
-          <label>Date</label>
-          <input type="date" id="uploadDate">
-        </div>
-        <div class="upload-field">
-          <label>Notes</label>
-          <textarea id="uploadNotes" rows="2" placeholder="Confirmation number, time, details..."></textarea>
-        </div>
-        <div class="upload-modal-btns">
-          <button class="btn-cancel" onclick="closeUploadModal()">Cancel</button>
-          <button class="btn-save" id="uploadSaveBtn" onclick="saveReservation()">💾 Save to Trip</button>
-        </div>
-      </div>
-
-      <!-- INITIAL BUTTONS (before file selected) -->
-      <div class="upload-modal-btns" id="uploadInitialBtns">
-        <button class="btn-cancel" onclick="closeUploadModal()">Cancel</button>
-      </div>
-    </div>
-  </div>
-
-  <!-- CHATBOT SECTION -->
+    <!-- CHATBOT SECTION -->
   <section class="chat-section" id="chatbot" style="padding:0 16px;box-sizing:border-box;">
     <div class="manga-divider"><div class="divider-line"></div><span class="divider-symbol">🤖</span><div class="divider-line"></div></div>
     <h2 class="section-heading">🤖 Trip Assistant</h2>
@@ -1310,12 +1233,6 @@ function buildNav() {
   mustTab.addEventListener('click', () => { var _emd = document.getElementById('mustdo'); if(_emd) _emd.scrollIntoView({ behavior: 'smooth' }); });
   nav.appendChild(mustTab);
 
-  const reservTab = document.createElement('div');
-  reservTab.className = 'day-tab';
-  reservTab.innerHTML = '<span style="font-size:22px">🎫</span><span class="tab-day" style="font-size:9px">Bookings</span>';
-  reservTab.addEventListener('click', () => document.getElementById('reservations')?.scrollIntoView({ behavior: 'smooth' }));
-  nav.appendChild(reservTab);
-
   const chatTab = document.createElement('div');
   chatTab.className = 'day-tab';
   chatTab.innerHTML = '<span style="font-size:22px">🤖</span><span class="tab-day" style="font-size:9px">Chat</span>';
@@ -1408,6 +1325,7 @@ function buildDays() {
             '<span class="meta-chip hotel">' + hotelDot + '🏨 ' + day.hotel + '</span>' +
           '</div>' +
         '</div>' +
+        '<div id="ep-badge-' + day.num + '"></div>' +
         '<div class="ep-toggle">⌄</div>' +
       '</div>' +
       '<div class="day-detail ' + (isOpen ? 'open' : '') + '" id="detail-' + day.num + '">' +
@@ -1417,6 +1335,19 @@ function buildDays() {
           '<div class="block-card"><div class="block-title">☀️ Afternoon</div><div class="block-items">' + afternoonItems + '</div></div>' +
           '<div class="block-card"><div class="block-title">🌙 Night</div><div class="block-items">' + nightItems + noteHtml + '</div></div>' +
           transportHtml + dinnerHtml +
+        '</div>' +
+        '<div class="day-reserv-panel" id="reserv-panel-' + day.num + '">' +
+          '<div class="day-reserv-header">' +
+            '<span class="day-reserv-title">🎫 Reservas do dia</span>' +
+            '<div class="day-reserv-badges">' +
+              '<span class="reserv-count-badge rcb-confirmed" id="reserv-count-confirmed-' + day.num + '" style="display:none"></span>' +
+              '<span class="reserv-count-badge rcb-pending" id="reserv-count-pending-' + day.num + '" style="display:none"></span>' +
+              '<button class="add-reserv-btn" onclick="openUploadForDay(' + day.num + ', \'' + day.date + '\')">+ Adicionar</button>' +
+            '</div>' +
+          '</div>' +
+          '<div class="day-reserv-list" id="reserv-list-' + day.num + '">' +
+            '<div class="reserv-empty" id="reserv-empty-' + day.num + '">Nenhuma reserva salva para este dia</div>' +
+          '</div>' +
         '</div>' +
       '</div>';
 
@@ -1545,619 +1476,185 @@ function setupControls() {
 }
 
 
-// ── RESERVATIONS / BOOKINGS TIMELINE ─────────────────────────
-var BOOKINGS = [
-  {
-    group: '✈️  PRE-DEPARTURE',
-    items: [
-      {
-        status: 'todo',
-        icon: '🎨',
-        title: 'teamLab Borderless — Ingressos',
-        detail: 'Azabudai Hills, Tokyo · 6 pessoas · Adultos ¥3.800–¥4.800 · Teens ¥2.800 · Kids ¥1.500',
-        meta: [{ icon: '📅', text: 'Reservar ASAP — agosto é alta temporada' }, { icon: '👥', text: '6 pessoas' }],
-        link: 'https://www.teamlab.art/e/tokyo/',
-        linkLabel: '→ Comprar ingresso oficial'
-      },
-      {
-        status: 'todo',
-        icon: '🚅',
-        title: 'Shinkansen — Tokyo → Kyoto (ida)',
-        detail: 'Nozomi · 2h15 · Assento reservado ¥14.370/pessoa · ~¥86.220 total (6px)',
-        meta: [{ icon: '📅', text: 'Jul 27 (sugerido)' }, { icon: '💴', text: '¥86.220 total' }],
-        link: 'https://smart-ex.jp/en/lp/app/',
-        linkLabel: '→ Reservar no Smart-EX (oficial, sem taxa)'
-      },
-      {
-        status: 'todo',
-        icon: '🚅',
-        title: 'Shinkansen — Kyoto → Tokyo (volta)',
-        detail: 'Nozomi · 2h15 · Assento reservado ¥14.370/pessoa · ~¥86.220 total (6px)',
-        meta: [{ icon: '📅', text: 'Jul 31 (sugerido)' }, { icon: '💴', text: '¥86.220 total' }],
-        link: 'https://smart-ex.jp/en/lp/app/',
-        linkLabel: '→ Reservar no Smart-EX'
-      },
-      {
-        status: 'todo',
-        icon: '🥃',
-        title: 'Kyoto Whisky Tasting',
-        detail: 'Nishijin, Kyoto · 5 whiskies single malt · 90 min · ¥14.800/pessoa · Máx 4 pessoas',
-        meta: [{ icon: '📅', text: 'Disponível Seg/Qua/Sex' }, { icon: '👥', text: 'Até 4 pessoas por sessão' }],
-        link: 'https://kyotowhiskytasting.com/',
-        linkLabel: '→ Reservar em kyotowhiskytasting.com'
-      }
-    ]
-  },
-  {
-    group: '📅  JUL 23 — CHEGADA TOKYO',
-    items: [
-      {
-        status: 'flight',
-        icon: '✈️',
-        title: 'Voo — Chegada em Tokyo (HND/NRT)',
-        detail: 'Check-in → Hotel Mitsui Garden Ginza Tsukiji',
-        meta: [{ icon: '🏨', text: 'Mitsui Garden Hotel Ginza Tsukiji' }],
-        link: null
-      }
-    ]
-  },
-  {
-    group: '🏨  JUL 23–27 — TOKYO (4 noites)',
-    items: [
-      {
-        status: 'confirmed',
-        icon: '🏨',
-        title: 'Mitsui Garden Hotel Ginza Tsukiji',
-        detail: 'Tokyo · 4 noites · 3 quartos · Check-in Jul 23 · Check-out Jul 27',
-        meta: [{ icon: '📍', text: 'Ginza, Tokyo' }, { icon: '🛏️', text: '3 quartos' }],
-        link: null
-      },
-      {
-        status: 'todo',
-        icon: '🌊',
-        title: 'Shibuya Sky — Observatory',
-        detail: 'Vista 360° aérea do cruzamento de Shibuya · Comprar com antecedência',
-        meta: [{ icon: '📅', text: 'Dia 3 (Jul 25 sugerido)' }],
-        link: 'https://shibuya-sky.jp/en/',
-        linkLabel: '→ Comprar ingresso'
-      },
-      {
-        status: 'todo',
-        icon: '🎨',
-        title: 'teamLab Borderless — Visita',
-        detail: 'Azabudai Hills · Hibiya Line → Kamiyacho Station (2 min a pé) · Escolher horário noturno',
-        meta: [{ icon: '📅', text: 'Dia 3 ou 4 (à noite)' }, { icon: '⏱️', text: '+3 horas dentro' }],
-        link: 'https://www.teamlab.art/e/tokyo/',
-        linkLabel: '→ Site oficial'
-      },
-      {
-        status: 'todo',
-        icon: '🍣',
-        title: 'Sushi Yoshitake — Omakase',
-        detail: '3 estrelas Michelin · Reservar via concierge do hotel com 4+ semanas de antecedência',
-        meta: [{ icon: '⚠️', text: 'Reservar pelo concierge do hotel' }],
-        link: 'https://sushi-yoshitake.com',
-        linkLabel: '→ sushi-yoshitake.com'
-      }
-    ]
-  },
-  {
-    group: '🚅  JUL 27 — TRANSFER TOKYO → KYOTO',
-    items: [
-      {
-        status: 'todo',
-        icon: '🚅',
-        title: 'Shinkansen Nozomi · Tokyo → Kyoto',
-        detail: 'Tokyo Station plataforma 14–19 · Chegada Kyoto Station lado Karasuma · Comprar ekiben antes de embarcar',
-        meta: [{ icon: '⏱️', text: '2h15 de viagem' }, { icon: '🗻', text: 'Assento E para vista do Fuji (lado direito)' }],
-        link: 'https://smart-ex.jp/en/lp/app/',
-        linkLabel: '→ Reservar no Smart-EX'
-      }
-    ]
-  },
-  {
-    group: '🏨  JUL 27–31 — KYOTO (4 noites)',
-    items: [
-      {
-        status: 'confirmed',
-        icon: '🏨',
-        title: 'Agora Kyoto Shijo',
-        detail: 'Kyoto · 4 noites · 3 quartos · Check-in Jul 27 · Check-out Jul 31',
-        meta: [{ icon: '📍', text: 'Shijo, Kyoto' }, { icon: '🛏️', text: '3 quartos' }],
-        link: null
-      },
-      {
-        status: 'todo',
-        icon: '🥃',
-        title: 'Kyoto Whisky Tasting — Visita',
-        detail: 'Nishijin · Próximo a Kinkakuji (Golden Pavilion) · Sessão de 90 min com sommelier',
-        meta: [{ icon: '📅', text: 'Seg, Qua ou Sex' }, { icon: '👥', text: 'Máx 4 por sessão — 2 sessões se necessário' }],
-        link: 'https://kyotowhiskytasting.com/',
-        linkLabel: '→ kyotowhiskytasting.com'
-      },
-      {
-        status: 'todo',
-        icon: '🌾',
-        title: 'Destilaria Suntory Yamazaki',
-        detail: 'Tour + degustação · 30 min de Kyoto de trem · Reservar com meses de antecedência',
-        meta: [{ icon: '⚠️', text: 'Esgota rápido — reservar ASAP' }],
-        link: 'https://www.suntory.com/factory/yamazaki/',
-        linkLabel: '→ Reservar na Suntory'
-      }
-    ]
-  },
-  {
-    group: '🚅  JUL 31 — TRANSFER KYOTO → OSAKA',
-    items: [
-      {
-        status: 'todo',
-        icon: '🚃',
-        title: 'Trem Kyoto → Osaka Namba',
-        detail: 'JR ou Hankyu · ~30 min · ~¥570/pessoa',
-        meta: [{ icon: '💴', text: '~¥3.420 total (6px)' }],
-        link: null
-      }
-    ]
-  },
-  {
-    group: '🏙️  JUL 31 – AGO 2 — OSAKA',
-    items: [
-      {
-        status: 'todo',
-        icon: '🏨',
-        title: 'Hotel Osaka — A Confirmar',
-        detail: 'Dotonbori/Namba area recomendada · 2 noites · 3 quartos',
-        meta: [{ icon: '📅', text: 'Jul 31 → Ago 2' }, { icon: '⚠️', text: 'Reservar' }],
-        link: 'https://www.booking.com/searchresults.en-gb.html?ss=Dotonbori+Osaka',
-        linkLabel: '→ Buscar hotel em Osaka'
-      }
-    ]
-  },
-  {
-    group: '✈️  AGO 2 — RETORNO',
-    items: [
-      {
-        status: 'flight',
-        icon: '✈️',
-        title: 'Voo — Partida Osaka/Kansai (KIX) ou Tokyo (NRT/HND)',
-        detail: 'Verificar aeroporto de saída conforme passagem',
-        meta: [{ icon: '📍', text: 'KIX (Kansai) se saindo de Osaka, ou trem de volta a Tokyo' }],
-        link: null
-      }
-    ]
-  }
-];
-
-// Flatten BOOKINGS into a sortable list with dateKey for merging
-function flattenBookings() {
-  var all = [];
-  // Date map for trip days
-  var dayDates = {
-    1:'2026-07-23',2:'2026-07-24',3:'2026-07-25',4:'2026-07-26',
-    5:'2026-07-27',6:'2026-07-28',7:'2026-07-29',8:'2026-07-30',
-    9:'2026-07-31',10:'2026-08-01',11:'2026-08-02'
-  };
-  BOOKINGS.forEach(function(group) {
-    group.items.forEach(function(item) {
-      // Try to get a date from the item
-      var dateKey = item.dateKey || group.dateKey || '2026-07-23';
-      all.push(Object.assign({}, item, { dateKey: dateKey, groupLabel: group.group, source: 'static' }));
-    });
-  });
-  return all;
-}
-
-function renderTimelineItem(item, fbId) {
-  var isFb = !!fbId;
-  var sent = item.sent || false;
-
-  // Badge
-  var badgeHtml;
-  if (isFb) {
-    if (sent) {
-      badgeHtml = '<span class="timeline-card-badge badge-confirmed" style="cursor:pointer" onclick="toggleSent(\"' + fbId + '\", true)">✅ Enviado</span>';
-    } else {
-      badgeHtml = '<span class="timeline-card-badge badge-pending" style="cursor:pointer" onclick="toggleSent(\"' + fbId + '\", false)">📤 Não enviado</span>';
-    }
-  } else {
-    var statusClass = item.status || 'todo';
-    var badgeLabel = statusClass === 'confirmed' ? '✓ Confirmado' : statusClass === 'flight' ? '✈️ Voo' : statusClass === 'pending' ? '⏳ Pendente' : '📋 Reservar';
-    badgeHtml = '<span class="timeline-card-badge badge-' + statusClass + '">' + badgeLabel + '</span>';
-  }
-
-  var dotClass = isFb ? (sent ? 'confirmed' : 'pending') : (item.status || 'todo');
-  var icon = item.icon || (item.category ? item.category.split(' ')[0] : '📎');
-  var title = item.title || '';
-  var detail = item.detail || (item.notes ? item.notes : '');
-  if (isFb && item.date) detail = '📅 ' + item.date + (detail ? ' · ' + detail : '');
-
-  var metaHtml = '';
-  if (item.meta && item.meta.length) {
-    metaHtml = '<div class="timeline-card-meta">';
-    item.meta.forEach(function(m) {
-      metaHtml += '<div class="timeline-meta-item"><span>' + m.icon + '</span><span>' + m.text + '</span></div>';
-    });
-    metaHtml += '</div>';
-  }
-
-  var linkHtml = item.link ? '<a class="timeline-card-link" href="' + item.link + '" target="_blank" rel="noopener">' + (item.linkLabel || '→ Ver') + '</a>' : '';
-
-  var attachHtml = '';
-  if (isFb && item.fileUrl) {
-    var isImg = item.fileType && item.fileType.startsWith('image/');
-    var isPdf = item.fileType && item.fileType.includes('pdf');
-    attachHtml = '<div class="timeline-card-attachments">';
-    if (isImg) {
-      attachHtml += '<a href="' + item.fileUrl + '" target="_blank"><img class="attach-thumb" src="' + item.fileUrl + '"></a>';
-      attachHtml += '<a class="attach-link" href="' + item.fileUrl + '" target="_blank">🖼️ Ver arquivo</a>';
-    } else {
-      attachHtml += '<a class="attach-link" href="' + item.fileUrl + '" target="_blank">' + (isPdf ? '📋' : '📎') + ' ' + (item.fileName || 'arquivo') + '</a>';
-    }
-    attachHtml += '</div>';
-  }
-
-  var actionsHtml = '';
-  if (isFb) {
-    actionsHtml = '<div class="timeline-card-actions">' +
-      '<button class="tl-action-btn edit" onclick="editReservation(\"' + fbId + '\")">✏️ Editar</button>' +
-      '<button class="tl-action-btn delete" onclick="deleteReservation(\"' + fbId + '\")">🗑️ Apagar</button>' +
-      '</div>';
-  }
-
-  return '<div class="timeline-item" id="tlitem-' + (fbId || '') + '">' +
-    '<div class="timeline-dot-wrap"><div class="timeline-dot ' + dotClass + '"></div></div>' +
-    '<div class="timeline-card">' +
-    '<div class="timeline-card-top"><span class="timeline-card-title">' + icon + ' ' + title + '</span>' + badgeHtml + '</div>' +
-    (detail ? '<div class="timeline-card-detail">' + detail + '</div>' : '') +
-    metaHtml + linkHtml + attachHtml + actionsHtml +
-    '</div></div>';
-}
-
-function buildTimeline() {
-  var container = document.getElementById('timelineContainer');
-  if (!container) return;
-  var html = '';
-  var lastGroup = '';
-  // Add dateKey to each static item for ordering
-  var dateMap = {
-    'PRE':'2026-07-01','JUL 23':'2026-07-23','JUL 23–27':'2026-07-23',
-    'JUL 27':'2026-07-27','JUL 27–31':'2026-07-27','JUL 31':'2026-07-31',
-    'JUL 31':'2026-07-31','AGO 2':'2026-08-02','OSAKA':'2026-07-31'
-  };
-  BOOKINGS.forEach(function(group) {
-    if (group.group !== lastGroup) {
-      if (lastGroup) html += '</div>';
-      html += '<div class="timeline-group"><div class="timeline-group-label">' + group.group + '</div>';
-      lastGroup = group.group;
-    }
-    group.items.forEach(function(item) {
-      html += renderTimelineItem(item, null);
-    });
-  });
-  if (lastGroup) html += '</div>';
-  container.innerHTML = html;
-}
-
-
-// ── FIREBASE CONFIG ────────────────────────────────────────────
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyD1t4W4pp-yeDbRjZ2dBxR67jLHOMKsIJo",
-  authDomain: "boys-japantrip-2026.firebaseapp.com",
-  projectId: "boys-japantrip-2026",
-  storageBucket: "boys-japantrip-2026.firebasestorage.app",
-  messagingSenderId: "161321284924",
-  appId: "1:161321284924:web:2eed2840b4cbcb991eda39"
+// ── PER-DAY RESERVATIONS ─────────────────────────────────────
+// Map trip dates to day numbers
+var DATE_TO_DAY = {
+  '07/23/2026':1,'07/24/2026':2,'07/25/2026':3,'07/26/2026':4,
+  '07/27/2026':5,'07/28/2026':6,'07/29/2026':7,'07/30/2026':8,
+  '07/31/2026':9,'08/01/2026':10,'08/02/2026':11
 };
-const ANTHROPIC_KEY = "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";
+var DAY_TO_DATE = {
+  1:'07/23/2026',2:'07/24/2026',3:'07/25/2026',4:'07/26/2026',
+  5:'07/27/2026',6:'07/28/2026',7:'07/29/2026',8:'07/30/2026',
+  9:'07/31/2026',10:'08/01/2026',11:'08/02/2026'
+};
 
-let firebaseApp = null, db = null, storage = null;
+var currentUploadDay = null;
+var currentUploadDate = null;
 
-function initFirebase() {
-  return new Promise((resolve) => {
-    if (db && storage) return resolve(true);
-    const sdks = [
-      'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js',
-      'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js',
-      'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js'
-    ];
-    let loaded = 0;
-    sdks.forEach(src => {
-      const s = document.createElement('script');
-      s.src = src;
-      s.onload = () => { loaded++; if (loaded === sdks.length) {
-        firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
-        db = firebase.firestore();
-        storage = firebase.storage();
-        resolve(true);
-      }};
-      document.head.appendChild(s);
-    });
+function openUploadForDay(dayNum, dayDate) {
+  currentUploadDay = dayNum;
+  currentUploadDate = dayDate;
+  // Pre-set date in modal
+  // Convert MM/DD/YYYY to YYYY-MM-DD
+  var parts = dayDate.split('/');
+  var isoDate = parts[2] + '-' + parts[0] + '-' + parts[1];
+  openUploadModal();
+  // Set date after modal opens
+  setTimeout(function() {
+    var dateEl = document.getElementById('uploadDate');
+    if (dateEl) dateEl.value = isoDate;
+  }, 50);
+}
+
+function renderReservItem(item, fbId) {
+  var sent = item.sent || false;
+  var dotClass = sent ? 'ri-dot-sent' : 'ri-dot-pending';
+  var badgeClass = sent ? 'rib-sent' : 'rib-pending';
+  var badgeLabel = sent ? '✅ Enviado' : '📤 Pendente';
+  var icon = item.category ? item.category.split(' ')[0] : '📎';
+
+  var detail = '';
+  if (item.notes) detail += item.notes;
+
+  var actionsHtml = '<div class="reserv-item-actions">';
+  if (item.fileUrl) {
+    var isPdf = item.fileType && item.fileType.includes('pdf');
+    var isImg = item.fileType && item.fileType.startsWith('image/');
+    actionsHtml += '<a class="ri-action file" href="' + item.fileUrl + '" target="_blank">' + (isPdf ? '📋 PDF' : isImg ? '🖼️ Imagem' : '📎 Arquivo') + '</a>';
+  }
+  actionsHtml += '<button class="ri-action edit" onclick="editReservation(\"' + fbId + '\")">✏️ Editar</button>';
+  actionsHtml += '<button class="ri-action ' + (sent ? 'edit' : 'file') + '" onclick="toggleSent(\"' + fbId + '\", ' + sent + ')">' + (sent ? '↩ Desfazer' : '✅ Marcar enviado') + '</button>';
+  actionsHtml += '<button class="ri-action del" onclick="deleteReservation(\"' + fbId + '\", ' + (item.dayNum || 'null') + ')">🗑️</button>';
+  actionsHtml += '</div>';
+
+  return '<div class="reserv-item" id="ri-' + fbId + '">' +
+    '<div class="reserv-item-dot ' + dotClass + '"></div>' +
+    '<div class="reserv-item-body">' +
+      '<div class="reserv-item-top">' +
+        '<span class="reserv-item-title">' + icon + ' ' + (item.title || '') + '</span>' +
+        '<span class="reserv-item-badge ' + badgeClass + '" onclick="toggleSent(\"' + fbId + '\", ' + sent + ')">' + badgeLabel + '</span>' +
+      '</div>' +
+      (detail ? '<div class="reserv-item-detail">' + detail + '</div>' : '') +
+      actionsHtml +
+    '</div>' +
+  '</div>';
+}
+
+function updateDayBadge(dayNum) {
+  var list = document.getElementById('reserv-list-' + dayNum);
+  if (!list) return;
+  var items = list.querySelectorAll('.reserv-item');
+  var sent = 0, pending = 0;
+  items.forEach(function(el) {
+    if (el.querySelector('.ri-dot-sent')) sent++;
+    else pending++;
   });
-}
+  var confBadge = document.getElementById('reserv-count-confirmed-' + dayNum);
+  var pendBadge = document.getElementById('reserv-count-pending-' + dayNum);
+  if (confBadge) { confBadge.textContent = sent + ' confirmado' + (sent !== 1 ? 's' : ''); confBadge.style.display = sent ? 'inline' : 'none'; }
+  if (pendBadge) { pendBadge.textContent = pending + ' pendente' + (pending !== 1 ? 's' : ''); pendBadge.style.display = pending ? 'inline' : 'none'; }
 
-// ── UPLOAD / RECEIPT ────────────────────────────────────────────
-let uploadFile = null;
-
-function openUploadModal() {
-  document.getElementById('uploadModal').classList.add('active');
-}
-function closeUploadModal() {
-  editingFbId = null;
-  document.getElementById('uploadModal').classList.remove('active');
-  uploadFile = null;
-  document.getElementById('uploadTitle').value = '';
-  document.getElementById('uploadNotes').value = '';
-  document.getElementById('uploadDate').value = '';
-  document.getElementById('uploadPreview').style.display = 'none';
-  document.getElementById('uploadPreview').src = '';
-  document.getElementById('dropZone').querySelector('.drop-icon').textContent = '📄';
-  document.getElementById('dropZone').querySelector('p').textContent = 'PDF, imagem, QR code — ou Cole (Ctrl+V) um screenshot';
-  document.getElementById('uploadSaveBtn').disabled = false;
-  document.getElementById('uploadSaveBtn').textContent = '💾 Save to Trip';
-  document.getElementById('uploadFields').style.display = 'none';
-  document.getElementById('uploadInitialBtns').style.display = 'flex';
-  document.getElementById('aiExtractStatus').style.display = 'none';
-}
-
-function setupDropZone() {
-  const zone = document.getElementById('dropZone');
-  const input = document.getElementById('uploadFileInput');
-  if (!zone) return;
-  zone.addEventListener('click', () => input.click());
-  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
-  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
-  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
-  input.addEventListener('change', () => handleFile(input.files[0]));
-
-  // Paste support (Ctrl+V anywhere on the page or in modal)
-  document.addEventListener('paste', e => {
-    const modal = document.getElementById('uploadModal');
-    if (!modal.classList.contains('active')) return;
-    const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-    for (const item of items) {
-      if (item.kind === 'file') {
-        const file = item.getAsFile();
-        if (file) { handleFile(file); break; }
-      }
-    }
-  });
-}
-
-function handleFile(file) {
-  if (!file) return;
-  uploadFile = file;
-  const icon = document.getElementById('dropZone').querySelector('.drop-icon');
-  icon.textContent = file.type.includes('pdf') ? '📋' : '🖼️';
-  document.getElementById('dropZone').querySelector('p').textContent = file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)';
-
-  // Show image preview
-  if (file.type.startsWith('image/')) {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const prev = document.getElementById('uploadPreview');
-      prev.src = e.target.result;
-      prev.style.display = 'block';
-      // Auto-extract from image
-      extractFromFile(e.target.result, 'image', file.type);
-    };
-    reader.readAsDataURL(file);
-  } else if (file.type.includes('pdf')) {
-    const reader = new FileReader();
-    reader.onload = e => {
-      const b64 = e.target.result.split(',')[1];
-      extractFromFile(b64, 'pdf', 'application/pdf');
-    };
-    reader.readAsDataURL(file);
-  }
-}
-
-async function extractFromFile(b64data, fileKind, mimeType) {
-  const statusEl = document.getElementById('aiExtractStatus');
-  statusEl.style.display = 'block';
-  statusEl.textContent = '✦ Claude lendo o documento completo...';
-  document.getElementById('uploadInitialBtns').style.display = 'none';
-  document.getElementById('uploadFields').style.display = 'none';
-
-  const prompt = `You are reading a travel document — ticket, receipt, hotel booking, flight confirmation, restaurant reservation, or similar.
-Read the ENTIRE document carefully and extract ALL relevant information.
-Return ONLY a valid JSON object with NO markdown, NO explanation, just raw JSON:
-{
-  "title": "descriptive title including venue/airline/hotel name and what it is (e.g. teamLab Borderless — 6 tickets, Jul 25)",
-  "category": "one of exactly: ✈️ Flight | 🏨 Hotel | 🎟️ Activity / Ticket | 🚅 Transport | 🍽️ Restaurant | 🥃 Experience | 📄 Other",
-  "date": "YYYY-MM-DD (reservation/event date, NOT today — empty string if not found)",
-  "notes": "confirmation code, booking reference, time, number of people, price, any important details — all in one line"
-}`;
-
-  try {
-    const msgContent = (fileKind === 'pdf')
-      ? [
-          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64data } },
-          { type: 'text', text: prompt }
-        ]
-      : [
-          { type: 'image', source: { type: 'base64', media_type: mimeType, data: b64data } },
-          { type: 'text', text: prompt }
-        ];
-
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 600,
-        messages: [{ role: 'user', content: msgContent }]
-      })
-    });
-
-    const data = await res.json();
-    if (data.error) throw new Error(data.error.message);
-    const text = (data.content?.[0]?.text || '{}').replace(/```json|```/g, '').trim();
-    // Find JSON in response robustly
-    const jsonMatch = text.match(/\{[\s\S]*\}/);
-    const parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : {};
-
-    if (parsed.title) document.getElementById('uploadTitle').value = parsed.title;
-    if (parsed.date) document.getElementById('uploadDate').value = parsed.date;
-    if (parsed.notes) document.getElementById('uploadNotes').value = parsed.notes;
-    if (parsed.category) {
-      const sel = document.getElementById('uploadCategory');
-      for (let i = 0; i < sel.options.length; i++) {
-        if (sel.options[i].value.includes(parsed.category.split(' ')[1] || parsed.category)) {
-          sel.selectedIndex = i; break;
-        }
-      }
-      // Try exact match too
-      for (let i = 0; i < sel.options.length; i++) {
-        if (sel.options[i].value === parsed.category) { sel.selectedIndex = i; break; }
-      }
-    }
-    statusEl.textContent = '✅ Extraído com sucesso — revise e salve!';
-    statusEl.style.color = '#2ecc71';
-  } catch(e) {
-    console.warn('AI extract failed:', e);
-    statusEl.textContent = '⚠️ Não foi possível extrair automaticamente — preencha manualmente';
-    statusEl.style.color = 'var(--gold)';
+  // Update episode header badge
+  var epBadge = document.getElementById('ep-badge-' + dayNum);
+  if (epBadge) {
+    if (sent + pending === 0) { epBadge.innerHTML = ''; }
+    else if (pending > 0) { epBadge.innerHTML = '<span class="ep-reserv-badge erb-pending">🎫 ' + pending + ' pendente</span>'; }
+    else { epBadge.innerHTML = '<span class="ep-reserv-badge erb-has">🎫 ' + sent + ' ✓</span>'; }
   }
 
-  setTimeout(() => {
-    statusEl.style.display = 'none';
-    statusEl.style.color = 'var(--neon)';
-  }, 2000);
-  document.getElementById('uploadFields').style.display = 'block';
+  // Show/hide empty message
+  var emptyEl = document.getElementById('reserv-empty-' + dayNum);
+  if (emptyEl) emptyEl.style.display = items.length ? 'none' : 'block';
 }
 
-let editingFbId = null;
-
-async function saveReservation() {
-  const title = document.getElementById('uploadTitle').value.trim();
-  if (!title) { alert('Por favor adicione um título'); return; }
-  const btn = document.getElementById('uploadSaveBtn');
-  btn.disabled = true; btn.textContent = '⏳ Salvando...';
-  try {
-    await initFirebase();
-    let fileUrl = null, fileName = null, fileType = null;
-    if (uploadFile) {
-      btn.textContent = '⏳ Fazendo upload...';
-      const ref = storage.ref('receipts/' + Date.now() + '_' + (uploadFile.name || 'paste.png'));
-      await ref.put(uploadFile);
-      fileUrl = await ref.getDownloadURL();
-      fileName = uploadFile.name || 'paste.png';
-      fileType = uploadFile.type;
+function injectItemIntoDay(item, fbId) {
+  // Figure out which day this belongs to
+  var dayNum = item.dayNum || null;
+  if (!dayNum && item.date) {
+    // item.date is YYYY-MM-DD, convert to MM/DD/YYYY
+    var parts = item.date.split('-');
+    if (parts.length === 3) {
+      var mmddyyyy = parts[1] + '/' + parts[2] + '/' + parts[0];
+      dayNum = DATE_TO_DAY[mmddyyyy] || null;
     }
-    const data = {
-      title,
-      category: document.getElementById('uploadCategory').value,
-      date: document.getElementById('uploadDate').value,
-      notes: document.getElementById('uploadNotes').value,
-      updatedAt: new Date().toISOString()
-    };
-    if (fileUrl) { data.fileUrl = fileUrl; data.fileName = fileName; data.fileType = fileType; }
-
-    btn.textContent = '⏳ Salvando no Firebase...';
-    if (editingFbId) {
-      await db.collection('reservations').doc(editingFbId).update(data);
-    } else {
-      data.createdAt = new Date().toISOString();
-      data.sent = false;
-      await db.collection('reservations').add(data);
-    }
-    editingFbId = null;
-    btn.textContent = '✅ Salvo!';
-    setTimeout(() => { closeUploadModal(); loadFirebaseReservations(); }, 700);
-  } catch(e) {
-    console.error(e);
-    btn.disabled = false;
-    btn.textContent = '💾 Save to Trip';
-    alert('Erro: ' + e.message);
   }
+  if (!dayNum) dayNum = 11; // fallback to last day
+
+  var list = document.getElementById('reserv-list-' + dayNum);
+  if (!list) return;
+
+  // Remove existing if updating
+  var existing = document.getElementById('ri-' + fbId);
+  if (existing) existing.remove();
+
+  list.insertAdjacentHTML('beforeend', renderReservItem(Object.assign({}, item, {dayNum: dayNum}), fbId));
+  updateDayBadge(dayNum);
 }
 
 async function loadFirebaseReservations() {
   try {
     await initFirebase();
-    const snap = await db.collection('reservations').orderBy('createdAt', 'asc').get();
-    const items = [];
-    snap.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
-    injectFirebaseIntoTimeline(items);
+    var snap = await db.collection('reservations').orderBy('createdAt', 'asc').get();
+    snap.forEach(function(doc) {
+      injectItemIntoDay(doc.data(), doc.id);
+    });
   } catch(e) {
     console.warn('Firebase load skipped:', e.message);
   }
 }
 
-function injectFirebaseIntoTimeline(items) {
-  if (!items.length) return;
-  const container = document.getElementById('timelineContainer');
-  if (!container) return;
-
-  // Find or create a "Minhas Reservas" group — inject after PRE-DEPARTURE group
-  let fbGroup = document.getElementById('fb-reservations-group');
-  if (!fbGroup) {
-    fbGroup = document.createElement('div');
-    fbGroup.className = 'timeline-group';
-    fbGroup.id = 'fb-reservations-group';
-    fbGroup.innerHTML = '<div class="timeline-group-label">📎 MINHAS RESERVAS SALVAS</div><div id="fb-items-container"></div>';
-    // Insert after first group (PRE-DEPARTURE)
-    const firstGroup = container.querySelector('.timeline-group');
-    if (firstGroup && firstGroup.nextSibling) {
-      container.insertBefore(fbGroup, firstGroup.nextSibling);
-    } else {
-      container.insertBefore(fbGroup, container.firstChild);
-    }
-  }
-
-  const fbContainer = document.getElementById('fb-items-container');
-  if (!fbContainer) return;
-  fbContainer.innerHTML = '';
-  items.forEach(item => {
-    fbContainer.insertAdjacentHTML('beforeend', renderTimelineItem(item, item.id));
-  });
-}
-
 async function toggleSent(fbId, currentSent) {
   try {
     await initFirebase();
-    await db.collection('reservations').doc(fbId).update({ sent: !currentSent });
-    loadFirebaseReservations();
+    var newSent = !currentSent;
+    await db.collection('reservations').doc(fbId).update({ sent: newSent });
+    // Reload that item
+    var doc = await db.collection('reservations').doc(fbId).get();
+    if (doc.exists) {
+      var item = doc.data();
+      var el = document.getElementById('ri-' + fbId);
+      var dayNum = item.dayNum;
+      injectItemIntoDay(item, fbId);
+    }
   } catch(e) { alert('Erro: ' + e.message); }
 }
 
-async function deleteReservation(fbId) {
+async function deleteReservation(fbId, dayNum) {
   if (!confirm('Apagar esta reserva?')) return;
   try {
     await initFirebase();
     await db.collection('reservations').doc(fbId).delete();
-    const el = document.getElementById('tlitem-' + fbId);
-    if (el) el.remove();
+    var el = document.getElementById('ri-' + fbId);
+    if (el) { el.remove(); if (dayNum) updateDayBadge(dayNum); }
   } catch(e) { alert('Erro: ' + e.message); }
 }
 
-// Edit reservation — re-opens modal pre-filled
 async function editReservation(fbId) {
   try {
     await initFirebase();
-    const doc = await db.collection('reservations').doc(fbId).get();
+    var doc = await db.collection('reservations').doc(fbId).get();
     if (!doc.exists) return;
-    const item = doc.data();
+    var item = doc.data();
     editingFbId = fbId;
     openUploadModal();
-    // Show fields immediately (no file needed for edit)
-    document.getElementById('uploadFields').style.display = 'block';
-    document.getElementById('uploadInitialBtns').style.display = 'none';
-    document.getElementById('uploadTitle').value = item.title || '';
-    document.getElementById('uploadNotes').value = item.notes || '';
-    document.getElementById('uploadDate').value = item.date || '';
-    const sel = document.getElementById('uploadCategory');
-    for (let i = 0; i < sel.options.length; i++) {
-      if (sel.options[i].value === item.category) { sel.selectedIndex = i; break; }
-    }
-    document.getElementById('uploadSaveBtn').textContent = '💾 Salvar Alterações';
+    setTimeout(function() {
+      document.getElementById('uploadFields').style.display = 'block';
+      document.getElementById('uploadInitialBtns').style.display = 'none';
+      document.getElementById('uploadTitle').value = item.title || '';
+      document.getElementById('uploadNotes').value = item.notes || '';
+      document.getElementById('uploadDate').value = item.date || '';
+      document.getElementById('uploadSaveBtn').textContent = '💾 Salvar Alterações';
+      var sel = document.getElementById('uploadCategory');
+      for (var i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === item.category) { sel.selectedIndex = i; break; }
+      }
+    }, 50);
   } catch(e) { alert('Erro: ' + e.message); }
 }
+
+// Stub buildTimeline (kept for compat but no longer renders a separate section)
+function buildTimeline() {}
 
 // ── CHATBOT ─────────────────────────────────────────────────────
 const TRIP_CONTEXT = `Você é o assistente pessoal da viagem "3Boys Japan Trip 2026". Você conhece TODOS os detalhes abaixo e deve usar essas informações para responder perguntas, dar sugestões e ajudar o usuário.
