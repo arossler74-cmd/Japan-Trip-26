@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 2.14
+     Version : 2.15
      Date    : 2026-05-23
      Changes : API key via Firebase (não hardcoded),
                setup modal para API key,
@@ -829,7 +829,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v2.14 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v2.15 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -2039,6 +2039,49 @@ function appendMessage(role, text) {
   return div;
 }
 
+// Cache of Firebase reservations for chat context
+var cachedReservations = null;
+
+async function getReservationsForContext() {
+  if (cachedReservations !== null) return cachedReservations;
+  try {
+    await initFirebase();
+    var snap = await db.collection('reservations').orderBy('createdAt', 'asc').get();
+    var items = [];
+    snap.forEach(function(doc) {
+      var d = doc.data();
+      items.push({
+        title: d.title || '',
+        category: d.category || '',
+        date: d.date || '',
+        notes: d.notes || '',
+        sent: d.sent || false
+      });
+    });
+    cachedReservations = items;
+    return items;
+  } catch(e) {
+    console.warn('Could not load reservations for chat:', e.message);
+    return [];
+  }
+}
+
+function buildDynamicContext(reservations) {
+  var base = TRIP_CONTEXT;
+  if (!reservations || reservations.length === 0) return base;
+
+  var reservStr = '\n\nRESERVAS SALVAS NO APP (use estas para responder — são a informação MAIS ATUAL):\n';
+  reservations.forEach(function(r, i) {
+    var status = r.sent ? '✅ Confirmado' : '📋 A confirmar';
+    reservStr += (i+1) + '. ' + r.category + ' — ' + r.title;
+    if (r.date) reservStr += ' · Data: ' + r.date;
+    if (r.notes) reservStr += ' · ' + r.notes;
+    reservStr += ' [' + status + ']\n';
+  });
+  reservStr += '\nIMPORTANTE: Se as reservas acima contradizem o itinerário original (ex: hotel diferente, data diferente), as RESERVAS são a verdade atual. Use-as para responder com precisão.';
+  return base + reservStr;
+}
+
 async function sendChat() {
   var input = document.getElementById('chatInput');
   var btn = document.getElementById('chatSendBtn');
@@ -2050,18 +2093,30 @@ async function sendChat() {
   chatHistory.push({ role:'user', content:text });
   var thinking = appendMessage('assistant thinking', '✦ pensando...');
   try {
+    // Fetch latest reservations from Firebase for context
+    var reservations = await getReservationsForContext();
+    var dynamicContext = buildDynamicContext(reservations);
+
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1024,system:TRIP_CONTEXT,messages:chatHistory})
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2048,system:dynamicContext,messages:chatHistory})
     });
     var data = await res.json();
+    if (data.error) throw new Error(data.error.message);
     var reply = data.content&&data.content[0]?data.content[0].text:'Desculpe, tente novamente.';
     chatHistory.push({role:'assistant',content:reply});
     thinking.remove();
     appendMessage('assistant', reply);
-  } catch(e) { thinking.remove(); appendMessage('assistant','⚠️ Erro de conexão.'); chatHistory.pop(); }
+  } catch(e) { thinking.remove(); appendMessage('assistant','⚠️ Erro: '+e.message); chatHistory.pop(); }
   btn.disabled=false;
+}
+
+// Invalidate cache when new reservation is saved
+var _origInjectItemIntoDay = injectItemIntoDay;
+function injectItemIntoDay(item, fbId) {
+  cachedReservations = null; // force refresh on next chat
+  _origInjectItemIntoDay(item, fbId);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
