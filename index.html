@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 3.1
+     Version : 3.2
      Date    : 2026-05-23
      Changes : API key via Firebase (não hardcoded),
                setup modal para API key,
@@ -829,7 +829,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v3.1 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v3.2 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -2781,8 +2781,10 @@ function buildDynamicContext(reservations) {
     return base + '\n\nRESERVAS: Nenhuma reserva salva ainda.';
   }
 
-  var reservStr = '\n\n═══ RESERVAS SALVAS NO APP (' + reservations.length + ' itens) ═══\n';
-  reservStr += 'ESTAS SÃO AS INFORMAÇÕES REAIS E ATUAIS DA VIAGEM. Use-as como base para TODAS as respostas.\n\n';
+  var reservStr = '\n\n══════════════════════════════════════\n';
+  reservStr += 'RESERVAS CONFIRMADAS DO USUÁRIO (' + reservations.length + ' itens)\n';
+  reservStr += 'VOCÊ JÁ TEM ESTES DADOS. Use-os diretamente. Não peça mais informações.\n';
+  reservStr += '══════════════════════════════════════\n\n';
 
   // Group by category for clarity
   var hotels = reservations.filter(function(r){ return r.category && r.category.includes('Hotel'); });
@@ -2820,8 +2822,8 @@ function buildDynamicContext(reservations) {
     reservStr += '\n';
   }
 
-  reservStr += '═══ FIM DAS RESERVAS ═══\n';
-  reservStr += 'Responda com base nestas reservas reais. Se o usuário perguntar algo que as reservas respondem, responda diretamente sem pedir mais informações.';
+  reservStr += '══════════════════════════════════════\n';
+  reservStr += 'INSTRUÇÃO FINAL: Você tem os dados acima. Age com eles. Quando pedido para atualizar o itinerário, use exatamente as informações das reservas e gere o ITINERARY_PATCH sem pedir confirmação.';
   return base + reservStr;
 }
 
