@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 2.9
+     Version : 2.10
      Date    : 2026-05-23
      Changes : API key via Firebase (não hardcoded),
                setup modal para API key,
@@ -829,7 +829,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v2.9 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v2.10 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -1586,11 +1586,11 @@ async function saveApiKey() {
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 10, messages: [{ role: 'user', content: 'hi' }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-6-20251001', max_tokens: 10, messages: [{ role: 'user', content: 'hi' }] })
     });
     var data = await res.json();
-    if (data.error && data.error.type !== 'overloaded_error') {
-      throw new Error(data.error.message);
+    if (data.error) {
+      throw new Error(data.error.message || data.error.type);
     }
     // Save to Firebase
     status.textContent = '⏳ Salvando no Firebase...';
@@ -1713,7 +1713,7 @@ Return ONLY a valid JSON object. No markdown, no explanation, just raw JSON.
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 800, messages: [{ role: 'user', content: msgContent }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-6-20251001', max_tokens: 800, messages: [{ role: 'user', content: msgContent }] })
     });
     var data = await res.json();
     if (data.error) throw new Error(data.error.message);
@@ -2024,7 +2024,7 @@ async function sendChat() {
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method:'POST',
       headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1024,system:TRIP_CONTEXT,messages:chatHistory})
+      body:JSON.stringify({model:'claude-sonnet-4-6-20251001',max_tokens:1024,system:TRIP_CONTEXT,messages:chatHistory})
     });
     var data = await res.json();
     var reply = data.content&&data.content[0]?data.content[0].text:'Desculpe, tente novamente.';
