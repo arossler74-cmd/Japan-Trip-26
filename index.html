@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 2.6
+     Version : 2.9
      Date    : 2026-05-23
-     Changes : Per-day reservations panel, Firebase upload,
-               AI extraction from PDF/image (Claude), 
-               edit/delete/sent toggle per reservation,
-               Claude chatbot tab, Shinkansen + Whisky info,
-               teamLab Borderless updated
+     Changes : API key via Firebase (não hardcoded),
+               setup modal para API key,
+               sugestão automática de review ao salvar reserva,
+               extração AI melhorada, badges em PT-BR
      GitHub  : arossler74-cmd/Japan-Trip-26
      ============================================================ -->
 <html lang="en" data-theme="dark">
@@ -639,6 +638,25 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
 .btn-save:disabled { opacity:0.4; cursor:not-allowed; }
 .attach-link { display:inline-flex; align-items:center; gap:4px; font-family:var(--font-mono); font-size:10px; color:var(--neon); text-decoration:none; background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.2); padding:4px 8px; border-radius:2px; }
 
+
+/* ====== API KEY SETUP MODAL ====== */
+.apikey-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.92); z-index:99999; align-items:center; justify-content:center; padding:16px; }
+.apikey-overlay.active { display:flex; }
+.apikey-modal { background:var(--manga-bg); border:var(--border-thick) solid var(--japan-red); border-radius:4px; width:100%; max-width:460px; padding:28px; }
+.apikey-modal h2 { font-family:var(--font-display); font-size:28px; color:var(--japan-red); margin:0 0 6px; letter-spacing:.05em; }
+.apikey-modal p { font-family:var(--font-mono); font-size:11px; color:rgba(200,180,150,0.6); margin:0 0 20px; line-height:1.6; }
+.apikey-input-wrap { position:relative; margin-bottom:16px; }
+.apikey-input { width:100%; background:rgba(255,255,255,0.05); border:2px solid rgba(201,168,76,0.3); border-radius:3px; padding:12px 44px 12px 14px; color:var(--text-main); font-family:var(--font-mono); font-size:12px; box-sizing:border-box; outline:none; letter-spacing:.03em; }
+.apikey-input:focus { border-color:var(--gold); }
+.apikey-toggle { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; color:rgba(200,180,150,0.5); font-size:16px; }
+.apikey-save { width:100%; background:var(--japan-red); border:none; color:white; padding:12px; border-radius:3px; font-family:var(--font-display); font-size:18px; letter-spacing:.08em; cursor:pointer; transition:background .2s; }
+.apikey-save:hover { background:#a93226; }
+.apikey-save:disabled { opacity:0.4; cursor:not-allowed; }
+.apikey-status { font-family:var(--font-mono); font-size:11px; text-align:center; margin-top:10px; min-height:16px; }
+.apikey-hint { font-family:var(--font-mono); font-size:10px; color:rgba(200,180,150,0.4); margin-top:14px; text-align:center; line-height:1.5; }
+.apikey-settings-btn { position:fixed; bottom:72px; right:16px; background:var(--manga-bg); border:2px solid rgba(201,168,76,0.3); border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; z-index:100; transition:border-color .2s; }
+.apikey-settings-btn:hover { border-color:var(--gold); }
+
 </style>
 </head>
 <body>
@@ -811,7 +829,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v2.6 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v2.9 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -1513,7 +1531,7 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "161321284924",
   appId: "1:161321284924:web:2eed2840b4cbcb991eda39"
 };
-const ANTHROPIC_KEY = "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";
+var ANTHROPIC_KEY = null; // loaded from Firestore
 var db = null, storage = null;
 
 function initFirebase() {
@@ -1531,6 +1549,72 @@ function initFirebase() {
       document.head.appendChild(s);
     });
   });
+}
+
+
+// ── API KEY MANAGEMENT (Firebase) ─────────────────────────────
+async function loadApiKey() {
+  try {
+    await initFirebase();
+    var doc = await db.collection('config').doc('anthropic').get();
+    if (doc.exists && doc.data().key) {
+      ANTHROPIC_KEY = doc.data().key;
+      console.log('✅ API key loaded from Firebase');
+      return true;
+    }
+  } catch(e) {
+    console.warn('Could not load API key:', e.message);
+  }
+  // No key found — show setup modal
+  document.getElementById('apikeyModal').classList.add('active');
+  return false;
+}
+
+async function saveApiKey() {
+  var key = document.getElementById('apikeyInput').value.trim();
+  var status = document.getElementById('apikeyStatus');
+  var btn = document.getElementById('apikeySaveBtn');
+  if (!key || !key.startsWith('sk-ant-')) {
+    status.style.color = '#e74c3c';
+    status.textContent = '⚠️ Key inválida — deve começar com sk-ant-';
+    return;
+  }
+  btn.disabled = true; btn.textContent = '⏳ Verificando...';
+  status.style.color = 'var(--neon)'; status.textContent = 'Testando conexão...';
+  // Quick test call
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': key, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 10, messages: [{ role: 'user', content: 'hi' }] })
+    });
+    var data = await res.json();
+    if (data.error && data.error.type !== 'overloaded_error') {
+      throw new Error(data.error.message);
+    }
+    // Save to Firebase
+    status.textContent = '⏳ Salvando no Firebase...';
+    await initFirebase();
+    await db.collection('config').doc('anthropic').set({ key: key, updatedAt: new Date().toISOString() });
+    ANTHROPIC_KEY = key;
+    status.style.color = '#2ecc71';
+    status.textContent = '✅ API key salva e ativa!';
+    setTimeout(function() {
+      document.getElementById('apikeyModal').classList.remove('active');
+      document.getElementById('apikeyInput').value = '';
+      status.textContent = '';
+      btn.disabled = false; btn.textContent = '💾 Salvar e Ativar';
+    }, 1200);
+  } catch(e) {
+    status.style.color = '#e74c3c';
+    status.textContent = '❌ ' + (e.message || 'Erro ao verificar key');
+    btn.disabled = false; btn.textContent = '💾 Salvar e Ativar';
+  }
+}
+
+function toggleKeyVisibility() {
+  var input = document.getElementById('apikeyInput');
+  input.type = input.type === 'password' ? 'text' : 'password';
 }
 
 // ── UPLOAD MODAL ──────────────────────────────────────────────
@@ -1955,6 +2039,7 @@ document.addEventListener('DOMContentLoaded', () => {
   buildNav();
   buildDays();
   setupDropZone();
+  loadApiKey();
   loadFirebaseReservations();
   buildMustDo();
   buildCosts();
@@ -1982,5 +2067,27 @@ function loadLeafletAndMap() {
   document.head.appendChild(script);
 }
 </script>
+
+<!-- API KEY SETUP MODAL -->
+<div class="apikey-overlay" id="apikeyModal">
+  <div class="apikey-modal">
+    <h2>🔑 API Key</h2>
+    <p>Cole sua Anthropic API key abaixo. Ela ficará salva no Firebase — segura e acessível em qualquer dispositivo, nunca no código.</p>
+    <div class="apikey-input-wrap">
+      <input type="password" class="apikey-input" id="apikeyInput" placeholder="sk-ant-api03-..." autocomplete="off" spellcheck="false">
+      <button class="apikey-toggle" onclick="toggleKeyVisibility()" title="Mostrar/ocultar">👁</button>
+    </div>
+    <button class="apikey-save" id="apikeySaveBtn" onclick="saveApiKey()">💾 Salvar e Ativar</button>
+    <div class="apikey-status" id="apikeyStatus"></div>
+    <div class="apikey-hint">
+      Obtenha em <strong>console.anthropic.com</strong> → API Keys → Create Key<br>
+      A key é usada apenas para o assistente de chat e leitura de documentos.
+    </div>
+  </div>
+</div>
+
+<!-- Settings button (gear) -->
+<button class="apikey-settings-btn" onclick="document.getElementById('apikeyModal').classList.add('active')" title="Configurar API Key">⚙️</button>
+
 </body>
 </html>
