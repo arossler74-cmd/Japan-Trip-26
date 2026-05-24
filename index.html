@@ -1,4 +1,13 @@
 <!DOCTYPE html>
+<!-- ============================================================
+     3BOYS JAPAN TRIP 2026 — Trip App
+     Version : 2.5
+     Date    : 2026-05-23
+     Changes : Per-day reservations panel, Firebase upload,
+               AI extraction (PDF/image), edit/delete/sent toggle,
+               Claude chatbot tab, Shinkansen + Whisky info
+     GitHub  : arossler74-cmd/Japan-Trip-26
+     ============================================================ -->
 <html lang="en" data-theme="dark">
 <head>
 <meta charset="UTF-8">
@@ -785,6 +794,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v2.5 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -1794,6 +1804,216 @@ async function sendChat() {
     chatHistory.pop();
   }
   btn.disabled = false;
+}
+
+
+// ── FIREBASE ───────────────────────────────────────────────────
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyD1t4W4pp-yeDbRjZ2dBxR67jLHOMKsIJo",
+  authDomain: "boys-japantrip-2026.firebaseapp.com",
+  projectId: "boys-japantrip-2026",
+  storageBucket: "boys-japantrip-2026.firebasestorage.app",
+  messagingSenderId: "161321284924",
+  appId: "1:161321284924:web:2eed2840b4cbcb991eda39"
+};
+const ANTHROPIC_KEY = "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";
+
+var firebaseApp = null, db = null, storage = null;
+
+function initFirebase() {
+  return new Promise(function(resolve) {
+    if (db && storage) return resolve(true);
+    var sdks = [
+      'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js',
+      'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js',
+      'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js'
+    ];
+    var loaded = 0;
+    sdks.forEach(function(src) {
+      var s = document.createElement('script');
+      s.src = src;
+      s.onload = function() {
+        loaded++;
+        if (loaded === sdks.length) {
+          firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
+          db = firebase.firestore();
+          storage = firebase.storage();
+          resolve(true);
+        }
+      };
+      document.head.appendChild(s);
+    });
+  });
+}
+
+// ── UPLOAD MODAL ───────────────────────────────────────────────
+var uploadFile = null;
+var editingFbId = null;
+
+function openUploadModal() {
+  document.getElementById('uploadModal').classList.add('active');
+}
+
+function closeUploadModal() {
+  editingFbId = null;
+  document.getElementById('uploadModal').classList.remove('active');
+  uploadFile = null;
+  document.getElementById('uploadTitle').value = '';
+  document.getElementById('uploadNotes').value = '';
+  document.getElementById('uploadDate').value = '';
+  document.getElementById('uploadPreview').style.display = 'none';
+  document.getElementById('uploadPreview').src = '';
+  document.getElementById('dropZone').querySelector('.drop-icon').textContent = '📄';
+  document.getElementById('dropZone').querySelector('p').textContent = 'PDF · PNG · JPG · Screenshot — max 10MB';
+  document.getElementById('uploadSaveBtn').disabled = false;
+  document.getElementById('uploadSaveBtn').textContent = '💾 Save to Trip';
+  document.getElementById('uploadFields').style.display = 'none';
+  document.getElementById('uploadInitialBtns').style.display = 'flex';
+  document.getElementById('aiExtractStatus').style.display = 'none';
+}
+
+function setupDropZone() {
+  var zone = document.getElementById('dropZone');
+  var input = document.getElementById('uploadFileInput');
+  if (!zone) return;
+  zone.addEventListener('click', function() { input.click(); });
+  zone.addEventListener('dragover', function(e) { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', function() { zone.classList.remove('dragover'); });
+  zone.addEventListener('drop', function(e) { e.preventDefault(); zone.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
+  input.addEventListener('change', function() { handleFile(input.files[0]); });
+  document.addEventListener('paste', function(e) {
+    var modal = document.getElementById('uploadModal');
+    if (!modal.classList.contains('active')) return;
+    var items = (e.clipboardData || e.originalEvent.clipboardData).items;
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].kind === 'file') { var f = items[i].getAsFile(); if (f) { handleFile(f); break; } }
+    }
+  });
+}
+
+function handleFile(file) {
+  if (!file) return;
+  uploadFile = file;
+  var icon = document.getElementById('dropZone').querySelector('.drop-icon');
+  icon.textContent = file.type.includes('pdf') ? '📋' : '🖼️';
+  document.getElementById('dropZone').querySelector('p').textContent = file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)';
+  if (file.type.startsWith('image/')) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var prev = document.getElementById('uploadPreview');
+      prev.src = e.target.result;
+      prev.style.display = 'block';
+      extractFromFile(e.target.result.split(',')[1], 'image', file.type);
+    };
+    reader.readAsDataURL(file);
+  } else if (file.type.includes('pdf')) {
+    var reader2 = new FileReader();
+    reader2.onload = function(e) { extractFromFile(e.target.result.split(',')[1], 'pdf', 'application/pdf'); };
+    reader2.readAsDataURL(file);
+  } else {
+    // Unknown type — show fields immediately
+    document.getElementById('uploadFields').style.display = 'block';
+    document.getElementById('uploadInitialBtns').style.display = 'none';
+  }
+}
+
+async function extractFromFile(b64data, fileKind, mimeType) {
+  var statusEl = document.getElementById('aiExtractStatus');
+  statusEl.style.display = 'block';
+  statusEl.style.color = 'var(--neon)';
+  statusEl.textContent = '✦ Claude lendo o documento completo...';
+  document.getElementById('uploadInitialBtns').style.display = 'none';
+  document.getElementById('uploadFields').style.display = 'none';
+
+  var prompt = 'You are reading a travel document — ticket, receipt, hotel booking, flight confirmation, or similar. Read the ENTIRE document carefully and extract ALL relevant information. Return ONLY a valid JSON object with NO markdown: {"title":"descriptive title including venue/service name and what it is","category":"one of exactly: ✈️ Flight | 🏨 Hotel | 🎟️ Activity / Ticket | 🚅 Transport | 🍽️ Restaurant | 🥃 Experience | 📄 Other","date":"YYYY-MM-DD event/reservation date or empty string","notes":"confirmation code, time, number of people, price — all in one line"}';
+
+  try {
+    var msgContent = (fileKind === 'pdf')
+      ? [{ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64data } }, { type: 'text', text: prompt }]
+      : [{ type: 'image', source: { type: 'base64', media_type: mimeType, data: b64data } }, { type: 'text', text: prompt }];
+
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 600, messages: [{ role: 'user', content: msgContent }] })
+    });
+    var data = await res.json();
+    if (data.error) throw new Error(data.error.message);
+    var text = (data.content && data.content[0] ? data.content[0].text : '{}').replace(/```json|```/g, '').trim();
+    var match = text.match(/\{[\s\S]*\}/);
+    var parsed = match ? JSON.parse(match[0]) : {};
+    if (parsed.title) document.getElementById('uploadTitle').value = parsed.title;
+    if (parsed.date) document.getElementById('uploadDate').value = parsed.date;
+    if (parsed.notes) document.getElementById('uploadNotes').value = parsed.notes;
+    if (parsed.category) {
+      var sel = document.getElementById('uploadCategory');
+      for (var i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === parsed.category) { sel.selectedIndex = i; break; }
+      }
+    }
+    statusEl.textContent = '✅ Extraído com sucesso — revise e salve!';
+    statusEl.style.color = '#2ecc71';
+  } catch(e) {
+    console.warn('AI extract failed:', e);
+    statusEl.textContent = '⚠️ Preencha os campos manualmente';
+    statusEl.style.color = 'var(--gold)';
+  }
+  setTimeout(function() { statusEl.style.display = 'none'; statusEl.style.color = 'var(--neon)'; }, 2000);
+  document.getElementById('uploadFields').style.display = 'block';
+}
+
+async function saveReservation() {
+  var title = document.getElementById('uploadTitle').value.trim();
+  if (!title) { alert('Por favor adicione um título'); return; }
+  var btn = document.getElementById('uploadSaveBtn');
+  btn.disabled = true; btn.textContent = '⏳ Salvando...';
+  try {
+    await initFirebase();
+    var fileUrl = null, fileName = null, fileType = null;
+    if (uploadFile) {
+      btn.textContent = '⏳ Fazendo upload...';
+      var ref = storage.ref('receipts/' + Date.now() + '_' + (uploadFile.name || 'paste.png'));
+      await ref.put(uploadFile);
+      fileUrl = await ref.getDownloadURL();
+      fileName = uploadFile.name || 'paste.png';
+      fileType = uploadFile.type;
+    }
+    var dateVal = document.getElementById('uploadDate').value;
+    var dayNum = currentUploadDay || null;
+    if (!dayNum && dateVal) {
+      var dp = dateVal.split('-');
+      if (dp.length === 3) { var mdy = dp[1] + '/' + dp[2] + '/' + dp[0]; dayNum = DATE_TO_DAY[mdy] || null; }
+    }
+    var data = {
+      title: title,
+      category: document.getElementById('uploadCategory').value,
+      date: dateVal,
+      notes: document.getElementById('uploadNotes').value,
+      dayNum: dayNum,
+      updatedAt: new Date().toISOString()
+    };
+    if (fileUrl) { data.fileUrl = fileUrl; data.fileName = fileName; data.fileType = fileType; }
+    btn.textContent = '⏳ Salvando no Firebase...';
+    var savedId;
+    if (editingFbId) {
+      await db.collection('reservations').doc(editingFbId).update(data);
+      savedId = editingFbId;
+    } else {
+      data.createdAt = new Date().toISOString();
+      data.sent = false;
+      var docRef = await db.collection('reservations').add(data);
+      savedId = docRef.id;
+    }
+    editingFbId = null; currentUploadDay = null; currentUploadDate = null;
+    btn.textContent = '✅ Salvo!';
+    injectItemIntoDay(data, savedId);
+    setTimeout(function() { closeUploadModal(); }, 700);
+  } catch(e) {
+    console.error(e);
+    btn.disabled = false;
+    btn.textContent = '💾 Save to Trip';
+    alert('Erro: ' + e.message);
+  }
 }
 
 // ── INIT ──────────────────────────────────────────────────────
