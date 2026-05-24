@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 2.15
+     Version : 2.16
      Date    : 2026-05-23
      Changes : API key via Firebase (não hardcoded),
                setup modal para API key,
@@ -829,7 +829,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v2.15 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v2.16 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -2014,14 +2014,26 @@ function sendToChatbot(text) {
 }
 
 // ── CHATBOT ───────────────────────────────────────────────────
-const TRIP_CONTEXT = `Você é o assistente da viagem 3Boys Japan Trip 2026. Responda em Português do Brasil.
+const TRIP_CONTEXT = `Você é o assistente pessoal da viagem 3Boys Japan Trip 2026. Responda sempre em Português do Brasil, de forma direta e útil.
 
-VIAGEM: 23 Jul–2 Ago 2026 · 3 adultos + 3 teens · Tokyo→Kyoto→Osaka
-HOTÉIS: Mitsui Garden Ginza Tsukiji (Tokyo, Jul 23-27) · Agora Kyoto Shijo (Kyoto, Jul 27-31) · Osaka a confirmar (Dotonbori)
-SHINKANSEN: Nozomi, 2h15, ¥14.370/px · Reservar: smart-ex.jp · NÃO comprar JR Pass
-TEAMLAB: Borderless em Azabudai Hills (não Planets/Toyosu) · teamlab.art/e/tokyo · Ago=alta temporada, reservar ASAP
-WHISKY: Kyoto Whisky Tasting (Nishijin, ¥14.800/px, máx 4, seg/qua/sex) · Suntory Yamazaki (30min de Kyoto, esgota rápido)
-RESERVAR URGENTE: 1.teamLab 2.Shinkansen 3.Whisky Tasting 4.Suntory 5.Shibuya Sky 6.Hotel Osaka 7.Sushi Yoshitake`;
+REGRA FUNDAMENTAL: As "RESERVAS SALVAS NO APP" (listadas abaixo quando disponíveis) são a ÚNICA fonte de verdade sobre hotéis, datas e transportes confirmados. Se uma reserva contradiz qualquer outra informação, a RESERVA GANHA SEMPRE. Não diga que não tem acesso — você TEM acesso às reservas listadas.
+
+CONTEXTO BASE DA VIAGEM:
+- Período: 23 Jul–2 Ago 2026 (11 dias) · 3 adultos + 3 teens · Tokyo→Kyoto→Osaka
+- Grupo: família brasileira, primeira vez no Japão
+- Estilo: cultura, gastronomia, anime/manga, whisky, experiências únicas
+
+DICAS GERAIS (podem ser atualizadas pelas reservas):
+- Shinkansen Nozomi: 2h15, ¥14.370/px · Reservar: smart-ex.jp · Assento E para ver Fuji
+- teamLab Borderless: Azabudai Hills · teamlab.art/e/tokyo · reservar ASAP
+- Kyoto Whisky Tasting: Nishijin · ¥14.800/px · máx 4 pessoas · seg/qua/sex
+- Suntory Yamazaki: 30min de Kyoto · esgota rápido
+
+QUANDO O USUÁRIO PERGUNTAR SOBRE HOTÉIS/DATAS/TRANSPORTES:
+1. Primeiro verifique as RESERVAS SALVAS abaixo
+2. Use os dados das reservas como verdade atual
+3. Se algo no itinerário base divergir das reservas, mencione a atualização
+4. Seja proativo: sugira o que ainda falta confirmar`;
 
 var chatHistory = [];
 
@@ -2068,17 +2080,51 @@ async function getReservationsForContext() {
 
 function buildDynamicContext(reservations) {
   var base = TRIP_CONTEXT;
-  if (!reservations || reservations.length === 0) return base;
+  if (!reservations || reservations.length === 0) {
+    return base + '\n\nRESERVAS: Nenhuma reserva salva ainda.';
+  }
 
-  var reservStr = '\n\nRESERVAS SALVAS NO APP (use estas para responder — são a informação MAIS ATUAL):\n';
-  reservations.forEach(function(r, i) {
-    var status = r.sent ? '✅ Confirmado' : '📋 A confirmar';
-    reservStr += (i+1) + '. ' + r.category + ' — ' + r.title;
-    if (r.date) reservStr += ' · Data: ' + r.date;
-    if (r.notes) reservStr += ' · ' + r.notes;
-    reservStr += ' [' + status + ']\n';
-  });
-  reservStr += '\nIMPORTANTE: Se as reservas acima contradizem o itinerário original (ex: hotel diferente, data diferente), as RESERVAS são a verdade atual. Use-as para responder com precisão.';
+  var reservStr = '\n\n═══ RESERVAS SALVAS NO APP (' + reservations.length + ' itens) ═══\n';
+  reservStr += 'ESTAS SÃO AS INFORMAÇÕES REAIS E ATUAIS DA VIAGEM. Use-as como base para TODAS as respostas.\n\n';
+
+  // Group by category for clarity
+  var hotels = reservations.filter(function(r){ return r.category && r.category.includes('Hotel'); });
+  var flights = reservations.filter(function(r){ return r.category && r.category.includes('Flight'); });
+  var transport = reservations.filter(function(r){ return r.category && r.category.includes('Transport'); });
+  var activities = reservations.filter(function(r){ return !r.category || (!r.category.includes('Hotel') && !r.category.includes('Flight') && !r.category.includes('Transport')); });
+
+  function formatItem(r, i) {
+    var status = r.sent ? '✅ CONFIRMADO' : '📋 a confirmar';
+    var line = (i+1) + '. ' + r.title;
+    if (r.date) line += ' | Data: ' + r.date;
+    if (r.notes) line += ' | ' + r.notes;
+    line += ' [' + status + ']';
+    return line;
+  }
+
+  if (hotels.length > 0) {
+    reservStr += '🏨 HOTÉIS CONFIRMADOS:\n';
+    hotels.forEach(function(r,i){ reservStr += '  ' + formatItem(r,i) + '\n'; });
+    reservStr += '  → ATENÇÃO: Use ESTES hotéis. Ignore qualquer hotel mencionado anteriormente que não esteja nesta lista.\n\n';
+  }
+  if (flights.length > 0) {
+    reservStr += '✈️ VOOS:\n';
+    flights.forEach(function(r,i){ reservStr += '  ' + formatItem(r,i) + '\n'; });
+    reservStr += '\n';
+  }
+  if (transport.length > 0) {
+    reservStr += '🚅 TRANSPORTE:\n';
+    transport.forEach(function(r,i){ reservStr += '  ' + formatItem(r,i) + '\n'; });
+    reservStr += '  → As datas destes transportes definem quando há mudança de cidade.\n\n';
+  }
+  if (activities.length > 0) {
+    reservStr += '🎟️ ATIVIDADES/OUTROS:\n';
+    activities.forEach(function(r,i){ reservStr += '  ' + formatItem(r,i) + '\n'; });
+    reservStr += '\n';
+  }
+
+  reservStr += '═══ FIM DAS RESERVAS ═══\n';
+  reservStr += 'Responda com base nestas reservas reais. Se o usuário perguntar algo que as reservas respondem, responda diretamente sem pedir mais informações.';
   return base + reservStr;
 }
 
