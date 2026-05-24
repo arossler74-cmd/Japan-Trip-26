@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 2.16
+     Version : 2.17
      Date    : 2026-05-23
      Changes : API key via Firebase (não hardcoded),
                setup modal para API key,
@@ -829,7 +829,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v2.16 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v2.17 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -2029,11 +2029,17 @@ DICAS GERAIS (podem ser atualizadas pelas reservas):
 - Kyoto Whisky Tasting: Nishijin · ¥14.800/px · máx 4 pessoas · seg/qua/sex
 - Suntory Yamazaki: 30min de Kyoto · esgota rápido
 
-QUANDO O USUÁRIO PERGUNTAR SOBRE HOTÉIS/DATAS/TRANSPORTES:
-1. Primeiro verifique as RESERVAS SALVAS abaixo
-2. Use os dados das reservas como verdade atual
-3. Se algo no itinerário base divergir das reservas, mencione a atualização
-4. Seja proativo: sugira o que ainda falta confirmar`;
+QUANDO O USUÁRIO PEDIR PARA ATUALIZAR O ITINERÁRIO:
+1. Analise as RESERVAS SALVAS (listadas abaixo)
+2. Identifique o que mudou (hotel, data, cidade)
+3. Responda normalmente EM PORTUGUÊS explicando as mudanças
+4. NO FINAL da resposta, inclua um bloco JSON assim para atualizar o app:
+
+ITINERARY_PATCH: [{"dayNum": 5, "hotel": "Mitsui Garden Kyoto", "note": "Atualizado conforme reserva"}, {"dayNum": 6, "hotel": "Mitsui Garden Kyoto"}]
+
+O campo dayNum usa: Dia 1=Jul23, 2=Jul24, 3=Jul25, 4=Jul26, 5=Jul27, 6=Jul28, 7=Jul29, 8=Jul30, 9=Jul31, 10=Ago1, 11=Ago2
+Campos disponíveis no patch: dayNum, hotel, city, theme, note, morning(array), afternoon(array), night(array), transport(array)
+Inclua o patch SEMPRE que houver mudança no itinerário. Sem patch = app não atualiza.`;
 
 var chatHistory = [];
 
@@ -2049,6 +2055,106 @@ function appendMessage(role, text) {
   msgs.appendChild(div);
   msgs.scrollTop = msgs.scrollHeight;
   return div;
+}
+
+
+// ── LIVE ITINERARY PATCHING ──────────────────────────────────────────────
+// Apply patches to DAYS array and re-render affected days
+function applyItineraryPatches(patches) {
+  if (!patches || !patches.length) return;
+  var changed = [];
+  patches.forEach(function(patch) {
+    // Find matching day(s)
+    var targetDays = [];
+    if (patch.dayNum) {
+      var d = DAYS.find(function(d){ return d.num === patch.dayNum; });
+      if (d) targetDays.push(d);
+    } else if (patch.dateRange) {
+      // e.g. {from: 5, to: 8} = days 5-8
+      DAYS.forEach(function(d){ if (d.num >= patch.dateRange.from && d.num <= patch.dateRange.to) targetDays.push(d); });
+    }
+
+    targetDays.forEach(function(day) {
+      if (patch.hotel) { day.hotel = patch.hotel; day.hotelNew = true; }
+      if (patch.city) day.city = patch.city;
+      if (patch.theme) day.theme = patch.theme;
+      if (patch.note) day.note = patch.note;
+      if (patch.morning) day.morning = patch.morning;
+      if (patch.afternoon) day.afternoon = patch.afternoon;
+      if (patch.night) day.night = patch.night;
+      if (patch.transport) day.transport = patch.transport;
+      if (changed.indexOf(day.num) === -1) changed.push(day.num);
+    });
+  });
+
+  // Re-render changed days
+  changed.forEach(function(num) {
+    var day = DAYS.find(function(d){ return d.num === num; });
+    if (!day) return;
+    var section = document.getElementById('day-' + num);
+    if (!section) return;
+    var wasOpen = section.querySelector('.day-detail.open') !== null;
+
+    // Rebuild just the header meta chips
+    var hotelDot = day.hotelNew ? '<span class="hotel-new-dot"></span>' : '';
+    var metaEl = section.querySelector('.ep-meta');
+    if (metaEl) {
+      metaEl.innerHTML =
+        '<span class="meta-chip city">📍 ' + day.city + '</span>' +
+        '<span class="meta-chip temp">🌡️ ' + day.temp + '</span>' +
+        '<span class="meta-chip hotel">' + hotelDot + '🏨 ' + day.hotel + '</span>';
+    }
+
+    // Rebuild note if changed
+    if (patch && patch.note) {
+      var noteEl = section.querySelector('.block-note');
+      if (noteEl) noteEl.innerHTML = '💡 ' + day.note;
+    }
+
+    // Flash the day card to show it was updated
+    section.style.transition = 'box-shadow 0.5s';
+    section.style.boxShadow = '0 0 0 3px var(--gold)';
+    setTimeout(function() { section.style.boxShadow = ''; }, 2000);
+  });
+
+  if (changed.length > 0) {
+    // Show update notification in chat
+    appendMessage('assistant', '✅ Itinerário atualizado! Dias ' + changed.join(', ') + ' foram modificados no app.');
+  }
+}
+
+// Parse Claude response for JSON patches
+function extractAndApplyPatches(text) {
+  var match = null;
+  // Look for ITINERARY_PATCH: [...] pattern (safe, no backticks in regex)
+  var patchIdx = text.indexOf('ITINERARY_PATCH:');
+  if (patchIdx !== -1) {
+    var patchStr = text.slice(patchIdx + 16).trim();
+    var jsonStart = -1;
+    for (var si = 0; si < patchStr.length; si++) {
+      if (patchStr[si] === '[' || patchStr[si] === '{') { jsonStart = si; break; }
+    }
+    if (jsonStart !== -1) {
+      patchStr = patchStr.slice(jsonStart);
+      var depth = 0, endIdx = 0;
+      var opener = patchStr[0], closer = opener === '[' ? ']' : '}';
+      for (var ci = 0; ci < patchStr.length; ci++) {
+        if (patchStr[ci] === opener) depth++;
+        else if (patchStr[ci] === closer) { depth--; if (depth === 0) { endIdx = ci + 1; break; } }
+      }
+      if (endIdx > 0) match = [null, patchStr.slice(0, endIdx)];
+    }
+  }
+  if (!match) return false;
+  try {
+    var patches = JSON.parse(match[1]);
+    if (!Array.isArray(patches)) patches = [patches];
+    applyItineraryPatches(patches);
+    return true;
+  } catch(e) {
+    console.warn('Could not parse itinerary patch:', e);
+    return false;
+  }
 }
 
 // Cache of Firebase reservations for chat context
@@ -2153,7 +2259,15 @@ async function sendChat() {
     var reply = data.content&&data.content[0]?data.content[0].text:'Desculpe, tente novamente.';
     chatHistory.push({role:'assistant',content:reply});
     thinking.remove();
-    appendMessage('assistant', reply);
+    // Remove patch block from visible chat message
+    // Remove patch from display
+    var displayReply = reply;
+    var patchStart = reply.indexOf('ITINERARY_PATCH:');
+    if (patchStart !== -1) displayReply = reply.slice(0, patchStart).trim();
+    if (!displayReply) displayReply = reply;
+    appendMessage('assistant', displayReply);
+    // Apply any itinerary patches silently
+    extractAndApplyPatches(reply);
   } catch(e) { thinking.remove(); appendMessage('assistant','⚠️ Erro: '+e.message); chatHistory.pop(); }
   btn.disabled=false;
 }
