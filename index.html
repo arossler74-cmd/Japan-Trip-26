@@ -1606,30 +1606,60 @@ function handleFile(file) {
 
 async function extractFromFile(b64, kind, mime) {
   var st = document.getElementById('aiExtractStatus');
-  st.style.display = 'block'; st.style.color = 'var(--neon)'; st.textContent = '✦ Claude lendo o documento completo...';
+  st.style.display = 'block'; st.style.color = 'var(--neon)';
+  st.innerHTML = '⏳ Claude lendo o documento... aguarde';
   document.getElementById('uploadInitialBtns').style.display = 'none';
   document.getElementById('uploadFields').style.display = 'none';
-  var prompt = 'Read this travel document completely and return ONLY valid JSON (no markdown): {"title":"descriptive title with venue/service name","category":"one of: ✈️ Flight|🏨 Hotel|🎟️ Activity / Ticket|🚅 Transport|🍽️ Restaurant|🥃 Experience|📄 Other","date":"YYYY-MM-DD event date or empty string","notes":"confirmation code, time, people, price in one line"}';
+
+  var prompt = `You are reading a travel document for a Japan trip (Jul 23 - Aug 2, 2026, Tokyo/Kyoto/Osaka).
+Read the ENTIRE document carefully — every field, date, name, price, confirmation number.
+Return ONLY a valid JSON object. No markdown, no explanation, just raw JSON.
+
+{
+  "title": "Short clear title: venue/airline/hotel name + what it is. Examples: 'teamLab Borderless — 6 ingressos Jul 25', 'Hotel Mitsui Garden Ginza — 4 noites', 'Voo GRU→NRT TAM JJ8042', 'Shinkansen Tokyo→Kyoto Nozomi'",
+  "category": "Exactly one of: ✈️ Flight | 🏨 Hotel | 🎟️ Activity / Ticket | 🚅 Transport | 🍽️ Restaurant | 🥃 Experience | 📄 Other",
+  "date": "YYYY-MM-DD format — use the CHECK-IN date for hotels, DEPARTURE date for flights/trains, EVENT date for tickets. Leave empty string if truly not found.",
+  "notes": "Pack all key details in one line: confirmation/booking code, time, number of people/rooms, total price, any special info. Example: 'Conf: ABC123 · 6 pessoas · 14:00 · ¥28.800 total · Azabudai Hills B1'"
+}`;
+
   try {
-    var content = kind === 'pdf'
+    var msgContent = kind === 'pdf'
       ? [{ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64 } }, { type: 'text', text: prompt }]
       : [{ type: 'image', source: { type: 'base64', media_type: mime, data: b64 } }, { type: 'text', text: prompt }];
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 600, messages: [{ role: 'user', content: content }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 800, messages: [{ role: 'user', content: msgContent }] })
     });
     var data = await res.json();
     if (data.error) throw new Error(data.error.message);
-    var text = (data.content && data.content[0] ? data.content[0].text : '{}').replace(/```json|```/g, '').trim();
-    var m = text.match(/\{[\s\S]*\}/); var p = m ? JSON.parse(m[0]) : {};
+    var rawText = (data.content && data.content[0] ? data.content[0].text : '{}');
+    rawText = rawText.replace(/```json|```/g, '').trim();
+    var jsonMatch = rawText.match(/\{[\s\S]*\}/);
+    var p = jsonMatch ? JSON.parse(jsonMatch[0]) : {};
+
     if (p.title) document.getElementById('uploadTitle').value = p.title;
     if (p.date) document.getElementById('uploadDate').value = p.date;
     if (p.notes) document.getElementById('uploadNotes').value = p.notes;
-    if (p.category) { var sel = document.getElementById('uploadCategory'); for (var i=0;i<sel.options.length;i++) { if (sel.options[i].value===p.category){sel.selectedIndex=i;break;} } }
-    st.textContent = '✅ Extraído — revise e salve!'; st.style.color = '#2ecc71';
-  } catch(e) { st.textContent = '⚠️ Preencha manualmente'; st.style.color = 'var(--gold)'; }
-  setTimeout(function() { st.style.display='none'; st.style.color='var(--neon)'; }, 2000);
+    if (p.category) {
+      var sel = document.getElementById('uploadCategory');
+      for (var i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === p.category) { sel.selectedIndex = i; break; }
+      }
+    }
+    // Highlight title field so user can easily edit it
+    st.innerHTML = '✅ Pronto! Revise o título e clique Salvar';
+    st.style.color = '#2ecc71';
+    setTimeout(function() {
+      document.getElementById('uploadTitle').focus();
+      document.getElementById('uploadTitle').select();
+    }, 100);
+  } catch(e) {
+    console.warn('AI extract error:', e);
+    st.innerHTML = '⚠️ Não foi possível ler automaticamente — preencha abaixo';
+    st.style.color = 'var(--gold)';
+  }
+  // Keep status visible — don't auto-hide
   document.getElementById('uploadFields').style.display = 'block';
 }
 
@@ -1660,7 +1690,11 @@ async function saveReservation() {
     else { docData.createdAt = new Date().toISOString(); docData.sent = false; var docRef = await db.collection('reservations').add(docData); savedId = docRef.id; }
     btn.textContent = '✅ Salvo!';
     injectItemIntoDay(docData, savedId);
-    setTimeout(function() { closeUploadModal(); }, 700);
+    setTimeout(function() {
+      closeUploadModal();
+      // Auto-suggest chatbot review for hotel, flight, transport reservations
+      suggestChatReview(docData);
+    }, 800);
   } catch(e) { console.error(e); btn.disabled=false; btn.textContent='💾 Save to Trip'; alert('Erro: '+e.message); }
 }
 
@@ -1671,7 +1705,7 @@ function renderReservItem(item, fbId) {
   var detail = item.notes || '';
   var dotC = sent ? 'ri-dot-sent' : 'ri-dot-pending';
   var badgeC = sent ? 'rib-sent' : 'rib-pending';
-  var badgeL = sent ? '✅ Enviado' : '📤 Pendente';
+  var badgeL = sent ? '✅ Confirmado' : '📋 A confirmar';
 
   var attachHtml = '';
   if (item.fileUrl) {
@@ -1706,13 +1740,13 @@ function updateDayBadge(dayNum) {
   items.forEach(function(el) { if (el.querySelector('.ri-dot-sent')) sent++; else pend++; });
   var cb = document.getElementById('reserv-count-confirmed-' + dayNum);
   var pb = document.getElementById('reserv-count-pending-' + dayNum);
-  if (cb) { cb.textContent = sent + ' confirmado' + (sent!==1?'s':''); cb.style.display = sent?'inline':'none'; }
-  if (pb) { pb.textContent = pend + ' pendente' + (pend!==1?'s':''); pb.style.display = pend?'inline':'none'; }
+  if (cb) { cb.textContent = '✅ ' + sent + ' confirmad' + (sent===1?'o':'os'); cb.style.display = sent?'inline':'none'; }
+  if (pb) { pb.textContent = '📋 ' + pend + ' a confirmar'; pb.style.display = pend?'inline':'none'; }
   var epb = document.getElementById('ep-badge-' + dayNum);
   if (epb) {
     if (sent+pend===0) epb.innerHTML='';
-    else if (pend>0) epb.innerHTML='<span class="ep-reserv-badge erb-pending">🎫 '+pend+' pendente</span>';
-    else epb.innerHTML='<span class="ep-reserv-badge erb-has">🎫 '+sent+' ✓</span>';
+    else if (pend>0) epb.innerHTML='<span class="ep-reserv-badge erb-pending">🎫 '+pend+' a confirmar</span>';
+    else epb.innerHTML='<span class="ep-reserv-badge erb-has">🎫 '+sent+' confirmado'+(sent!==1?'s':'')+'</span>';
   }
   var emp = document.getElementById('reserv-empty-' + dayNum);
   if (emp) emp.style.display = items.length ? 'none' : 'block';
@@ -1778,6 +1812,92 @@ async function editReservation(fbId) {
       for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===item.category){sel.selectedIndex=i;break;}}
     }, 50);
   } catch(e) { alert('Erro: '+e.message); }
+}
+
+
+// ── AUTO-SUGGEST CHAT REVIEW AFTER UPLOAD ────────────────────
+function suggestChatReview(item) {
+  var cat = item.category || '';
+  var isHotel = cat.includes('Hotel');
+  var isFlight = cat.includes('Flight');
+  var isTransport = cat.includes('Transport');
+  var isActivity = cat.includes('Activity') || cat.includes('Ticket');
+  var isExperience = cat.includes('Experience');
+
+  // Only prompt for bookings that affect itinerary
+  if (!isHotel && !isFlight && !isTransport && !isActivity && !isExperience) return;
+
+  // Build smart suggestion text
+  var title = item.title || 'esta reserva';
+  var date = item.date ? ' (' + item.date + ')' : '';
+  var suggestion = '';
+
+  if (isHotel) {
+    suggestion = 'Acabei de adicionar uma reserva de hotel: ' + title + date + '. Revisa o itinerário — hotel, mapa e datas podem precisar de atualização.';
+  } else if (isFlight) {
+    suggestion = 'Adicionei reserva de voo: ' + title + date + '. Revisa chegada/partida no itinerário e se os dias estão certos.';
+  } else if (isTransport) {
+    suggestion = 'Adicionei reserva de transporte: ' + title + date + '. Verifica se as datas de transfer entre cidades estão corretas no itinerário.';
+  } else if (isActivity || isExperience) {
+    suggestion = 'Adicionei ingresso/experiência: ' + title + date + '. Qual o melhor dia do itinerário para encaixar isso?';
+  }
+
+  if (!suggestion) return;
+
+  // Show chat suggestion banner
+  showChatSuggestionBanner(suggestion);
+}
+
+function showChatSuggestionBanner(suggestion) {
+  // Remove any existing banner
+  var existing = document.getElementById('chatSuggestBanner');
+  if (existing) existing.remove();
+
+  var banner = document.createElement('div');
+  banner.id = 'chatSuggestBanner';
+  banner.style.cssText = 'position:fixed;bottom:24px;left:50%;transform:translateX(-50%);z-index:8888;background:var(--manga-bg);border:2px solid var(--gold);border-radius:6px;padding:14px 18px;max-width:480px;width:90%;box-shadow:0 8px 32px rgba(0,0,0,0.6);animation:slideUp .3s ease';
+  // Store suggestion globally to avoid quote escaping issues
+  window._pendingSuggestion = suggestion;
+  banner.innerHTML =
+    '<div style="font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--gold);margin-bottom:6px">🤖 Assistente de Viagem</div>' +
+    '<div style="font-size:13px;color:var(--text-main);line-height:1.5;margin-bottom:12px">' + suggestion + '</div>' +
+    '<div style="display:flex;gap:8px;justify-content:flex-end">' +
+      '<button onclick="dismissChatBanner()" style="font-family:var(--font-mono);font-size:10px;background:transparent;border:1px solid rgba(200,180,150,0.3);color:rgba(200,180,150,0.6);padding:5px 12px;border-radius:2px;cursor:pointer">Ignorar</button>' +
+      '<button onclick="sendToChatbot(window._pendingSuggestion)" style="font-family:var(--font-mono);font-size:10px;background:var(--japan-red);border:none;color:white;padding:5px 14px;border-radius:2px;cursor:pointer;font-weight:700">Perguntar ao assistente →</button>' +
+    '</div>';
+
+  // Add slide-up animation
+  if (!document.getElementById('slideUpStyle')) {
+    var style = document.createElement('style');
+    style.id = 'slideUpStyle';
+    style.textContent = '@keyframes slideUp { from { opacity:0; transform:translateX(-50%) translateY(20px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }';
+    document.head.appendChild(style);
+  }
+
+  document.body.appendChild(banner);
+
+  // Auto-dismiss after 12 seconds
+  setTimeout(function() { if (banner.parentNode) banner.remove(); }, 12000);
+}
+
+function dismissChatBanner() {
+  var banner = document.getElementById('chatSuggestBanner');
+  if (banner) banner.remove();
+}
+
+function sendToChatbot(text) {
+  var banner = document.getElementById('chatSuggestBanner');
+  if (banner) banner.remove();
+
+  // Scroll to chatbot
+  var chatSection = document.getElementById('chatbot');
+  if (chatSection) chatSection.scrollIntoView({ behavior: 'smooth' });
+
+  // Pre-fill and send
+  setTimeout(function() {
+    document.getElementById('chatInput').value = text;
+    sendChat();
+  }, 600);
 }
 
 // ── CHATBOT ───────────────────────────────────────────────────
