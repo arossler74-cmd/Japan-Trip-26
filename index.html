@@ -767,41 +767,57 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <div class="upload-modal-overlay" id="uploadModal">
     <div class="upload-modal">
       <h3>📎 Add Reservation</h3>
-      <p>Upload a receipt, ticket, PDF, or QR code — saved to your trip</p>
-      <div class="upload-field">
-        <label>Title *</label>
-        <input type="text" id="uploadTitle" placeholder="e.g. teamLab Borderless — 6 tickets">
-      </div>
-      <div class="upload-field">
-        <label>Category</label>
-        <select id="uploadCategory">
-          <option value="✈️ Flight">✈️ Flight</option>
-          <option value="🏨 Hotel">🏨 Hotel</option>
-          <option value="🎟️ Activity / Ticket" selected>🎟️ Activity / Ticket</option>
-          <option value="🚅 Transport">🚅 Transport</option>
-          <option value="🍽️ Restaurant">🍽️ Restaurant</option>
-          <option value="🥃 Experience">🥃 Experience</option>
-          <option value="📄 Other">📄 Other</option>
-        </select>
-      </div>
-      <div class="upload-field">
-        <label>Date</label>
-        <input type="date" id="uploadDate">
-      </div>
-      <div class="upload-field">
-        <label>Notes</label>
-        <textarea id="uploadNotes" rows="2" placeholder="Confirmation number, time, details..."></textarea>
-      </div>
+      <p style="font-family:var(--font-mono);font-size:11px;color:rgba(200,180,150,0.55);margin:0 0 16px">Drop, clique, ou cole (Ctrl+V) um screenshot — Claude extrai os detalhes automaticamente 🤖</p>
+
+      <!-- DROP ZONE FIRST -->
       <div class="upload-drop-zone" id="dropZone">
         <div class="drop-icon">📄</div>
-        <div style="font-family:var(--font-mono);font-size:12px;color:rgba(200,180,150,0.7);margin-top:8px">Drop file here or click to browse</div>
-        <p>PDF, image, QR code — max 10MB</p>
-        <input type="file" id="uploadFileInput" accept="image/*,.pdf" style="display:none">
+        <div style="font-family:var(--font-mono);font-size:12px;color:rgba(200,180,150,0.7);margin-top:8px">Drop, click or <strong style="color:var(--neon)">Ctrl+V</strong> para colar screenshot</div>
+        <p>PDF · PNG · JPG · Screenshot — max 10MB</p>
+        <input type="file" id="uploadFileInput" accept="image/*,.pdf,.png,.jpg,.jpeg,.webp" style="display:none">
         <img class="upload-preview" id="uploadPreview">
       </div>
-      <div class="upload-modal-btns">
+
+      <!-- AI STATUS -->
+      <div id="aiExtractStatus" style="display:none;font-family:var(--font-mono);font-size:11px;color:var(--neon);padding:8px 0;text-align:center;letter-spacing:.05em">
+        ✦ Claude analisando o documento...
+      </div>
+
+      <!-- AUTO-POPULATED FIELDS -->
+      <div id="uploadFields" style="display:none">
+        <div class="upload-field">
+          <label>Title *</label>
+          <input type="text" id="uploadTitle" placeholder="e.g. teamLab Borderless — 6 tickets">
+        </div>
+        <div class="upload-field">
+          <label>Category</label>
+          <select id="uploadCategory">
+            <option value="✈️ Flight">✈️ Flight</option>
+            <option value="🏨 Hotel">🏨 Hotel</option>
+            <option value="🎟️ Activity / Ticket" selected>🎟️ Activity / Ticket</option>
+            <option value="🚅 Transport">🚅 Transport</option>
+            <option value="🍽️ Restaurant">🍽️ Restaurant</option>
+            <option value="🥃 Experience">🥃 Experience</option>
+            <option value="📄 Other">📄 Other</option>
+          </select>
+        </div>
+        <div class="upload-field">
+          <label>Date</label>
+          <input type="date" id="uploadDate">
+        </div>
+        <div class="upload-field">
+          <label>Notes</label>
+          <textarea id="uploadNotes" rows="2" placeholder="Confirmation number, time, details..."></textarea>
+        </div>
+        <div class="upload-modal-btns">
+          <button class="btn-cancel" onclick="closeUploadModal()">Cancel</button>
+          <button class="btn-save" id="uploadSaveBtn" onclick="saveReservation()">💾 Save to Trip</button>
+        </div>
+      </div>
+
+      <!-- INITIAL BUTTONS (before file selected) -->
+      <div class="upload-modal-btns" id="uploadInitialBtns">
         <button class="btn-cancel" onclick="closeUploadModal()">Cancel</button>
-        <button class="btn-save" id="uploadSaveBtn" onclick="saveReservation()">💾 Save to Trip</button>
       </div>
     </div>
   </div>
@@ -1785,8 +1801,12 @@ function closeUploadModal() {
   document.getElementById('uploadPreview').style.display = 'none';
   document.getElementById('uploadPreview').src = '';
   document.getElementById('dropZone').querySelector('.drop-icon').textContent = '📄';
+  document.getElementById('dropZone').querySelector('p').textContent = 'PDF, imagem, QR code — ou Cole (Ctrl+V) um screenshot';
   document.getElementById('uploadSaveBtn').disabled = false;
   document.getElementById('uploadSaveBtn').textContent = '💾 Save to Trip';
+  document.getElementById('uploadFields').style.display = 'none';
+  document.getElementById('uploadInitialBtns').style.display = 'flex';
+  document.getElementById('aiExtractStatus').style.display = 'none';
 }
 
 function setupDropZone() {
@@ -1798,6 +1818,19 @@ function setupDropZone() {
   zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
   zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
   input.addEventListener('change', () => handleFile(input.files[0]));
+
+  // Paste support (Ctrl+V anywhere on the page or in modal)
+  document.addEventListener('paste', e => {
+    const modal = document.getElementById('uploadModal');
+    if (!modal.classList.contains('active')) return;
+    const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+    for (const item of items) {
+      if (item.kind === 'file') {
+        const file = item.getAsFile();
+        if (file) { handleFile(file); break; }
+      }
+    }
+  });
 }
 
 function handleFile(file) {
@@ -1805,17 +1838,83 @@ function handleFile(file) {
   uploadFile = file;
   const icon = document.getElementById('dropZone').querySelector('.drop-icon');
   icon.textContent = file.type.includes('pdf') ? '📋' : '🖼️';
-  const zone = document.getElementById('dropZone').querySelector('div');
+  document.getElementById('dropZone').querySelector('p').textContent = file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)';
+
+  // Show image preview
   if (file.type.startsWith('image/')) {
     const reader = new FileReader();
     reader.onload = e => {
       const prev = document.getElementById('uploadPreview');
       prev.src = e.target.result;
       prev.style.display = 'block';
+      // Auto-extract from image
+      extractFromFile(e.target.result, 'image', file.type);
+    };
+    reader.readAsDataURL(file);
+  } else if (file.type.includes('pdf')) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const b64 = e.target.result.split(',')[1];
+      extractFromFile(b64, 'pdf', 'application/pdf');
     };
     reader.readAsDataURL(file);
   }
-  document.getElementById('dropZone').querySelector('p').textContent = file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)';
+}
+
+async function extractFromFile(b64data, fileKind, mimeType) {
+  // Show AI status, hide initial buttons
+  document.getElementById('aiExtractStatus').style.display = 'block';
+  document.getElementById('uploadInitialBtns').style.display = 'none';
+  document.getElementById('uploadFields').style.display = 'none';
+
+  try {
+    const msgContent = fileKind === 'image'
+      ? [
+          { type: 'image', source: { type: 'base64', media_type: mimeType, data: b64data } },
+          { type: 'text', text: 'This is a travel receipt, ticket, or reservation document. Extract the following and return ONLY valid JSON, no markdown: {"title": "short descriptive title", "category": one of ["✈️ Flight","🏨 Hotel","🎟️ Activity / Ticket","🚅 Transport","🍽️ Restaurant","🥃 Experience","📄 Other"], "date": "YYYY-MM-DD or empty string", "notes": "confirmation number, time, key details in one line"}' }
+        ]
+      : [
+          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64data } },
+          { type: 'text', text: 'This is a travel receipt, ticket, or reservation document. Extract the following and return ONLY valid JSON, no markdown: {"title": "short descriptive title", "category": one of ["✈️ Flight","🏨 Hotel","🎟️ Activity / Ticket","🚅 Transport","🍽️ Restaurant","🥃 Experience","📄 Other"], "date": "YYYY-MM-DD or empty string", "notes": "confirmation number, time, key details in one line"}' }
+        ];
+
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 400,
+        messages: [{ role: 'user', content: msgContent }]
+      })
+    });
+
+    const data = await res.json();
+    const text = data.content?.[0]?.text || '{}';
+    const clean = text.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+
+    // Populate fields
+    if (parsed.title) document.getElementById('uploadTitle').value = parsed.title;
+    if (parsed.date) document.getElementById('uploadDate').value = parsed.date;
+    if (parsed.notes) document.getElementById('uploadNotes').value = parsed.notes;
+    if (parsed.category) {
+      const sel = document.getElementById('uploadCategory');
+      for (let i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value === parsed.category) { sel.selectedIndex = i; break; }
+      }
+    }
+  } catch(e) {
+    console.warn('AI extract failed:', e);
+    // Still show fields even if extraction failed
+  }
+
+  document.getElementById('aiExtractStatus').style.display = 'none';
+  document.getElementById('uploadFields').style.display = 'block';
 }
 
 async function saveReservation() {
