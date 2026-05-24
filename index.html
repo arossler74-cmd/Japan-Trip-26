@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 2.5
+     Version : 2.6
      Date    : 2026-05-23
      Changes : Per-day reservations panel, Firebase upload,
-               AI extraction (PDF/image), edit/delete/sent toggle,
-               Claude chatbot tab, Shinkansen + Whisky info
+               AI extraction from PDF/image (Claude), 
+               edit/delete/sent toggle per reservation,
+               Claude chatbot tab, Shinkansen + Whisky info,
+               teamLab Borderless updated
      GitHub  : arossler74-cmd/Japan-Trip-26
      ============================================================ -->
 <html lang="en" data-theme="dark">
@@ -456,37 +458,6 @@ body::after {
 /* COSTS */
 .costs-section { margin: 40px 0 80px; scroll-margin-top: 80px; }
 
-/* ====== RESERVATIONS TIMELINE ====== */
-.reserv-section { margin: 40px 0 60px; scroll-margin-top: 80px; }
-.timeline-wrapper { position: relative; padding: 0 0 20px 0; }
-.timeline-line { position: absolute; left: 38px; top: 0; bottom: 0; width: 3px; background: linear-gradient(to bottom, var(--japan-red), var(--gold), var(--neon)); border-radius: 2px; }
-.timeline-group { margin-bottom: 32px; }
-.timeline-group-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--japan-red); margin-left: 70px; margin-bottom: 10px; opacity: .8; }
-.timeline-item { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 10px; position: relative; }
-.timeline-dot-wrap { display: flex; flex-direction: column; align-items: center; min-width: 40px; padding-top: 2px; }
-.timeline-dot { width: 18px; height: 18px; border-radius: 50%; border: 3px solid var(--japan-red); background: var(--manga-bg); flex-shrink: 0; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; font-size: 9px; }
-.timeline-dot.confirmed { background: #27ae60; border-color: #27ae60; }
-.timeline-dot.pending { background: var(--gold); border-color: var(--gold); }
-.timeline-dot.todo { background: var(--manga-bg); border-color: rgba(200,180,150,0.3); }
-.timeline-dot.flight { background: var(--neon); border-color: var(--neon); }
-.timeline-card { flex: 1; background: var(--panel-bg); border: 1.5px solid rgba(201,168,76,0.15); border-radius: 4px; padding: 12px 14px; transition: border-color .2s, transform .2s; }
-.timeline-card:hover { border-color: rgba(201,168,76,0.5); transform: translateX(3px); }
-.timeline-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
-.timeline-card-title { font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--text-main); letter-spacing: .03em; }
-.timeline-card-badge { font-family: var(--font-mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 7px; border-radius: 2px; white-space: nowrap; flex-shrink: 0; }
-.badge-confirmed { background: rgba(39,174,96,.15); color: #2ecc71; border: 1px solid rgba(39,174,96,.3); }
-.badge-pending { background: rgba(201,168,76,.15); color: var(--gold); border: 1px solid rgba(201,168,76,.3); }
-.badge-todo { background: rgba(200,180,150,.08); color: rgba(200,180,150,.5); border: 1px solid rgba(200,180,150,.15); }
-.badge-flight { background: rgba(0,212,255,.1); color: var(--neon); border: 1px solid rgba(0,212,255,.3); }
-.timeline-card-detail { font-size: 12px; color: rgba(200,180,150,0.65); line-height: 1.5; }
-.timeline-card-meta { display: flex; gap: 12px; margin-top: 6px; flex-wrap: wrap; }
-.timeline-meta-item { font-family: var(--font-mono); font-size: 10px; color: rgba(200,180,150,0.45); display: flex; align-items: center; gap: 4px; }
-.timeline-card-link { display: inline-block; margin-top: 8px; font-family: var(--font-mono); font-size: 10px; color: var(--neon); text-decoration: none; letter-spacing: .05em; border-bottom: 1px solid rgba(0,212,255,.3); padding-bottom: 1px; }
-.timeline-card-link:hover { color: #fff; border-bottom-color: #fff; }
-.reserv-legend { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
-.reserv-legend-item { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10px; color: rgba(200,180,150,.6); letter-spacing: .05em; }
-.reserv-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-
 .cost-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
 
 .cost-card {
@@ -596,63 +567,6 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
 .mustdo-day { font-family:var(--font-mono); font-size:9px; color:var(--japan-red); letter-spacing:.1em; text-transform:uppercase; margin-top:5px; opacity:.8; }
 @media (max-width:768px) { .mustdo-grid { grid-template-columns:1fr; } }
 
-/* ====== CHATBOT TAB ====== */
-.chat-section { margin: 40px 0 60px; scroll-margin-top: 80px; }
-.chat-wrapper { display: flex; flex-direction: column; height: 600px; background: var(--panel-bg); border: var(--border-thick) solid var(--text-main); border-radius: 4px; overflow: hidden; }
-.chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
-.chat-messages::-webkit-scrollbar { width: 4px; } .chat-messages::-webkit-scrollbar-track { background: transparent; } .chat-messages::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 2px; }
-.chat-bubble { max-width: 85%; padding: 10px 14px; border-radius: 4px; font-size: 13px; line-height: 1.6; }
-.chat-bubble.user { align-self: flex-end; background: var(--japan-red); color: #fff; border-bottom-right-radius: 0; }
-.chat-bubble.assistant { align-self: flex-start; background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.2); color: var(--text-main); border-bottom-left-radius: 0; }
-.chat-bubble.assistant a { color: var(--neon); }
-.chat-bubble.thinking { opacity: 0.6; font-style: italic; font-family: var(--font-mono); font-size: 11px; }
-.chat-input-row { display: flex; gap: 0; border-top: var(--border-w) solid rgba(201,168,76,0.2); }
-.chat-input { flex: 1; background: transparent; border: none; padding: 14px 16px; color: var(--text-main); font-family: var(--font-body); font-size: 13px; outline: none; resize: none; min-height: 48px; max-height: 120px; }
-.chat-input::placeholder { color: rgba(200,180,150,0.35); }
-.chat-send { background: var(--japan-red); border: none; color: white; padding: 0 20px; cursor: pointer; font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; font-weight: 700; transition: background .2s; flex-shrink: 0; }
-.chat-send:hover { background: #a93226; }
-.chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
-.chat-suggestions { display: flex; gap: 8px; flex-wrap: wrap; padding: 10px 16px; border-top: 1px solid rgba(201,168,76,0.1); }
-.chat-suggestion { font-family: var(--font-mono); font-size: 10px; background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.2); color: rgba(200,180,150,0.7); padding: 5px 10px; border-radius: 2px; cursor: pointer; transition: all .2s; letter-spacing: .03em; }
-.chat-suggestion:hover { background: rgba(201,168,76,0.18); color: var(--text-main); border-color: var(--gold); }
-
-/* ====== UPLOAD / RECEIPT ====== */
-.upload-bar { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid rgba(201,168,76,0.15); flex-wrap: wrap; }
-.upload-btn { font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.3); color: var(--neon); padding: 6px 12px; border-radius: 2px; cursor: pointer; transition: all .2s; white-space: nowrap; }
-.upload-btn:hover { background: rgba(0,212,255,0.18); }
-.upload-status { font-family: var(--font-mono); font-size: 10px; color: rgba(200,180,150,0.5); }
-.upload-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; padding:16px; }
-.upload-modal-overlay.active { display:flex; }
-.upload-modal { background: var(--manga-bg); border: var(--border-thick) solid var(--text-main); border-radius:4px; width:100%; max-width:500px; padding:24px; }
-.upload-modal h3 { font-family:var(--font-display); font-size:24px; color:var(--japan-red); margin:0 0 4px; letter-spacing:.05em; }
-.upload-modal p { font-size:12px; color:rgba(200,180,150,0.6); margin:0 0 20px; font-family:var(--font-mono); }
-.upload-field { margin-bottom:14px; }
-.upload-field label { display:block; font-family:var(--font-mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:rgba(200,180,150,0.6); margin-bottom:6px; }
-.upload-field input, .upload-field select, .upload-field textarea { width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(201,168,76,0.25); border-radius:3px; padding:9px 12px; color:var(--text-main); font-family:var(--font-body); font-size:13px; box-sizing:border-box; outline:none; }
-.upload-field input:focus, .upload-field select:focus, .upload-field textarea:focus { border-color:var(--gold); }
-.upload-field select option { background:#1a1a2e; }
-.upload-drop-zone { border:2px dashed rgba(0,212,255,0.3); border-radius:4px; padding:24px; text-align:center; cursor:pointer; transition:all .2s; margin-bottom:14px; }
-.upload-drop-zone:hover, .upload-drop-zone.dragover { border-color:var(--neon); background:rgba(0,212,255,0.05); }
-.upload-drop-zone p { font-family:var(--font-mono); font-size:11px; color:rgba(200,180,150,0.5); margin:6px 0 0; }
-.upload-drop-zone .drop-icon { font-size:32px; }
-.upload-preview { max-width:100%; max-height:120px; border-radius:3px; margin-top:8px; display:none; }
-.upload-modal-btns { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
-.btn-cancel { font-family:var(--font-mono); font-size:11px; background:transparent; border:1px solid rgba(200,180,150,0.3); color:rgba(200,180,150,0.6); padding:8px 16px; border-radius:2px; cursor:pointer; }
-.btn-save { font-family:var(--font-mono); font-size:11px; background:var(--japan-red); border:none; color:white; padding:8px 16px; border-radius:2px; cursor:pointer; font-weight:700; letter-spacing:.05em; }
-.btn-save:disabled { opacity:0.4; cursor:not-allowed; }
-.timeline-card-attachments { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
-.attach-thumb { width:48px; height:48px; object-fit:cover; border-radius:3px; border:1px solid rgba(201,168,76,0.2); cursor:pointer; }
-.attach-link { display:inline-flex; align-items:center; gap:4px; font-family:var(--font-mono); font-size:10px; color:var(--neon); text-decoration:none; background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.2); padding:4px 8px; border-radius:2px; }
-.attach-link:hover { background:rgba(0,212,255,0.18); }
-
-
-.timeline-card-actions { display:flex; gap:8px; margin-top:8px; }
-.tl-action-btn { font-family:var(--font-mono); font-size:10px; padding:4px 10px; border-radius:2px; border:none; cursor:pointer; letter-spacing:.05em; transition:all .2s; }
-.tl-action-btn.edit { background:rgba(201,168,76,0.12); color:var(--gold); border:1px solid rgba(201,168,76,0.3); }
-.tl-action-btn.edit:hover { background:rgba(201,168,76,0.25); }
-.tl-action-btn.delete { background:rgba(192,57,43,0.1); color:#e74c3c; border:1px solid rgba(192,57,43,0.3); }
-.tl-action-btn.delete:hover { background:rgba(192,57,43,0.25); }
-
 /* ====== PER-DAY RESERVATIONS PANEL ====== */
 .day-reserv-panel { margin: 16px 0 4px; border-top: 1px solid rgba(201,168,76,0.15); padding-top: 14px; }
 .day-reserv-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px; }
@@ -683,10 +597,47 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
 .ri-action.del { background:rgba(192,57,43,0.08); color:#e74c3c; border:1px solid rgba(192,57,43,0.2); }
 .ri-action:hover { opacity:.8; transform:translateY(-1px); }
 .reserv-empty { font-family:var(--font-mono); font-size:10px; color:rgba(200,180,150,0.3); padding:8px 0; letter-spacing:.05em; }
-/* Badge on episode header */
 .ep-reserv-badge { display:inline-flex; align-items:center; gap:3px; font-family:var(--font-mono); font-size:8px; letter-spacing:.06em; padding:2px 7px; border-radius:2px; margin-left:6px; }
 .erb-has { background:rgba(39,174,96,.15); color:#2ecc71; border:1px solid rgba(39,174,96,.2); }
 .erb-pending { background:rgba(201,168,76,.12); color:var(--gold); border:1px solid rgba(201,168,76,.2); }
+
+/* ====== CHATBOT ====== */
+.chat-section { margin: 40px 0 60px; scroll-margin-top: 80px; }
+.chat-wrapper { display:flex; flex-direction:column; height:600px; background:var(--panel-bg); border:var(--border-thick) solid var(--text-main); border-radius:4px; overflow:hidden; }
+.chat-messages { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px; scroll-behavior:smooth; }
+.chat-messages::-webkit-scrollbar { width:4px; } .chat-messages::-webkit-scrollbar-thumb { background:rgba(201,168,76,0.3); border-radius:2px; }
+.chat-bubble { max-width:85%; padding:10px 14px; border-radius:4px; font-size:13px; line-height:1.6; }
+.chat-bubble.user { align-self:flex-end; background:var(--japan-red); color:#fff; border-bottom-right-radius:0; }
+.chat-bubble.assistant { align-self:flex-start; background:rgba(201,168,76,0.1); border:1px solid rgba(201,168,76,0.2); color:var(--text-main); border-bottom-left-radius:0; }
+.chat-bubble.thinking { opacity:0.6; font-style:italic; font-family:var(--font-mono); font-size:11px; }
+.chat-input-row { display:flex; border-top:var(--border-w) solid rgba(201,168,76,0.2); }
+.chat-input { flex:1; background:transparent; border:none; padding:14px 16px; color:var(--text-main); font-family:var(--font-body); font-size:13px; outline:none; resize:none; min-height:48px; max-height:120px; }
+.chat-input::placeholder { color:rgba(200,180,150,0.35); }
+.chat-send { background:var(--japan-red); border:none; color:white; padding:0 20px; cursor:pointer; font-family:var(--font-mono); font-size:12px; font-weight:700; transition:background .2s; flex-shrink:0; }
+.chat-send:hover { background:#a93226; } .chat-send:disabled { opacity:0.4; cursor:not-allowed; }
+.chat-suggestions { display:flex; gap:8px; flex-wrap:wrap; padding:10px 16px; border-top:1px solid rgba(201,168,76,0.1); }
+.chat-suggestion { font-family:var(--font-mono); font-size:10px; background:rgba(201,168,76,0.08); border:1px solid rgba(201,168,76,0.2); color:rgba(200,180,150,0.7); padding:5px 10px; border-radius:2px; cursor:pointer; transition:all .2s; }
+.chat-suggestion:hover { background:rgba(201,168,76,0.18); color:var(--text-main); }
+
+/* ====== UPLOAD MODAL ====== */
+.upload-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; padding:16px; }
+.upload-modal-overlay.active { display:flex; }
+.upload-modal { background:var(--manga-bg); border:var(--border-thick) solid var(--text-main); border-radius:4px; width:100%; max-width:500px; padding:24px; max-height:90vh; overflow-y:auto; }
+.upload-modal h3 { font-family:var(--font-display); font-size:24px; color:var(--japan-red); margin:0 0 4px; }
+.upload-field { margin-bottom:14px; }
+.upload-field label { display:block; font-family:var(--font-mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:rgba(200,180,150,0.6); margin-bottom:6px; }
+.upload-field input, .upload-field select, .upload-field textarea { width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(201,168,76,0.25); border-radius:3px; padding:9px 12px; color:var(--text-main); font-family:var(--font-body); font-size:13px; box-sizing:border-box; outline:none; }
+.upload-field select option { background:#1a1a2e; }
+.upload-drop-zone { border:2px dashed rgba(0,212,255,0.3); border-radius:4px; padding:24px; text-align:center; cursor:pointer; transition:all .2s; margin-bottom:14px; }
+.upload-drop-zone:hover, .upload-drop-zone.dragover { border-color:var(--neon); background:rgba(0,212,255,0.05); }
+.upload-drop-zone p { font-family:var(--font-mono); font-size:11px; color:rgba(200,180,150,0.5); margin:6px 0 0; }
+.upload-drop-zone .drop-icon { font-size:32px; }
+.upload-preview { max-width:100%; max-height:120px; border-radius:3px; margin-top:8px; display:none; }
+.upload-modal-btns { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
+.btn-cancel { font-family:var(--font-mono); font-size:11px; background:transparent; border:1px solid rgba(200,180,150,0.3); color:rgba(200,180,150,0.6); padding:8px 16px; border-radius:2px; cursor:pointer; }
+.btn-save { font-family:var(--font-mono); font-size:11px; background:var(--japan-red); border:none; color:white; padding:8px 16px; border-radius:2px; cursor:pointer; font-weight:700; }
+.btn-save:disabled { opacity:0.4; cursor:not-allowed; }
+.attach-link { display:inline-flex; align-items:center; gap:4px; font-family:var(--font-mono); font-size:10px; color:var(--neon); text-decoration:none; background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.2); padding:4px 8px; border-radius:2px; }
 
 </style>
 </head>
@@ -759,25 +710,91 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
     <div id="tripMap"></div>
   </section>
 
+  <div style="padding:0 16px;box-sizing:border-box;">
+    <div class="manga-divider"><div class="divider-line"></div><span class="divider-symbol">¥</span><div class="divider-line"></div></div>
+  </div>
 
+  <section class="costs-section" id="custos" style="padding:0 16px;box-sizing:border-box;">
+    <h2 class="section-heading">💴 Trip Costs</h2>
+    <p class="section-sub">Estimates in USD · 6 people · 3 rooms · Jul–Aug 2026</p>
+    <div class="cost-cards" id="costCards"></div>
+    <div class="costs-table-wrapper">
+      <table class="costs-table" aria-label="Cost breakdown">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Details</th>
+            <th>Basis</th>
+            <th>Total (USD)</th>
+            <th>JPY</th>
+          </tr>
+        </thead>
+        <tbody id="costsTbody"></tbody>
+        <tfoot>
+          <tr class="total-row">
+            <td colspan="3"><strong>ESTIMATED TOTAL</strong></td>
+            <td><span class="amt-usd" id="tableTotalUsd">—</span><span class="amt-jpy" id="tableTotalJpy">—</span></td>
+            <td>—</td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+    <p class="cost-note">⚠️ Indicative values subject to change. Estimated rate: 1 USD = 155 JPY (Jul/2026). Breakfast included. Lunches are free choice.</p>
+  </section>
 
-    <!-- CHATBOT SECTION -->
+  <!-- UPLOAD MODAL -->
+  <div class="upload-modal-overlay" id="uploadModal">
+    <div class="upload-modal">
+      <h3>📎 Add Reservation</h3>
+      <p style="font-family:var(--font-mono);font-size:11px;color:rgba(200,180,150,0.55);margin:0 0 16px">Drop receipt, ticket or PDF — Claude extrai os detalhes 🤖</p>
+      <div class="upload-drop-zone" id="dropZone">
+        <div class="drop-icon">📄</div>
+        <div style="font-family:var(--font-mono);font-size:12px;color:rgba(200,180,150,0.7);margin-top:8px">Drop, clique ou <strong style="color:var(--neon)">Ctrl+V</strong> para colar</div>
+        <p>PDF · PNG · JPG · Screenshot — max 10MB</p>
+        <input type="file" id="uploadFileInput" accept="image/*,.pdf" style="display:none">
+        <img class="upload-preview" id="uploadPreview">
+      </div>
+      <div id="aiExtractStatus" style="display:none;font-family:var(--font-mono);font-size:11px;color:var(--neon);padding:8px 0;text-align:center">✦ Claude lendo o documento...</div>
+      <div id="uploadFields" style="display:none">
+        <div class="upload-field"><label>Title *</label><input type="text" id="uploadTitle" placeholder="e.g. teamLab Borderless — 6 tickets"></div>
+        <div class="upload-field"><label>Category</label>
+          <select id="uploadCategory">
+            <option value="✈️ Flight">✈️ Flight</option>
+            <option value="🏨 Hotel">🏨 Hotel</option>
+            <option value="🎟️ Activity / Ticket" selected>🎟️ Activity / Ticket</option>
+            <option value="🚅 Transport">🚅 Transport</option>
+            <option value="🍽️ Restaurant">🍽️ Restaurant</option>
+            <option value="🥃 Experience">🥃 Experience</option>
+            <option value="📄 Other">📄 Other</option>
+          </select>
+        </div>
+        <div class="upload-field"><label>Date</label><input type="date" id="uploadDate"></div>
+        <div class="upload-field"><label>Notes</label><textarea id="uploadNotes" rows="2" placeholder="Confirmation number, time, details..."></textarea></div>
+        <div class="upload-modal-btns">
+          <button class="btn-cancel" onclick="closeUploadModal()">Cancel</button>
+          <button class="btn-save" id="uploadSaveBtn" onclick="saveReservation()">💾 Save to Trip</button>
+        </div>
+      </div>
+      <div class="upload-modal-btns" id="uploadInitialBtns">
+        <button class="btn-cancel" onclick="closeUploadModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHATBOT -->
   <section class="chat-section" id="chatbot" style="padding:0 16px;box-sizing:border-box;">
     <div class="manga-divider"><div class="divider-line"></div><span class="divider-symbol">🤖</span><div class="divider-line"></div></div>
     <h2 class="section-heading">🤖 Trip Assistant</h2>
     <p class="section-sub">Pergunte qualquer coisa sobre a viagem — sugestões, mudanças, dúvidas</p>
     <div class="chat-wrapper">
       <div class="chat-messages" id="chatMessages">
-        <div class="chat-bubble assistant">
-          Oi! 👋 Sou o assistente da <strong>3Boys Japan Trip 2026</strong>. Conheço toda a sua viagem — itinerário, hotéis, custos, restaurantes e atividades. Pode me perguntar qualquer coisa ou pedir sugestões! 🗾
-        </div>
+        <div class="chat-bubble assistant">Oi! 👋 Sou o assistente da <strong>3Boys Japan Trip 2026</strong>. Conheço toda a viagem — itinerário, hotéis, custos, restaurantes. Pode perguntar qualquer coisa! 🗾</div>
       </div>
-      <div class="chat-suggestions" id="chatSuggestions">
+      <div class="chat-suggestions">
         <div class="chat-suggestion" onclick="sendSuggestion(this)">Qual o melhor dia pra teamLab?</div>
         <div class="chat-suggestion" onclick="sendSuggestion(this)">O que os teens vão curtir mais?</div>
         <div class="chat-suggestion" onclick="sendSuggestion(this)">Sugestão de rota em Kyoto</div>
-        <div class="chat-suggestion" onclick="sendSuggestion(this)">Quanto vou gastar em Osaka?</div>
-        <div class="chat-suggestion" onclick="sendSuggestion(this)">Melhor dia pro Shinkansen</div>
+        <div class="chat-suggestion" onclick="sendSuggestion(this)">Quanto gastar em Osaka?</div>
         <div class="chat-suggestion" onclick="sendSuggestion(this)">O que reservar primeiro?</div>
       </div>
       <div class="chat-input-row">
@@ -794,7 +811,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v2.5 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v2.6 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -856,7 +873,7 @@ const DAYS = [
     hotel: 'Mitsui Garden Ginza Tsukiji', hotelNew: false, cityChange: false, temp: '29–33°C',
     morning: ['Hotel breakfast','Meiji Shrine — 30min forest walk, calm and spiritual, great for the whole family','Harajuku Takeshita Street — kawaii fashion, colorful crepes, Japanese pop culture'],
     afternoon: ['Shibuya Crossing at dusk — full scramble crossing experience','Shibuya Sky observatory — buy tickets in advance, aerial 360° view of Tokyo','Rest back at hotel — skip teamLab today, save energy (or do teamLab instead of Shibuya Sky)'],
-    night: ['teamLab Borderless (Azabudai Hills) — museu de arte digital sem fronteiras','Ingresso obrigatório com antecedência — teamlab.art/e/tokyo','Experiência inesquecível para toda a família'],
+    night: ['teamLab Borderless (Azabudai Hills) — museu digital sem fronteiras','Ingresso obrigatório antecipado — teamlab.art/e/tokyo','Experiência inesquecível para toda a família'],
     transport: ['Hotel','→','Harajuku (subway ~12min)','→','Shibuya (JR 2min, or walk 10min)'],
     dinner: [
       { name: 'Torishiki', type: "Japan's best yakitori — charcoal-grilled chicken, Michelin listed. Book weeks ahead", price: '~$80/person', url: 'https://tabelog.com/en/tokyo/A1316/A131601/13004849/', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.7</span></span><a href=\"https://tabelog.com/en/tokyo/A1316/A131601/13004849/\" target=\"_blank\" rel=\"noopener\" class=\"r-rating\" onclick=\"event.stopPropagation()\" style=\"text-decoration:none\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.8</span></a></div>', grating: 4.7 },
@@ -1185,7 +1202,7 @@ const MAP_SPOTS = [
 var MUST_DO = [
   { num:1,  icon:'🚦', title:'Shibuya Crossing',       sub:'Go at dusk. See from Shibuya Sky above for the full aerial epic view.',       day:3,  url:'https://www.google.com/maps/place/Shibuya+Crossing' },
   { num:2,  icon:'⛩️', title:'Senso-ji (Asakusa)',      sub:'Tokyo oldest temple. Kaminarimon gate + Nakamise Street snacks. Go early.',   day:2,  url:'https://www.senso-ji.jp/english/' },
-  { num:3,  icon:'🎨', title:'teamLab Borderless',       sub:'Museu de arte digital sem fronteiras — Azabudai Hills. Compre ingresso oficial: teamlab.art/e/tokyo. Adultos ¥3.800–¥4.800 | Teens ¥2.800 | Kids ¥1.500. Reserve com antecedência!', day:3, url:'https://www.teamlab.art/e/tokyo/' },
+  { num:3,  icon:'🎨', title:'teamLab Borderless',       sub:'Museu de arte digital — Azabudai Hills. Compre oficial: teamlab.art/e/tokyo. Adultos ¥3.800–¥4.800 | Teens ¥2.800. Reserve com antecedência!', day:3, url:'https://www.teamlab.art/e/tokyo/' },
   { num:4,  icon:'🍣', title:'Sushi Yoshitake',         sub:'3 Michelin stars omakase. Book 4+ weeks ahead via hotel concierge.',          day:1,  url:'https://sushi-yoshitake.com' },
   { num:5,  icon:'🍱', title:'Kaiseki at Shirosaka',    sub:'Refined seasonal Japanese tasting menu in Ginza. Reserve in advance.',        day:3,  url:'https://tabelog.com/en/tokyo/A1308/A130801/13193461/' },
   { num:6,  icon:'🍜', title:'Ramen at Ramenya Shima',  sub:'One of Tokyo best ramen. Arrive early — long lines, worth every minute.',    day:2,  url:'https://tabelog.com/en/tokyo/A1307/A130701/13240706/' },
@@ -1243,12 +1260,6 @@ function buildNav() {
   mustTab.addEventListener('click', () => { var _emd = document.getElementById('mustdo'); if(_emd) _emd.scrollIntoView({ behavior: 'smooth' }); });
   nav.appendChild(mustTab);
 
-  const chatTab = document.createElement('div');
-  chatTab.className = 'day-tab';
-  chatTab.innerHTML = '<span style="font-size:22px">🤖</span><span class="tab-day" style="font-size:9px">Chat</span>';
-  chatTab.addEventListener('click', () => document.getElementById('chatbot')?.scrollIntoView({ behavior: 'smooth' }));
-  nav.appendChild(chatTab);
-
   const costTab = document.createElement('div');
   costTab.className = 'day-tab';
   costTab.innerHTML = '<span style="font-size:22px">💴</span><span class="tab-day" style="font-size:9px">Costs</span>';
@@ -1260,6 +1271,12 @@ function buildNav() {
   mapTab.innerHTML = '<span style="font-size:22px">🗾</span><span class="tab-day" style="font-size:9px">Map</span>';
   mapTab.addEventListener('click', () => document.getElementById('mapa')?.scrollIntoView({ behavior: 'smooth' }));
   nav.appendChild(mapTab);
+
+  const chatTab = document.createElement('div');
+  chatTab.className = 'day-tab';
+  chatTab.innerHTML = '<span style="font-size:22px">🤖</span><span class="tab-day" style="font-size:9px">Chat</span>';
+  chatTab.addEventListener('click', () => document.getElementById('chatbot')?.scrollIntoView({ behavior: 'smooth' }));
+  nav.appendChild(chatTab);
 }
 
 function setActiveTab(num) {
@@ -1485,329 +1502,9 @@ function setupControls() {
   topBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 }
 
+// ── INIT ──────────────────────────────────────────────────────
 
-// ── PER-DAY RESERVATIONS ─────────────────────────────────────
-// Map trip dates to day numbers
-var DATE_TO_DAY = {
-  '07/23/2026':1,'07/24/2026':2,'07/25/2026':3,'07/26/2026':4,
-  '07/27/2026':5,'07/28/2026':6,'07/29/2026':7,'07/30/2026':8,
-  '07/31/2026':9,'08/01/2026':10,'08/02/2026':11
-};
-var DAY_TO_DATE = {
-  1:'07/23/2026',2:'07/24/2026',3:'07/25/2026',4:'07/26/2026',
-  5:'07/27/2026',6:'07/28/2026',7:'07/29/2026',8:'07/30/2026',
-  9:'07/31/2026',10:'08/01/2026',11:'08/02/2026'
-};
-
-var currentUploadDay = null;
-var currentUploadDate = null;
-
-function openUploadForDay(dayNum, dayDate) {
-  currentUploadDay = dayNum;
-  currentUploadDate = dayDate;
-  // Pre-set date in modal
-  // Convert MM/DD/YYYY to YYYY-MM-DD
-  var parts = dayDate.split('/');
-  var isoDate = parts[2] + '-' + parts[0] + '-' + parts[1];
-  openUploadModal();
-  // Set date after modal opens
-  setTimeout(function() {
-    var dateEl = document.getElementById('uploadDate');
-    if (dateEl) dateEl.value = isoDate;
-  }, 50);
-}
-
-function renderReservItem(item, fbId) {
-  var sent = item.sent || false;
-  var dotClass = sent ? 'ri-dot-sent' : 'ri-dot-pending';
-  var badgeClass = sent ? 'rib-sent' : 'rib-pending';
-  var badgeLabel = sent ? '✅ Enviado' : '📤 Pendente';
-  var icon = item.category ? item.category.split(' ')[0] : '📎';
-
-  var detail = '';
-  if (item.notes) detail += item.notes;
-
-  var actionsHtml = '<div class="reserv-item-actions">';
-  if (item.fileUrl) {
-    var isPdf = item.fileType && item.fileType.includes('pdf');
-    var isImg = item.fileType && item.fileType.startsWith('image/');
-    actionsHtml += '<a class="ri-action file" href="' + item.fileUrl + '" target="_blank">' + (isPdf ? '📋 PDF' : isImg ? '🖼️ Imagem' : '📎 Arquivo') + '</a>';
-  }
-  actionsHtml += '<button class="ri-action edit" onclick="editReservation(\"' + fbId + '\")">✏️ Editar</button>';
-  actionsHtml += '<button class="ri-action ' + (sent ? 'edit' : 'file') + '" onclick="toggleSent(\"' + fbId + '\", ' + sent + ')">' + (sent ? '↩ Desfazer' : '✅ Marcar enviado') + '</button>';
-  actionsHtml += '<button class="ri-action del" onclick="deleteReservation(\"' + fbId + '\", ' + (item.dayNum || 'null') + ')">🗑️</button>';
-  actionsHtml += '</div>';
-
-  return '<div class="reserv-item" id="ri-' + fbId + '">' +
-    '<div class="reserv-item-dot ' + dotClass + '"></div>' +
-    '<div class="reserv-item-body">' +
-      '<div class="reserv-item-top">' +
-        '<span class="reserv-item-title">' + icon + ' ' + (item.title || '') + '</span>' +
-        '<span class="reserv-item-badge ' + badgeClass + '" onclick="toggleSent(\"' + fbId + '\", ' + sent + ')">' + badgeLabel + '</span>' +
-      '</div>' +
-      (detail ? '<div class="reserv-item-detail">' + detail + '</div>' : '') +
-      actionsHtml +
-    '</div>' +
-  '</div>';
-}
-
-function updateDayBadge(dayNum) {
-  var list = document.getElementById('reserv-list-' + dayNum);
-  if (!list) return;
-  var items = list.querySelectorAll('.reserv-item');
-  var sent = 0, pending = 0;
-  items.forEach(function(el) {
-    if (el.querySelector('.ri-dot-sent')) sent++;
-    else pending++;
-  });
-  var confBadge = document.getElementById('reserv-count-confirmed-' + dayNum);
-  var pendBadge = document.getElementById('reserv-count-pending-' + dayNum);
-  if (confBadge) { confBadge.textContent = sent + ' confirmado' + (sent !== 1 ? 's' : ''); confBadge.style.display = sent ? 'inline' : 'none'; }
-  if (pendBadge) { pendBadge.textContent = pending + ' pendente' + (pending !== 1 ? 's' : ''); pendBadge.style.display = pending ? 'inline' : 'none'; }
-
-  // Update episode header badge
-  var epBadge = document.getElementById('ep-badge-' + dayNum);
-  if (epBadge) {
-    if (sent + pending === 0) { epBadge.innerHTML = ''; }
-    else if (pending > 0) { epBadge.innerHTML = '<span class="ep-reserv-badge erb-pending">🎫 ' + pending + ' pendente</span>'; }
-    else { epBadge.innerHTML = '<span class="ep-reserv-badge erb-has">🎫 ' + sent + ' ✓</span>'; }
-  }
-
-  // Show/hide empty message
-  var emptyEl = document.getElementById('reserv-empty-' + dayNum);
-  if (emptyEl) emptyEl.style.display = items.length ? 'none' : 'block';
-}
-
-function injectItemIntoDay(item, fbId) {
-  // Figure out which day this belongs to
-  var dayNum = item.dayNum || null;
-  if (!dayNum && item.date) {
-    // item.date is YYYY-MM-DD, convert to MM/DD/YYYY
-    var parts = item.date.split('-');
-    if (parts.length === 3) {
-      var mmddyyyy = parts[1] + '/' + parts[2] + '/' + parts[0];
-      dayNum = DATE_TO_DAY[mmddyyyy] || null;
-    }
-  }
-  if (!dayNum) dayNum = 11; // fallback to last day
-
-  var list = document.getElementById('reserv-list-' + dayNum);
-  if (!list) return;
-
-  // Remove existing if updating
-  var existing = document.getElementById('ri-' + fbId);
-  if (existing) existing.remove();
-
-  list.insertAdjacentHTML('beforeend', renderReservItem(Object.assign({}, item, {dayNum: dayNum}), fbId));
-  updateDayBadge(dayNum);
-}
-
-async function loadFirebaseReservations() {
-  try {
-    await initFirebase();
-    var snap = await db.collection('reservations').orderBy('createdAt', 'asc').get();
-    snap.forEach(function(doc) {
-      injectItemIntoDay(doc.data(), doc.id);
-    });
-  } catch(e) {
-    console.warn('Firebase load skipped:', e.message);
-  }
-}
-
-async function toggleSent(fbId, currentSent) {
-  try {
-    await initFirebase();
-    var newSent = !currentSent;
-    await db.collection('reservations').doc(fbId).update({ sent: newSent });
-    // Reload that item
-    var doc = await db.collection('reservations').doc(fbId).get();
-    if (doc.exists) {
-      var item = doc.data();
-      var el = document.getElementById('ri-' + fbId);
-      var dayNum = item.dayNum;
-      injectItemIntoDay(item, fbId);
-    }
-  } catch(e) { alert('Erro: ' + e.message); }
-}
-
-async function deleteReservation(fbId, dayNum) {
-  if (!confirm('Apagar esta reserva?')) return;
-  try {
-    await initFirebase();
-    await db.collection('reservations').doc(fbId).delete();
-    var el = document.getElementById('ri-' + fbId);
-    if (el) { el.remove(); if (dayNum) updateDayBadge(dayNum); }
-  } catch(e) { alert('Erro: ' + e.message); }
-}
-
-async function editReservation(fbId) {
-  try {
-    await initFirebase();
-    var doc = await db.collection('reservations').doc(fbId).get();
-    if (!doc.exists) return;
-    var item = doc.data();
-    editingFbId = fbId;
-    openUploadModal();
-    setTimeout(function() {
-      document.getElementById('uploadFields').style.display = 'block';
-      document.getElementById('uploadInitialBtns').style.display = 'none';
-      document.getElementById('uploadTitle').value = item.title || '';
-      document.getElementById('uploadNotes').value = item.notes || '';
-      document.getElementById('uploadDate').value = item.date || '';
-      document.getElementById('uploadSaveBtn').textContent = '💾 Salvar Alterações';
-      var sel = document.getElementById('uploadCategory');
-      for (var i = 0; i < sel.options.length; i++) {
-        if (sel.options[i].value === item.category) { sel.selectedIndex = i; break; }
-      }
-    }, 50);
-  } catch(e) { alert('Erro: ' + e.message); }
-}
-
-// Stub buildTimeline (kept for compat but no longer renders a separate section)
-function buildTimeline() {}
-
-// ── CHATBOT ─────────────────────────────────────────────────────
-const TRIP_CONTEXT = `Você é o assistente pessoal da viagem "3Boys Japan Trip 2026". Você conhece TODOS os detalhes abaixo e deve usar essas informações para responder perguntas, dar sugestões e ajudar o usuário.
-
-VIAGEM:
-- Datas: 23 Jul a 2 Ago 2026 (11 dias)
-- Grupo: 3 adultos + 3 adolescentes = 6 pessoas
-- Estilo: cultura, gastronomia, anime/manga, whisky, experiências únicas
-
-CIDADES E HOTÉIS:
-- Tokyo (Jul 23-27, 4 noites): Mitsui Garden Hotel Ginza Tsukiji — próximo a Tsukiji, Ginza
-- Kyoto (Jul 27-31, 4 noites): Agora Kyoto Shijo — centro de Kyoto
-- Osaka (Jul 31 - Ago 2, 2 noites): hotel ainda não reservado, área Dotonbori/Namba recomendada
-
-TRANSPORTE:
-- Shinkansen Tokyo → Kyoto: Nozomi, 2h15, ¥14.370/pessoa. Reservar no smart-ex.jp
-- Shinkansen Kyoto → Tokyo: mesmo valor e tempo
-- Kyoto → Osaka: JR ou Hankyu, ~30min, ~¥570/pessoa
-- NÃO comprar JR Pass — tickets individuais são mais baratos para esse roteiro
-- Assento E no Nozomi para ver o Monte Fuji (lado direito saindo de Tokyo)
-
-ITINERÁRIO RESUMIDO:
-Dia 1 (Jul 23 Qui): Chegada Tokyo via Haneda. Hotel Ginza. Tsukiji Outer Market (5min do hotel). Ginza à noite.
-Dia 2 (Jul 24 Sex): Senso-ji (Asakusa), Nakamise Street. Harajuku + Takeshita. Meiji Shrine.
-Dia 3 (Jul 25 Sáb): Shibuya Crossing ao entardecer. Shibuya Sky (vista aérea). teamLab Borderless à noite.
-Dia 4 (Jul 26 Dom): Hakone day trip — onsen, vista do Fuji. Retorno Tokyo à noite.
-Dia 5 (Jul 27 Seg): Shinkansen Tokyo → Kyoto. Check-in Agora Shijo. Nishiki Market. Pontocho.
-Dia 6 (Jul 28 Ter): Arashiyama — bamboo grove, Tenryu-ji, Togetsukyo bridge. Kinkakuji (Golden Pavilion). Destilaria Suntory Yamazaki (30min de trem).
-Dia 7 (Jul 29 Qua): Fushimi Inari (torii gates — ir cedo). Nijo Castle. Kyoto Whisky Tasting (Nishijin, ~¥14.800/pessoa, máx 4, seg/qua/sex).
-Dia 8 (Jul 30 Qui): Nara day trip — Todai-ji, veados livres. Volta Kyoto. Gion à noite.
-Dia 9 (Jul 31 Sex): Manhã livre Kyoto. Shinkansen/trem → Osaka. Check-in. Dotonbori, Namba.
-Dia 10 (Ago 1 Sáb): Osaka — Takoyaki, Den Den Town (anime/manga), Kuromon Market. Osaka Castle.
-Dia 11 (Ago 2 Dom): Partida.
-
-RESERVAS CONFIRMADAS:
-- Mitsui Garden Hotel Ginza Tsukiji (Tokyo)
-- Agora Kyoto Shijo (Kyoto)
-
-O QUE RESERVAR URGENTE:
-1. teamLab Borderless: teamlab.art/e/tokyo — Adultos ¥3.800-4.800, Teens ¥2.800, Kids ¥1.500 — ESGOTA RÁPIDO
-2. Shinkansen (ida e volta): smart-ex.jp
-3. Kyoto Whisky Tasting: kyotowhiskytasting.com — ¥14.800/pessoa, máx 4 por sessão
-4. Suntory Yamazaki Distillery: suntory.com/factory/yamazaki — esgota meses antes
-5. Shibuya Sky: shibuya-sky.jp
-6. Hotel Osaka: área Dotonbori/Namba, 2 noites, 3 quartos
-7. Sushi Yoshitake (opcional): 3 estrelas Michelin, via concierge do hotel
-
-CUSTOS ESTIMADOS:
-- Voos: não incluídos
-- Hotéis: ~$8.000 total (3 quartos × 10 noites × preço médio)
-- Refeições: ~$5.700 total ($95/dia × 6px × 10 dias)
-- Transporte local: ~$600 (¥93.000 — Suica cards, ônibus, metrô)
-- Shinkansen: ~$1.140 ida e volta × 6 pessoas
-- Ingressos/experiências: ~$390 (teamLab, Suntory, etc.)
-- Total estimado: ~$21.000+ (sem voos)
-
-RESTAURANTES ESPECIAIS:
-- Sushi Yoshitake (Tokyo/Ginza): 3★ Michelin omakase, ~$280/pessoa, reservar 4+ semanas via concierge
-- Shirosaka (Tokyo/Ginza): kaiseki, ~$180/pessoa
-- Torishiki (Tokyo): melhor yakitori do Japão, muito concorrido
-- Ramenya Shima (Tokyo): um dos melhores ramen, fila enorme, vale
-- Pontocho (Kyoto): rua de restaurantes ao lado do rio Kamo, ótima para qualquer noite em Kyoto
-- Dotonbori (Osaka): takoyaki, okonomiyaki, comida de rua
-
-DICAS IMPORTANTES:
-- Agosto é ALTA temporada — reservar tudo o mais rápido possível
-- Suica card: essencial para transporte público em todas as cidades
-- Clima em agosto: 28-35°C, muito úmido — levar roupas leves, hidratação
-- teamLab: usar calça/shorts (pisos espelhados), comprar antecipado pelo site oficial
-- Shinkansen: comprar ekiben (marmita) na estação antes de embarcar. Não há carrinho de comida em 2026
-- Nozomi: assento E para vista do Monte Fuji (~45 min após Tokyo)
-- JR Pass NÃO vale a pena para esse roteiro específico
-- Kyoto em agosto: muito quente e turístico — visitar templos cedo pela manhã
-
-Responda sempre em Português do Brasil, de forma amigável e útil. Se o usuário pedir para modificar a viagem, dê sugestões práticas. Se perguntar sobre custos, use os valores acima.`;
-
-let chatHistory = [];
-
-function chatKeydown(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
-}
-
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
-}
-
-function sendSuggestion(el) {
-  document.getElementById('chatInput').value = el.textContent;
-  sendChat();
-}
-
-function appendMessage(role, text) {
-  const msgs = document.getElementById('chatMessages');
-  const div = document.createElement('div');
-  div.className = 'chat-bubble ' + role;
-  div.innerHTML = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
-  msgs.appendChild(div);
-  msgs.scrollTop = msgs.scrollHeight;
-  return div;
-}
-
-async function sendChat() {
-  const input = document.getElementById('chatInput');
-  const btn = document.getElementById('chatSendBtn');
-  const text = input.value.trim();
-  if (!text || btn.disabled) return;
-  input.value = ''; input.style.height = 'auto';
-  btn.disabled = true;
-  appendMessage('user', text);
-  chatHistory.push({ role: 'user', content: text });
-  const thinking = appendMessage('assistant thinking', '✦ pensando...');
-  try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': ANTHROPIC_KEY,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1024,
-        system: TRIP_CONTEXT,
-        messages: chatHistory
-      })
-    });
-    const data = await res.json();
-    const reply = data.content?.[0]?.text || 'Desculpe, não consegui responder. Tente novamente.';
-    chatHistory.push({ role: 'assistant', content: reply });
-    thinking.remove();
-    appendMessage('assistant', reply);
-  } catch(e) {
-    thinking.remove();
-    appendMessage('assistant', '⚠️ Erro de conexão. Verifique sua internet e tente novamente.');
-    chatHistory.pop();
-  }
-  btn.disabled = false;
-}
-
-
-// ── FIREBASE ───────────────────────────────────────────────────
+// ── FIREBASE ──────────────────────────────────────────────────
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyD1t4W4pp-yeDbRjZ2dBxR67jLHOMKsIJo",
   authDomain: "boys-japantrip-2026.firebaseapp.com",
@@ -1817,8 +1514,7 @@ const FIREBASE_CONFIG = {
   appId: "1:161321284924:web:2eed2840b4cbcb991eda39"
 };
 const ANTHROPIC_KEY = "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";
-
-var firebaseApp = null, db = null, storage = null;
+var db = null, storage = null;
 
 function initFirebase() {
   return new Promise(function(resolve) {
@@ -1830,32 +1526,30 @@ function initFirebase() {
     ];
     var loaded = 0;
     sdks.forEach(function(src) {
-      var s = document.createElement('script');
-      s.src = src;
-      s.onload = function() {
-        loaded++;
-        if (loaded === sdks.length) {
-          firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
-          db = firebase.firestore();
-          storage = firebase.storage();
-          resolve(true);
-        }
-      };
+      var s = document.createElement('script'); s.src = src;
+      s.onload = function() { loaded++; if (loaded === sdks.length) { firebase.initializeApp(FIREBASE_CONFIG); db = firebase.firestore(); storage = firebase.storage(); resolve(true); } };
       document.head.appendChild(s);
     });
   });
 }
 
-// ── UPLOAD MODAL ───────────────────────────────────────────────
-var uploadFile = null;
-var editingFbId = null;
+// ── UPLOAD MODAL ──────────────────────────────────────────────
+var uploadFile = null, editingFbId = null, currentUploadDay = null, currentUploadDate = null;
 
-function openUploadModal() {
-  document.getElementById('uploadModal').classList.add('active');
+var DATE_TO_DAY = {'07/23/2026':1,'07/24/2026':2,'07/25/2026':3,'07/26/2026':4,'07/27/2026':5,'07/28/2026':6,'07/29/2026':7,'07/30/2026':8,'07/31/2026':9,'08/01/2026':10,'08/02/2026':11};
+
+function openUploadForDay(dayNum, dayDate) {
+  currentUploadDay = dayNum; currentUploadDate = dayDate;
+  var parts = dayDate.split('/');
+  var isoDate = parts[2] + '-' + parts[0] + '-' + parts[1];
+  openUploadModal();
+  setTimeout(function() { var d = document.getElementById('uploadDate'); if (d) d.value = isoDate; }, 50);
 }
 
+function openUploadModal() { document.getElementById('uploadModal').classList.add('active'); }
+
 function closeUploadModal() {
-  editingFbId = null;
+  editingFbId = null; currentUploadDay = null; currentUploadDate = null;
   document.getElementById('uploadModal').classList.remove('active');
   uploadFile = null;
   document.getElementById('uploadTitle').value = '';
@@ -1882,83 +1576,60 @@ function setupDropZone() {
   zone.addEventListener('drop', function(e) { e.preventDefault(); zone.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
   input.addEventListener('change', function() { handleFile(input.files[0]); });
   document.addEventListener('paste', function(e) {
-    var modal = document.getElementById('uploadModal');
-    if (!modal.classList.contains('active')) return;
+    if (!document.getElementById('uploadModal').classList.contains('active')) return;
     var items = (e.clipboardData || e.originalEvent.clipboardData).items;
-    for (var i = 0; i < items.length; i++) {
-      if (items[i].kind === 'file') { var f = items[i].getAsFile(); if (f) { handleFile(f); break; } }
-    }
+    for (var i = 0; i < items.length; i++) { if (items[i].kind === 'file') { var f = items[i].getAsFile(); if (f) { handleFile(f); break; } } }
   });
 }
 
 function handleFile(file) {
   if (!file) return;
   uploadFile = file;
-  var icon = document.getElementById('dropZone').querySelector('.drop-icon');
-  icon.textContent = file.type.includes('pdf') ? '📋' : '🖼️';
-  document.getElementById('dropZone').querySelector('p').textContent = file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)';
+  document.getElementById('dropZone').querySelector('.drop-icon').textContent = file.type.includes('pdf') ? '📋' : '🖼️';
+  document.getElementById('dropZone').querySelector('p').textContent = (file.name || 'arquivo') + ' (' + (file.size/1024).toFixed(0) + ' KB)';
   if (file.type.startsWith('image/')) {
-    var reader = new FileReader();
-    reader.onload = function(e) {
-      var prev = document.getElementById('uploadPreview');
-      prev.src = e.target.result;
-      prev.style.display = 'block';
+    var r = new FileReader();
+    r.onload = function(e) {
+      var prev = document.getElementById('uploadPreview'); prev.src = e.target.result; prev.style.display = 'block';
       extractFromFile(e.target.result.split(',')[1], 'image', file.type);
     };
-    reader.readAsDataURL(file);
+    r.readAsDataURL(file);
   } else if (file.type.includes('pdf')) {
-    var reader2 = new FileReader();
-    reader2.onload = function(e) { extractFromFile(e.target.result.split(',')[1], 'pdf', 'application/pdf'); };
-    reader2.readAsDataURL(file);
+    var r2 = new FileReader();
+    r2.onload = function(e) { extractFromFile(e.target.result.split(',')[1], 'pdf', 'application/pdf'); };
+    r2.readAsDataURL(file);
   } else {
-    // Unknown type — show fields immediately
     document.getElementById('uploadFields').style.display = 'block';
     document.getElementById('uploadInitialBtns').style.display = 'none';
   }
 }
 
-async function extractFromFile(b64data, fileKind, mimeType) {
-  var statusEl = document.getElementById('aiExtractStatus');
-  statusEl.style.display = 'block';
-  statusEl.style.color = 'var(--neon)';
-  statusEl.textContent = '✦ Claude lendo o documento completo...';
+async function extractFromFile(b64, kind, mime) {
+  var st = document.getElementById('aiExtractStatus');
+  st.style.display = 'block'; st.style.color = 'var(--neon)'; st.textContent = '✦ Claude lendo o documento completo...';
   document.getElementById('uploadInitialBtns').style.display = 'none';
   document.getElementById('uploadFields').style.display = 'none';
-
-  var prompt = 'You are reading a travel document — ticket, receipt, hotel booking, flight confirmation, or similar. Read the ENTIRE document carefully and extract ALL relevant information. Return ONLY a valid JSON object with NO markdown: {"title":"descriptive title including venue/service name and what it is","category":"one of exactly: ✈️ Flight | 🏨 Hotel | 🎟️ Activity / Ticket | 🚅 Transport | 🍽️ Restaurant | 🥃 Experience | 📄 Other","date":"YYYY-MM-DD event/reservation date or empty string","notes":"confirmation code, time, number of people, price — all in one line"}';
-
+  var prompt = 'Read this travel document completely and return ONLY valid JSON (no markdown): {"title":"descriptive title with venue/service name","category":"one of: ✈️ Flight|🏨 Hotel|🎟️ Activity / Ticket|🚅 Transport|🍽️ Restaurant|🥃 Experience|📄 Other","date":"YYYY-MM-DD event date or empty string","notes":"confirmation code, time, people, price in one line"}';
   try {
-    var msgContent = (fileKind === 'pdf')
-      ? [{ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64data } }, { type: 'text', text: prompt }]
-      : [{ type: 'image', source: { type: 'base64', media_type: mimeType, data: b64data } }, { type: 'text', text: prompt }];
-
+    var content = kind === 'pdf'
+      ? [{ type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64 } }, { type: 'text', text: prompt }]
+      : [{ type: 'image', source: { type: 'base64', media_type: mime, data: b64 } }, { type: 'text', text: prompt }];
     var res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'x-api-key': ANTHROPIC_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
-      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 600, messages: [{ role: 'user', content: msgContent }] })
+      body: JSON.stringify({ model: 'claude-sonnet-4-20250514', max_tokens: 600, messages: [{ role: 'user', content: content }] })
     });
     var data = await res.json();
     if (data.error) throw new Error(data.error.message);
     var text = (data.content && data.content[0] ? data.content[0].text : '{}').replace(/```json|```/g, '').trim();
-    var match = text.match(/\{[\s\S]*\}/);
-    var parsed = match ? JSON.parse(match[0]) : {};
-    if (parsed.title) document.getElementById('uploadTitle').value = parsed.title;
-    if (parsed.date) document.getElementById('uploadDate').value = parsed.date;
-    if (parsed.notes) document.getElementById('uploadNotes').value = parsed.notes;
-    if (parsed.category) {
-      var sel = document.getElementById('uploadCategory');
-      for (var i = 0; i < sel.options.length; i++) {
-        if (sel.options[i].value === parsed.category) { sel.selectedIndex = i; break; }
-      }
-    }
-    statusEl.textContent = '✅ Extraído com sucesso — revise e salve!';
-    statusEl.style.color = '#2ecc71';
-  } catch(e) {
-    console.warn('AI extract failed:', e);
-    statusEl.textContent = '⚠️ Preencha os campos manualmente';
-    statusEl.style.color = 'var(--gold)';
-  }
-  setTimeout(function() { statusEl.style.display = 'none'; statusEl.style.color = 'var(--neon)'; }, 2000);
+    var m = text.match(/\{[\s\S]*\}/); var p = m ? JSON.parse(m[0]) : {};
+    if (p.title) document.getElementById('uploadTitle').value = p.title;
+    if (p.date) document.getElementById('uploadDate').value = p.date;
+    if (p.notes) document.getElementById('uploadNotes').value = p.notes;
+    if (p.category) { var sel = document.getElementById('uploadCategory'); for (var i=0;i<sel.options.length;i++) { if (sel.options[i].value===p.category){sel.selectedIndex=i;break;} } }
+    st.textContent = '✅ Extraído — revise e salve!'; st.style.color = '#2ecc71';
+  } catch(e) { st.textContent = '⚠️ Preencha manualmente'; st.style.color = 'var(--gold)'; }
+  setTimeout(function() { st.style.display='none'; st.style.color='var(--neon)'; }, 2000);
   document.getElementById('uploadFields').style.display = 'block';
 }
 
@@ -1971,7 +1642,7 @@ async function saveReservation() {
     await initFirebase();
     var fileUrl = null, fileName = null, fileType = null;
     if (uploadFile) {
-      btn.textContent = '⏳ Fazendo upload...';
+      btn.textContent = '⏳ Upload...';
       var ref = storage.ref('receipts/' + Date.now() + '_' + (uploadFile.name || 'paste.png'));
       await ref.put(uploadFile);
       fileUrl = await ref.getDownloadURL();
@@ -1980,47 +1651,189 @@ async function saveReservation() {
     }
     var dateVal = document.getElementById('uploadDate').value;
     var dayNum = currentUploadDay || null;
-    if (!dayNum && dateVal) {
-      var dp = dateVal.split('-');
-      if (dp.length === 3) { var mdy = dp[1] + '/' + dp[2] + '/' + dp[0]; dayNum = DATE_TO_DAY[mdy] || null; }
-    }
-    var data = {
-      title: title,
-      category: document.getElementById('uploadCategory').value,
-      date: dateVal,
-      notes: document.getElementById('uploadNotes').value,
-      dayNum: dayNum,
-      updatedAt: new Date().toISOString()
-    };
-    if (fileUrl) { data.fileUrl = fileUrl; data.fileName = fileName; data.fileType = fileType; }
-    btn.textContent = '⏳ Salvando no Firebase...';
+    if (!dayNum && dateVal) { var dp = dateVal.split('-'); if (dp.length===3) { var mdy=dp[1]+'/'+dp[2]+'/'+dp[0]; dayNum=DATE_TO_DAY[mdy]||null; } }
+    var docData = { title: title, category: document.getElementById('uploadCategory').value, date: dateVal, notes: document.getElementById('uploadNotes').value, dayNum: dayNum, updatedAt: new Date().toISOString() };
+    if (fileUrl) { docData.fileUrl=fileUrl; docData.fileName=fileName; docData.fileType=fileType; }
+    btn.textContent = '⏳ Firebase...';
     var savedId;
-    if (editingFbId) {
-      await db.collection('reservations').doc(editingFbId).update(data);
-      savedId = editingFbId;
-    } else {
-      data.createdAt = new Date().toISOString();
-      data.sent = false;
-      var docRef = await db.collection('reservations').add(data);
-      savedId = docRef.id;
-    }
-    editingFbId = null; currentUploadDay = null; currentUploadDate = null;
+    if (editingFbId) { await db.collection('reservations').doc(editingFbId).update(docData); savedId = editingFbId; }
+    else { docData.createdAt = new Date().toISOString(); docData.sent = false; var docRef = await db.collection('reservations').add(docData); savedId = docRef.id; }
     btn.textContent = '✅ Salvo!';
-    injectItemIntoDay(data, savedId);
+    injectItemIntoDay(docData, savedId);
     setTimeout(function() { closeUploadModal(); }, 700);
-  } catch(e) {
-    console.error(e);
-    btn.disabled = false;
-    btn.textContent = '💾 Save to Trip';
-    alert('Erro: ' + e.message);
-  }
+  } catch(e) { console.error(e); btn.disabled=false; btn.textContent='💾 Save to Trip'; alert('Erro: '+e.message); }
 }
 
-// ── INIT ──────────────────────────────────────────────────────
+// ── PER-DAY RESERVATIONS ──────────────────────────────────────
+function renderReservItem(item, fbId) {
+  var sent = item.sent || false;
+  var icon = item.category ? item.category.split(' ')[0] : '📎';
+  var detail = item.notes || '';
+  var dotC = sent ? 'ri-dot-sent' : 'ri-dot-pending';
+  var badgeC = sent ? 'rib-sent' : 'rib-pending';
+  var badgeL = sent ? '✅ Enviado' : '📤 Pendente';
+
+  var attachHtml = '';
+  if (item.fileUrl) {
+    var isImg = item.fileType && item.fileType.startsWith('image/');
+    var isPdf = item.fileType && item.fileType.includes('pdf');
+    attachHtml = '<a class="ri-action file" href="' + item.fileUrl + '" target="_blank">' + (isPdf ? '📋 PDF' : isImg ? '🖼️ Imagem' : '📎 Arquivo') + '</a>';
+  }
+
+  var id1 = fbId.replace(/[^a-zA-Z0-9]/g, '_');
+  return '<div class="reserv-item" id="ri-' + id1 + '">' +
+    '<div class="reserv-item-dot ' + dotC + '"></div>' +
+    '<div class="reserv-item-body">' +
+      '<div class="reserv-item-top">' +
+        '<span class="reserv-item-title">' + icon + ' ' + (item.title||'') + '</span>' +
+        '<span class="reserv-item-badge ' + badgeC + '" onclick="toggleSent(\'' + fbId + '\',' + sent + ')">' + badgeL + '</span>' +
+      '</div>' +
+      (detail ? '<div class="reserv-item-detail">' + detail + '</div>' : '') +
+      '<div class="reserv-item-actions">' +
+        attachHtml +
+        '<button class="ri-action edit" onclick="editReservation(\'' + fbId + '\')">✏️ Editar</button>' +
+        '<button class="ri-action ' + (sent ? 'edit' : 'file') + '" onclick="toggleSent(\'' + fbId + '\',' + sent + ')">' + (sent ? '↩ Desfazer' : '✅ Enviado') + '</button>' +
+        '<button class="ri-action del" onclick="deleteReservation(\'' + fbId + '\',' + (item.dayNum||'null') + ')">🗑️</button>' +
+      '</div>' +
+    '</div></div>';
+}
+
+function updateDayBadge(dayNum) {
+  var list = document.getElementById('reserv-list-' + dayNum);
+  if (!list) return;
+  var items = list.querySelectorAll('.reserv-item');
+  var sent = 0, pend = 0;
+  items.forEach(function(el) { if (el.querySelector('.ri-dot-sent')) sent++; else pend++; });
+  var cb = document.getElementById('reserv-count-confirmed-' + dayNum);
+  var pb = document.getElementById('reserv-count-pending-' + dayNum);
+  if (cb) { cb.textContent = sent + ' confirmado' + (sent!==1?'s':''); cb.style.display = sent?'inline':'none'; }
+  if (pb) { pb.textContent = pend + ' pendente' + (pend!==1?'s':''); pb.style.display = pend?'inline':'none'; }
+  var epb = document.getElementById('ep-badge-' + dayNum);
+  if (epb) {
+    if (sent+pend===0) epb.innerHTML='';
+    else if (pend>0) epb.innerHTML='<span class="ep-reserv-badge erb-pending">🎫 '+pend+' pendente</span>';
+    else epb.innerHTML='<span class="ep-reserv-badge erb-has">🎫 '+sent+' ✓</span>';
+  }
+  var emp = document.getElementById('reserv-empty-' + dayNum);
+  if (emp) emp.style.display = items.length ? 'none' : 'block';
+}
+
+function injectItemIntoDay(item, fbId) {
+  var dayNum = item.dayNum || null;
+  if (!dayNum && item.date) { var dp=item.date.split('-'); if(dp.length===3){var mdy=dp[1]+'/'+dp[2]+'/'+dp[0]; dayNum=DATE_TO_DAY[mdy]||null;} }
+  if (!dayNum) dayNum = 11;
+  var list = document.getElementById('reserv-list-' + dayNum);
+  if (!list) return;
+  var id1 = fbId.replace(/[^a-zA-Z0-9]/g, '_');
+  var ex = document.getElementById('ri-' + id1);
+  if (ex) ex.remove();
+  list.insertAdjacentHTML('beforeend', renderReservItem(Object.assign({}, item, {dayNum: dayNum}), fbId));
+  updateDayBadge(dayNum);
+}
+
+async function loadFirebaseReservations() {
+  try {
+    await initFirebase();
+    var snap = await db.collection('reservations').orderBy('createdAt', 'asc').get();
+    snap.forEach(function(doc) { injectItemIntoDay(doc.data(), doc.id); });
+  } catch(e) { console.warn('Firebase load:', e.message); }
+}
+
+async function toggleSent(fbId, currentSent) {
+  try {
+    await initFirebase();
+    await db.collection('reservations').doc(fbId).update({ sent: !currentSent });
+    var doc = await db.collection('reservations').doc(fbId).get();
+    if (doc.exists) injectItemIntoDay(doc.data(), fbId);
+  } catch(e) { alert('Erro: '+e.message); }
+}
+
+async function deleteReservation(fbId, dayNum) {
+  if (!confirm('Apagar esta reserva?')) return;
+  try {
+    await initFirebase();
+    await db.collection('reservations').doc(fbId).delete();
+    var id1 = fbId.replace(/[^a-zA-Z0-9]/g, '_');
+    var el = document.getElementById('ri-'+id1);
+    if (el) { el.remove(); if (dayNum) updateDayBadge(dayNum); }
+  } catch(e) { alert('Erro: '+e.message); }
+}
+
+async function editReservation(fbId) {
+  try {
+    await initFirebase();
+    var doc = await db.collection('reservations').doc(fbId).get();
+    if (!doc.exists) return;
+    var item = doc.data();
+    editingFbId = fbId;
+    openUploadModal();
+    setTimeout(function() {
+      document.getElementById('uploadFields').style.display='block';
+      document.getElementById('uploadInitialBtns').style.display='none';
+      document.getElementById('uploadTitle').value=item.title||'';
+      document.getElementById('uploadNotes').value=item.notes||'';
+      document.getElementById('uploadDate').value=item.date||'';
+      document.getElementById('uploadSaveBtn').textContent='💾 Salvar Alterações';
+      var sel=document.getElementById('uploadCategory');
+      for(var i=0;i<sel.options.length;i++){if(sel.options[i].value===item.category){sel.selectedIndex=i;break;}}
+    }, 50);
+  } catch(e) { alert('Erro: '+e.message); }
+}
+
+// ── CHATBOT ───────────────────────────────────────────────────
+const TRIP_CONTEXT = `Você é o assistente da viagem 3Boys Japan Trip 2026. Responda em Português do Brasil.
+
+VIAGEM: 23 Jul–2 Ago 2026 · 3 adultos + 3 teens · Tokyo→Kyoto→Osaka
+HOTÉIS: Mitsui Garden Ginza Tsukiji (Tokyo, Jul 23-27) · Agora Kyoto Shijo (Kyoto, Jul 27-31) · Osaka a confirmar (Dotonbori)
+SHINKANSEN: Nozomi, 2h15, ¥14.370/px · Reservar: smart-ex.jp · NÃO comprar JR Pass
+TEAMLAB: Borderless em Azabudai Hills (não Planets/Toyosu) · teamlab.art/e/tokyo · Ago=alta temporada, reservar ASAP
+WHISKY: Kyoto Whisky Tasting (Nishijin, ¥14.800/px, máx 4, seg/qua/sex) · Suntory Yamazaki (30min de Kyoto, esgota rápido)
+RESERVAR URGENTE: 1.teamLab 2.Shinkansen 3.Whisky Tasting 4.Suntory 5.Shibuya Sky 6.Hotel Osaka 7.Sushi Yoshitake`;
+
+var chatHistory = [];
+
+function chatKeydown(e) { if (e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendChat();} }
+function autoResize(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,120)+'px'; }
+function sendSuggestion(el) { document.getElementById('chatInput').value=el.textContent; sendChat(); }
+
+function appendMessage(role, text) {
+  var msgs = document.getElementById('chatMessages');
+  var div = document.createElement('div');
+  div.className = 'chat-bubble ' + role;
+  div.innerHTML = text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>');
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+async function sendChat() {
+  var input = document.getElementById('chatInput');
+  var btn = document.getElementById('chatSendBtn');
+  var text = input.value.trim();
+  if (!text || btn.disabled) return;
+  input.value=''; input.style.height='auto';
+  btn.disabled=true;
+  appendMessage('user', text);
+  chatHistory.push({ role:'user', content:text });
+  var thinking = appendMessage('assistant thinking', '✦ pensando...');
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1024,system:TRIP_CONTEXT,messages:chatHistory})
+    });
+    var data = await res.json();
+    var reply = data.content&&data.content[0]?data.content[0].text:'Desculpe, tente novamente.';
+    chatHistory.push({role:'assistant',content:reply});
+    thinking.remove();
+    appendMessage('assistant', reply);
+  } catch(e) { thinking.remove(); appendMessage('assistant','⚠️ Erro de conexão.'); chatHistory.pop(); }
+  btn.disabled=false;
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   buildNav();
   buildDays();
-  buildTimeline();
   setupDropZone();
   loadFirebaseReservations();
   buildMustDo();
