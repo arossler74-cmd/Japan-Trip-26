@@ -447,6 +447,37 @@ body::after {
 /* COSTS */
 .costs-section { margin: 40px 0 80px; scroll-margin-top: 80px; }
 
+/* ====== RESERVATIONS TIMELINE ====== */
+.reserv-section { margin: 40px 0 60px; scroll-margin-top: 80px; }
+.timeline-wrapper { position: relative; padding: 0 0 20px 0; }
+.timeline-line { position: absolute; left: 38px; top: 0; bottom: 0; width: 3px; background: linear-gradient(to bottom, var(--japan-red), var(--gold), var(--neon)); border-radius: 2px; }
+.timeline-group { margin-bottom: 32px; }
+.timeline-group-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: .15em; text-transform: uppercase; color: var(--japan-red); margin-left: 70px; margin-bottom: 10px; opacity: .8; }
+.timeline-item { display: flex; align-items: flex-start; gap: 14px; margin-bottom: 10px; position: relative; }
+.timeline-dot-wrap { display: flex; flex-direction: column; align-items: center; min-width: 40px; padding-top: 2px; }
+.timeline-dot { width: 18px; height: 18px; border-radius: 50%; border: 3px solid var(--japan-red); background: var(--manga-bg); flex-shrink: 0; position: relative; z-index: 1; display: flex; align-items: center; justify-content: center; font-size: 9px; }
+.timeline-dot.confirmed { background: #27ae60; border-color: #27ae60; }
+.timeline-dot.pending { background: var(--gold); border-color: var(--gold); }
+.timeline-dot.todo { background: var(--manga-bg); border-color: rgba(200,180,150,0.3); }
+.timeline-dot.flight { background: var(--neon); border-color: var(--neon); }
+.timeline-card { flex: 1; background: var(--panel-bg); border: 1.5px solid rgba(201,168,76,0.15); border-radius: 4px; padding: 12px 14px; transition: border-color .2s, transform .2s; }
+.timeline-card:hover { border-color: rgba(201,168,76,0.5); transform: translateX(3px); }
+.timeline-card-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+.timeline-card-title { font-family: var(--font-mono); font-size: 12px; font-weight: 700; color: var(--text-main); letter-spacing: .03em; }
+.timeline-card-badge { font-family: var(--font-mono); font-size: 9px; letter-spacing: .1em; text-transform: uppercase; padding: 2px 7px; border-radius: 2px; white-space: nowrap; flex-shrink: 0; }
+.badge-confirmed { background: rgba(39,174,96,.15); color: #2ecc71; border: 1px solid rgba(39,174,96,.3); }
+.badge-pending { background: rgba(201,168,76,.15); color: var(--gold); border: 1px solid rgba(201,168,76,.3); }
+.badge-todo { background: rgba(200,180,150,.08); color: rgba(200,180,150,.5); border: 1px solid rgba(200,180,150,.15); }
+.badge-flight { background: rgba(0,212,255,.1); color: var(--neon); border: 1px solid rgba(0,212,255,.3); }
+.timeline-card-detail { font-size: 12px; color: rgba(200,180,150,0.65); line-height: 1.5; }
+.timeline-card-meta { display: flex; gap: 12px; margin-top: 6px; flex-wrap: wrap; }
+.timeline-meta-item { font-family: var(--font-mono); font-size: 10px; color: rgba(200,180,150,0.45); display: flex; align-items: center; gap: 4px; }
+.timeline-card-link { display: inline-block; margin-top: 8px; font-family: var(--font-mono); font-size: 10px; color: var(--neon); text-decoration: none; letter-spacing: .05em; border-bottom: 1px solid rgba(0,212,255,.3); padding-bottom: 1px; }
+.timeline-card-link:hover { color: #fff; border-bottom-color: #fff; }
+.reserv-legend { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+.reserv-legend-item { display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 10px; color: rgba(200,180,150,.6); letter-spacing: .05em; }
+.reserv-legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
 .cost-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; margin-bottom: 32px; }
 
 .cost-card {
@@ -544,6 +575,67 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   .day-detail { display: block !important; }
   #tripMap { display: none; }
 }
+
+.mustdo-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:10px; }
+.mustdo-card { display:flex; align-items:flex-start; gap:12px; padding:14px 16px; background:var(--panel-bg); border:1.5px solid rgba(201,168,76,0.2); text-decoration:none; color:inherit; transition:border-color .2s,background .2s,transform .2s; border-radius:3px; cursor:pointer; }
+.mustdo-card:hover { border-color:var(--gold); background:rgba(201,168,76,0.06); transform:translateY(-2px); }
+.mustdo-num { font-family:var(--font-display); font-size:26px; color:rgba(192,57,43,0.6); line-height:1; min-width:26px; text-align:center; }
+.mustdo-icon { font-size:22px; line-height:1; }
+.mustdo-body { flex:1; min-width:0; }
+.mustdo-title { font-family:var(--font-mono); font-size:11px; font-weight:700; letter-spacing:.06em; text-transform:uppercase; color:var(--text-main); margin-bottom:4px; }
+.mustdo-sub { font-size:12px; color:rgba(200,180,150,0.75); line-height:1.5; }
+.mustdo-day { font-family:var(--font-mono); font-size:9px; color:var(--japan-red); letter-spacing:.1em; text-transform:uppercase; margin-top:5px; opacity:.8; }
+@media (max-width:768px) { .mustdo-grid { grid-template-columns:1fr; } }
+
+/* ====== CHATBOT TAB ====== */
+.chat-section { margin: 40px 0 60px; scroll-margin-top: 80px; }
+.chat-wrapper { display: flex; flex-direction: column; height: 600px; background: var(--panel-bg); border: var(--border-thick) solid var(--text-main); border-radius: 4px; overflow: hidden; }
+.chat-messages { flex: 1; overflow-y: auto; padding: 16px; display: flex; flex-direction: column; gap: 12px; scroll-behavior: smooth; }
+.chat-messages::-webkit-scrollbar { width: 4px; } .chat-messages::-webkit-scrollbar-track { background: transparent; } .chat-messages::-webkit-scrollbar-thumb { background: rgba(201,168,76,0.3); border-radius: 2px; }
+.chat-bubble { max-width: 85%; padding: 10px 14px; border-radius: 4px; font-size: 13px; line-height: 1.6; }
+.chat-bubble.user { align-self: flex-end; background: var(--japan-red); color: #fff; border-bottom-right-radius: 0; }
+.chat-bubble.assistant { align-self: flex-start; background: rgba(201,168,76,0.1); border: 1px solid rgba(201,168,76,0.2); color: var(--text-main); border-bottom-left-radius: 0; }
+.chat-bubble.assistant a { color: var(--neon); }
+.chat-bubble.thinking { opacity: 0.6; font-style: italic; font-family: var(--font-mono); font-size: 11px; }
+.chat-input-row { display: flex; gap: 0; border-top: var(--border-w) solid rgba(201,168,76,0.2); }
+.chat-input { flex: 1; background: transparent; border: none; padding: 14px 16px; color: var(--text-main); font-family: var(--font-body); font-size: 13px; outline: none; resize: none; min-height: 48px; max-height: 120px; }
+.chat-input::placeholder { color: rgba(200,180,150,0.35); }
+.chat-send { background: var(--japan-red); border: none; color: white; padding: 0 20px; cursor: pointer; font-family: var(--font-mono); font-size: 12px; letter-spacing: .08em; font-weight: 700; transition: background .2s; flex-shrink: 0; }
+.chat-send:hover { background: #a93226; }
+.chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+.chat-suggestions { display: flex; gap: 8px; flex-wrap: wrap; padding: 10px 16px; border-top: 1px solid rgba(201,168,76,0.1); }
+.chat-suggestion { font-family: var(--font-mono); font-size: 10px; background: rgba(201,168,76,0.08); border: 1px solid rgba(201,168,76,0.2); color: rgba(200,180,150,0.7); padding: 5px 10px; border-radius: 2px; cursor: pointer; transition: all .2s; letter-spacing: .03em; }
+.chat-suggestion:hover { background: rgba(201,168,76,0.18); color: var(--text-main); border-color: var(--gold); }
+
+/* ====== UPLOAD / RECEIPT ====== */
+.upload-bar { display: flex; align-items: center; gap: 10px; padding: 10px 16px; border-bottom: 1px solid rgba(201,168,76,0.15); flex-wrap: wrap; }
+.upload-btn { font-family: var(--font-mono); font-size: 10px; letter-spacing: .08em; text-transform: uppercase; background: rgba(0,212,255,0.08); border: 1px solid rgba(0,212,255,0.3); color: var(--neon); padding: 6px 12px; border-radius: 2px; cursor: pointer; transition: all .2s; white-space: nowrap; }
+.upload-btn:hover { background: rgba(0,212,255,0.18); }
+.upload-status { font-family: var(--font-mono); font-size: 10px; color: rgba(200,180,150,0.5); }
+.upload-modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:9999; align-items:center; justify-content:center; padding:16px; }
+.upload-modal-overlay.active { display:flex; }
+.upload-modal { background: var(--manga-bg); border: var(--border-thick) solid var(--text-main); border-radius:4px; width:100%; max-width:500px; padding:24px; }
+.upload-modal h3 { font-family:var(--font-display); font-size:24px; color:var(--japan-red); margin:0 0 4px; letter-spacing:.05em; }
+.upload-modal p { font-size:12px; color:rgba(200,180,150,0.6); margin:0 0 20px; font-family:var(--font-mono); }
+.upload-field { margin-bottom:14px; }
+.upload-field label { display:block; font-family:var(--font-mono); font-size:10px; letter-spacing:.1em; text-transform:uppercase; color:rgba(200,180,150,0.6); margin-bottom:6px; }
+.upload-field input, .upload-field select, .upload-field textarea { width:100%; background:rgba(255,255,255,0.05); border:1px solid rgba(201,168,76,0.25); border-radius:3px; padding:9px 12px; color:var(--text-main); font-family:var(--font-body); font-size:13px; box-sizing:border-box; outline:none; }
+.upload-field input:focus, .upload-field select:focus, .upload-field textarea:focus { border-color:var(--gold); }
+.upload-field select option { background:#1a1a2e; }
+.upload-drop-zone { border:2px dashed rgba(0,212,255,0.3); border-radius:4px; padding:24px; text-align:center; cursor:pointer; transition:all .2s; margin-bottom:14px; }
+.upload-drop-zone:hover, .upload-drop-zone.dragover { border-color:var(--neon); background:rgba(0,212,255,0.05); }
+.upload-drop-zone p { font-family:var(--font-mono); font-size:11px; color:rgba(200,180,150,0.5); margin:6px 0 0; }
+.upload-drop-zone .drop-icon { font-size:32px; }
+.upload-preview { max-width:100%; max-height:120px; border-radius:3px; margin-top:8px; display:none; }
+.upload-modal-btns { display:flex; gap:10px; justify-content:flex-end; margin-top:20px; }
+.btn-cancel { font-family:var(--font-mono); font-size:11px; background:transparent; border:1px solid rgba(200,180,150,0.3); color:rgba(200,180,150,0.6); padding:8px 16px; border-radius:2px; cursor:pointer; }
+.btn-save { font-family:var(--font-mono); font-size:11px; background:var(--japan-red); border:none; color:white; padding:8px 16px; border-radius:2px; cursor:pointer; font-weight:700; letter-spacing:.05em; }
+.btn-save:disabled { opacity:0.4; cursor:not-allowed; }
+.timeline-card-attachments { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+.attach-thumb { width:48px; height:48px; object-fit:cover; border-radius:3px; border:1px solid rgba(201,168,76,0.2); cursor:pointer; }
+.attach-link { display:inline-flex; align-items:center; gap:4px; font-family:var(--font-mono); font-size:10px; color:var(--neon); text-decoration:none; background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.2); padding:4px 8px; border-radius:2px; }
+.attach-link:hover { background:rgba(0,212,255,0.18); }
+
 </style>
 </head>
 <body>
@@ -600,11 +692,43 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
 <main class="main-content" id="main">
   <div id="daysContainer" style="width:100%;padding:0 12px;box-sizing:border-box;"></div>
 
+
+  <section id="mustdo" style="padding:0 12px;box-sizing:border-box;margin-bottom:48px;scroll-margin-top:80px;">
+    <div class="manga-divider"><div class="divider-line"></div><span class="divider-symbol">⭐</span><div class="divider-line"></div></div>
+    <h2 class="section-heading">10 Must-Do Experiences</h2>
+    <p class="section-sub">Non-negotiables — insider picks for the 3Boys</p>
+    <div class="mustdo-grid" id="mustdoGrid"></div>
+  </section>
+
   <section class="map-section" id="mapa" style="padding:0 16px;box-sizing:border-box;">
     <div class="manga-divider"><div class="divider-line"></div><span class="divider-symbol">MAP</span><div class="divider-line"></div></div>
     <h2 class="section-heading">🗾 Interactive Map</h2>
     <p class="section-sub">All trip locations — click for details</p>
     <div id="tripMap"></div>
+  </section>
+
+
+  <div style="padding:0 16px;box-sizing:border-box;">
+    <div class="manga-divider"><div class="divider-line"></div><span class="divider-symbol">🎫</span><div class="divider-line"></div></div>
+  </div>
+
+  <section class="reserv-section" id="reservations" style="padding:0 16px;box-sizing:border-box;">
+    <h2 class="section-heading">🎫 Bookings & Reservations</h2>
+    <p class="section-sub">Timeline · Jul 23 – Aug 2, 2026 · 3Boys Japan</p>
+    <div class="upload-bar">
+      <button class="upload-btn" onclick="openUploadModal()">📎 + Add Reservation / Receipt</button>
+      <span class="upload-status" id="uploadStatus">Tap to upload a ticket, PDF, QR code, or screenshot</span>
+    </div>
+    <div class="reserv-legend">
+      <div class="reserv-legend-item"><div class="reserv-legend-dot" style="background:#27ae60"></div>Confirmed</div>
+      <div class="reserv-legend-item"><div class="reserv-legend-dot" style="background:#c9a84c"></div>Pending</div>
+      <div class="reserv-legend-item"><div class="reserv-legend-dot" style="background:#00d4ff"></div>Flight</div>
+      <div class="reserv-legend-item"><div class="reserv-legend-dot" style="background:rgba(200,180,150,0.2);border:1px solid rgba(200,180,150,0.3)"></div>To Book</div>
+    </div>
+    <div class="timeline-wrapper">
+      <div class="timeline-line"></div>
+      <div id="timelineContainer"></div>
+    </div>
   </section>
 
   <div style="padding:0 16px;box-sizing:border-box;">
@@ -638,6 +762,76 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
     </div>
     <p class="cost-note">⚠️ Indicative values subject to change. Estimated rate: 1 USD = 155 JPY (Jul/2026). Breakfast included. Lunches are free choice.</p>
   </section>
+
+  <!-- UPLOAD MODAL -->
+  <div class="upload-modal-overlay" id="uploadModal">
+    <div class="upload-modal">
+      <h3>📎 Add Reservation</h3>
+      <p>Upload a receipt, ticket, PDF, or QR code — saved to your trip</p>
+      <div class="upload-field">
+        <label>Title *</label>
+        <input type="text" id="uploadTitle" placeholder="e.g. teamLab Borderless — 6 tickets">
+      </div>
+      <div class="upload-field">
+        <label>Category</label>
+        <select id="uploadCategory">
+          <option value="✈️ Flight">✈️ Flight</option>
+          <option value="🏨 Hotel">🏨 Hotel</option>
+          <option value="🎟️ Activity / Ticket" selected>🎟️ Activity / Ticket</option>
+          <option value="🚅 Transport">🚅 Transport</option>
+          <option value="🍽️ Restaurant">🍽️ Restaurant</option>
+          <option value="🥃 Experience">🥃 Experience</option>
+          <option value="📄 Other">📄 Other</option>
+        </select>
+      </div>
+      <div class="upload-field">
+        <label>Date</label>
+        <input type="date" id="uploadDate">
+      </div>
+      <div class="upload-field">
+        <label>Notes</label>
+        <textarea id="uploadNotes" rows="2" placeholder="Confirmation number, time, details..."></textarea>
+      </div>
+      <div class="upload-drop-zone" id="dropZone">
+        <div class="drop-icon">📄</div>
+        <div style="font-family:var(--font-mono);font-size:12px;color:rgba(200,180,150,0.7);margin-top:8px">Drop file here or click to browse</div>
+        <p>PDF, image, QR code — max 10MB</p>
+        <input type="file" id="uploadFileInput" accept="image/*,.pdf" style="display:none">
+        <img class="upload-preview" id="uploadPreview">
+      </div>
+      <div class="upload-modal-btns">
+        <button class="btn-cancel" onclick="closeUploadModal()">Cancel</button>
+        <button class="btn-save" id="uploadSaveBtn" onclick="saveReservation()">💾 Save to Trip</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHATBOT SECTION -->
+  <section class="chat-section" id="chatbot" style="padding:0 16px;box-sizing:border-box;">
+    <div class="manga-divider"><div class="divider-line"></div><span class="divider-symbol">🤖</span><div class="divider-line"></div></div>
+    <h2 class="section-heading">🤖 Trip Assistant</h2>
+    <p class="section-sub">Pergunte qualquer coisa sobre a viagem — sugestões, mudanças, dúvidas</p>
+    <div class="chat-wrapper">
+      <div class="chat-messages" id="chatMessages">
+        <div class="chat-bubble assistant">
+          Oi! 👋 Sou o assistente da <strong>3Boys Japan Trip 2026</strong>. Conheço toda a sua viagem — itinerário, hotéis, custos, restaurantes e atividades. Pode me perguntar qualquer coisa ou pedir sugestões! 🗾
+        </div>
+      </div>
+      <div class="chat-suggestions" id="chatSuggestions">
+        <div class="chat-suggestion" onclick="sendSuggestion(this)">Qual o melhor dia pra teamLab?</div>
+        <div class="chat-suggestion" onclick="sendSuggestion(this)">O que os teens vão curtir mais?</div>
+        <div class="chat-suggestion" onclick="sendSuggestion(this)">Sugestão de rota em Kyoto</div>
+        <div class="chat-suggestion" onclick="sendSuggestion(this)">Quanto vou gastar em Osaka?</div>
+        <div class="chat-suggestion" onclick="sendSuggestion(this)">Melhor dia pro Shinkansen</div>
+        <div class="chat-suggestion" onclick="sendSuggestion(this)">O que reservar primeiro?</div>
+      </div>
+      <div class="chat-input-row">
+        <textarea class="chat-input" id="chatInput" placeholder="Pergunte sobre sua viagem..." rows="1" onkeydown="chatKeydown(event)" oninput="autoResize(this)"></textarea>
+        <button class="chat-send" id="chatSendBtn" onclick="sendChat()">ENVIAR</button>
+      </div>
+    </div>
+  </section>
+
 </main>
 
 <footer class="site-footer">
@@ -656,40 +850,40 @@ const DAYS = [
   {
     num: 1, date: '07/23/2026', weekday: 'THU',
     city: 'Tokyo / Ginza', theme: 'Gateway Arrival', icon: '⛩️',
-    hotel: 'Agora Tokyo Ginza', hotelNew: false, cityChange: false, temp: '28–32°C',
+    hotel: 'Mitsui Garden Ginza Tsukiji', hotelNew: false, cityChange: false, temp: '28–32°C',
     morning: ['Arrive at Haneda — immigration and baggage claim','Collect SIM card and pocket Wi-Fi','Transfer to hotel in Ginza (Keikyu Line or taxi)','Check-in and rest — easy first day after long flight'],
-    afternoon: ['Rest at hotel and recover from jet lag','Easy stroll around the Ginza block','First impressions of the Japanese atmosphere'],
-    night: ['Relaxed evening walk through Ginza streets','First Japanese experience — Tsutaya bookstore or arcade','Soak in the lights and illuminated storefronts'],
+    afternoon: ['Tsukiji Outer Market — 5min walk from hotel, fresh sushi, street food, amazing for kids','Easy stroll through Ginza — window shopping, people watching','No rush: sit in a café, breathe in Japan'],
+    night: ['Ginza at night — luxury storefronts illuminated, stunning contemporary architecture','Explore concept stores and galleries along Chuo-dori (closes ~9pm)','First taste of Japan — take it slow, soak in the atmosphere'],
     transport: ['Haneda','→','Hotel Ginza (Keikyu Line ~25min)'],
     dinner: [
-      { name: 'Sushiro Ginza', type: 'Conveyor belt sushi — great for first night', price: '~$15/person', url: 'https://www.google.com/maps/search/Sushiro+Ginza', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.0</span></span><a href=\"https://www.tripadvisor.com/Search?q=Sushiro+Ginza+Tokyo\" target=\"_blank\" rel=\"noopener\" class=\"r-rating\" onclick=\"event.stopPropagation()\" style=\"text-decoration:none\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.2</span></a></div>', grating: 4.0 },
-      { name: 'Ichiran Ramen Ginza', type: 'Ramen in private booths — unique experience', price: '~$12/person', url: 'https://www.google.com/maps/search/Ichiran+Ramen+Ginza', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.1</span></span><a href=\"https://www.tripadvisor.com/Search?q=Ichiran+Ramen+Ginza+Tokyo\" target=\"_blank\" rel=\"noopener\" class=\"r-rating\" onclick=\"event.stopPropagation()\" style=\"text-decoration:none\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.3</span></a></div>', grating: 4.1 },
-      { name: 'Izakaya near hotel', type: 'Yakitori and edamame — casual and relaxed', price: '~$20/person', url: 'https://www.google.com/maps/search/izakaya+Ginza', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.2</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.1</span></span></div>', grating: 4.2 },
+      { name: 'Sushi Yoshitake', type: '3★ Michelin Omakase — book 4+ weeks via hotel concierge', price: '~$280/person', url: 'https://sushi-yoshitake.com', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.8</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.9</span></span></div>', grating: 4.8 },
+      { name: 'Ginza Izakaya', type: 'Classic Japanese bar — yakitori, edamame, casual first-night vibes', price: '~$25/person', url: 'https://www.google.com/maps/search/izakaya+Ginza', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.2</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.1</span></span></div>', grating: 4.2 },
+      { name: 'Sushiro Ginza', type: 'Conveyor belt sushi — great casual option, no reservation needed', price: '~$15/person', url: 'https://www.google.com/maps/search/Sushiro+Ginza', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.0</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.2</span></span></div>', grating: 4.0 },
     ],
-    note: 'Take it easy after the flight. Priority: hydration and rest. No intense activities planned.',
+    note: 'Light day — you just flew. Do NOT plan anything intense. Tsukiji Outer Market is 5min walk from the hotel and perfect for grazing/snacking with kids. Tonight: casual dinner nearby, early sleep.',
     photos: [
       { label: 'Ginza', maps: 'https://www.google.com/maps/search/?api=1&query=Ginza+Tokyo', web: 'https://ginza.jp/' },
       { label: 'Haneda Airport', maps: 'https://www.google.com/maps/search/?api=1&query=Haneda+International+Airport', web: 'https://www.haneda-airport.jp/inter/en/' },
     ],
     links: [
-      { label: 'Agora Tokyo Ginza', url: 'https://www.agora-ginza.com/en/', icon: '🏨' },
-      { label: '📍 GPS — Agora Ginza', url: 'https://www.google.com/maps/search/?api=1&query=Agora+Tokyo+Ginza', icon: '📍' },
+      { label: 'Mitsui Garden Ginza Tsukiji', url: 'https://www.gardenhotels.co.jp/ginza-tsukiji/eng/', icon: '🏨' },
+      { label: '📍 GPS — Agora Ginza', url: 'https://www.google.com/maps/search/?api=1&query=Mitsui+Garden+Hotel+Ginza+Tsukiji', icon: '📍' },
     ],
   },
   {
     num: 2, date: '07/24/2026', weekday: 'FRI',
     city: 'Tokyo', theme: 'Temple & Pixels', icon: '🎮',
-    hotel: 'Agora Tokyo Ginza', hotelNew: false, cityChange: false, temp: '28–33°C',
-    morning: ['Breakfast at hotel','Subway to Asakusa (Ginza + Toei Line)','Senso-ji early — before 8am to avoid crowds','Kaminarimon Gate and Nakamise Shopping Street','Photos at the torii gate and pagoda'],
-    afternoon: ['Subway to Ueno (15 min)','Ameyoko Market — street food and lively shops','Ueno Park — quick stroll','Subway to Akihabara (5 min)','Electric Town — arcades, manga, electronics'],
-    night: ['Evening in Akihabara — arcades open until midnight','Sega Arcade and Don Quijote Akihabara','Shopping for tech souvenirs and anime goods'],
-    transport: ['Hotel Ginza','→','Asakusa (subway ~20min)','→','Ueno (subway 5min)','→','Akihabara (subway 3min)'],
+    hotel: 'Mitsui Garden Ginza Tsukiji', hotelNew: false, cityChange: false, temp: '28–33°C',
+    morning: ['Hotel breakfast — relax, no rush','Subway to Asakusa (15min from hotel)','Senso-ji early — before 9am for the best experience','Kaminarimon Gate + Nakamise Street snacks — ningyo-yaki doll cakes, senbei, dango','Photos at pagoda and torii gate'],
+    afternoon: ['Walk to Kappabashi "Kitchen Town" — fun shopping street with plastic food displays','Free time: explore Asakusa backstreets and craft shops','Optional: Ueno Park picnic if the group has energy — 10min away'],
+    night: ['Back to Ginza/Tsukiji area by early evening','Dinner near the hotel — easy night for everyone','Early rest — adjust to the time zone properly'],
+    transport: ['Hotel','→','Asakusa (subway ~15min)','→','back to hotel by 6pm'],
     dinner: [
-      { name: 'Yakiniku Heijoen Akihabara', type: 'Japanese BBQ — quality meat', price: '~$28/person', url: 'https://www.google.com/maps/search/yakiniku+Akihabara', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.3</span></span><a href=\"https://www.tripadvisor.com/Search?q=Yakiniku+Heijoen+Akihabara\" target=\"_blank\" rel=\"noopener\" class=\"r-rating\" onclick=\"event.stopPropagation()\" style=\"text-decoration:none\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.4</span></a></div>', grating: 4.3 },
-      { name: 'CoCo Ichibanya Curry', type: 'Japanese curry — teen favorite', price: '~$10/person', url: 'https://www.google.com/maps/search/CoCo+Ichibanya+Akihabara', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★½<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 3.9</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★½<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 3.8</span></span></div>', grating: 3.9 },
-      { name: 'Ramen in Ueno', type: 'Tokyo-style tonkotsu — rich and creamy', price: '~$12/person', url: 'https://www.google.com/maps/search/ramen+Ueno', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.1</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.2</span></span></div>', grating: 4.1 },
+      { name: 'Ramenya Shima', type: "One of Tokyo's best ramen — arrive early or reserve, lines are long", price: '~$15/person', url: 'https://tabelog.com/en/tokyo/A1307/A130701/13240706/', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.5</span></span><a href=\"https://tabelog.com/en/tokyo/A1307/A130701/13240706/\" target=\"_blank\" rel=\"noopener\" class=\"r-rating\" onclick=\"event.stopPropagation()\" style=\"text-decoration:none\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.6</span></a></div>', grating: 4.5 },
+      { name: 'Yakiniku Heijoen Akihabara', type: 'Japanese BBQ — quality beef, great for the group', price: '~$28/person', url: 'https://www.google.com/maps/search/yakiniku+Akihabara', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.3</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.4</span></span></div>', grating: 4.3 },
+      { name: 'CoCo Ichibanya Curry', type: 'Japanese curry — teen favorite, wildly customizable spice levels', price: '~$10/person', url: 'https://www.google.com/maps/search/CoCo+Ichibanya+Akihabara', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★½<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 3.9</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★½<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 3.8</span></span></div>', grating: 3.9 },
     ],
-    note: null,
+    note: 'Keep this day slow — Asakusa is meant to be wandered, not rushed. Senso-ji is best before 9am. Kappabashi (Kitchen Town) is hilarious for kids — plastic food displays everywhere. Dinner near hotel, early night.',
     photos: [
       { label: 'Senso-ji 浅草寺', maps: 'https://www.google.com/maps/search/?api=1&query=Senso-ji+Temple+Asakusa', web: 'https://www.senso-ji.jp/english/' },
       { label: 'Akihabara 秋葉原', maps: 'https://www.google.com/maps/search/?api=1&query=Akihabara+Tokyo', web: 'https://www.google.com/maps/place/Akihabara' },
@@ -703,41 +897,54 @@ const DAYS = [
   {
     num: 3, date: '07/25/2026', weekday: 'SAT',
     city: 'Tokyo', theme: 'Neon & Immersion', icon: '🌆',
-    hotel: 'Agora Tokyo Ginza', hotelNew: false, cityChange: false, temp: '29–33°C',
-    morning: ['Breakfast at hotel','JR subway to Shibuya','Hachiko — must-have group photo','Shibuya Crossing — the most famous scramble in the world','Shibuya Sky or Scramble Square Observatory'],
-    afternoon: ['Harajuku — Takeshita Street (pop culture)','Colorful crepes and kawaii fashion','Omotesando — boutiques and premium architecture','Rest at hotel before immersive experience'],
-    night: ['teamLab Borderless or teamLab Planets — digital art','Advance booking required','Unforgettable experience for everyone'],
-    transport: ['Hotel Ginza','→','Shibuya (subway ~10min)','→','Harajuku (JR 2min)','→','teamLab (subway)'],
+    hotel: 'Mitsui Garden Ginza Tsukiji', hotelNew: false, cityChange: false, temp: '29–33°C',
+    morning: ['Hotel breakfast','Meiji Shrine — 30min forest walk, calm and spiritual, great for the whole family','Harajuku Takeshita Street — kawaii fashion, colorful crepes, Japanese pop culture'],
+    afternoon: ['Shibuya Crossing at dusk — full scramble crossing experience','Shibuya Sky observatory — buy tickets in advance, aerial 360° view of Tokyo','Rest back at hotel — skip teamLab today, save energy (or do teamLab instead of Shibuya Sky)'],
+    night: ['teamLab Borderless (Azabudai Hills) — museu de arte digital sem fronteiras','Ingresso obrigatório com antecedência — teamlab.art/e/tokyo','Experiência inesquecível para toda a família'],
+    transport: ['Hotel','→','Harajuku (subway ~12min)','→','Shibuya (JR 2min, or walk 10min)'],
     dinner: [
-      { name: 'Sushi Zanmai Shibuya', type: 'Fresh high-turnover sushi', price: '~$20/person', url: 'https://www.google.com/maps/search/Sushi+Zanmai+Shibuya', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★½<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 3.8</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★½<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 3.9</span></span></div>', grating: 3.8 },
-      { name: 'Udon Shin Shibuya', type: 'Artisan udon hot or cold — delicate', price: '~$12/person', url: 'https://www.google.com/maps/search/udon+Shibuya', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.3</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.4</span></span></div>', grating: 4.3 },
-      { name: 'Modern izakaya in Shibuya', type: 'Yakitori + drinks — great for groups', price: '~$25/person', url: 'https://www.google.com/maps/search/izakaya+Shibuya', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.2</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.1</span></span></div>', grating: 4.2 },
+      { name: 'Torishiki', type: "Japan's best yakitori — charcoal-grilled chicken, Michelin listed. Book weeks ahead", price: '~$80/person', url: 'https://tabelog.com/en/tokyo/A1316/A131601/13004849/', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.7</span></span><a href=\"https://tabelog.com/en/tokyo/A1316/A131601/13004849/\" target=\"_blank\" rel=\"noopener\" class=\"r-rating\" onclick=\"event.stopPropagation()\" style=\"text-decoration:none\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.8</span></a></div>', grating: 4.7 },
+      { name: 'Shirosaka', type: 'Modern kaiseki — refined seasonal Japanese tasting menu. Reserve ahead', price: '~$120/person', url: 'https://tabelog.com/en/tokyo/A1308/A130801/13193461/', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.6</span></span><a href=\"https://tabelog.com/en/tokyo/A1308/A130801/13193461/\" target=\"_blank\" rel=\"noopener\" class=\"r-rating\" onclick=\"event.stopPropagation()\" style=\"text-decoration:none\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.7</span></a></div>', grating: 4.6 },
+      { name: 'Sushi Zanmai Shibuya', type: 'Fresh quality sushi — great value, no reservation needed', price: '~$20/person', url: 'https://www.google.com/maps/search/Sushi+Zanmai+Shibuya', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★½<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 3.8</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★½<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 3.9</span></span></div>', grating: 3.8 },
     ],
-    note: 'teamLab: book at teamlab.art. Wear comfortable clothes — walk barefoot in Planets.',
+    note: 'Shibuya Crossing is best at dusk from street level then from Shibuya Sky above — do both! Torishiki and Shirosaka need reservations weeks ahead via hotel concierge. teamLab Borderless: compre em teamlab.art/e/tokyo — Azabudai Hills, perto de Tokyo Tower.',
     photos: [
       { label: 'Shibuya Crossing', maps: 'https://www.google.com/maps/search/?api=1&query=Shibuya+Crossing+Tokyo', web: 'https://www.google.com/maps/place/Shibuya+Crossing' },
       { label: 'Harajuku 原宿', maps: 'https://www.google.com/maps/search/?api=1&query=Harajuku+Takeshita+Street', web: 'https://www.google.com/maps/place/Harajuku' },
     ],
     links: [
       { label: 'Shibuya Sky', url: 'https://shibuya-sky.jp/e/', icon: '🏙️' },
-      { label: 'teamLab Planets', url: 'https://planets.teamlab.art/tokyo/', icon: '🎨' },
+      { label: 'teamLab Borderless', url: 'https://www.teamlab.art/e/tokyo/', icon: '🎨' },
       { label: '📍 GPS — Shibuya Sky', url: 'https://www.google.com/maps/search/?api=1&query=Shibuya+Sky', icon: '📍' },
     ],
   },
   {
     num: 4, date: '07/26/2026', weekday: 'SUN',
     city: 'Kawaguchiko', theme: 'Fuji Quest', icon: '🗻',
-    hotel: 'Agora Tokyo Ginza', hotelNew: false, cityChange: false, temp: '24–30°C',
-    morning: ['Early departure from hotel (7am recommended)','Fujikyu Highway Bus or JR train to Kawaguchiko (~2h)','Arrival and lake exploration'],
-    afternoon: ['Lake Kawaguchiko — boat ride or bicycle','Kachi Kachi Ropeway — cable car with Fuji views','Cafes with views of Fuji','Photos with Mount Fuji backdrop'],
-    night: ['Return to Tokyo in the afternoon','Arrival at hotel in Ginza','Relaxed dinner in Ginza'],
+    hotel: 'Mitsui Garden Ginza Tsukiji', hotelNew: false, cityChange: false, temp: '24–30°C',
+    morning: [
+      'Hotel breakfast — take it slow, no early rush',
+      'Head to Shinjuku by subway (30min), catch Fujikyu Highway Bus',
+      'Scenic 2h ride through countryside to Kawaguchiko lake',
+    ],
+    afternoon: [
+      'Arrive at Kawaguchiko lake — soak in the Fuji views',
+      'Lake walk or easy boat ride — kids love it',
+      'Kachi Kachi Ropeway (optional) — cable car up for panoramic views',
+      'Matcha soft cream and local snacks at lakeside cafés',
+    ],
+    night: [
+      'Return bus to Shinjuku by late afternoon',
+      'Easy dinner near hotel in Ginza/Tsukiji area',
+      'Early night — full day tomorrow traveling to Kyoto',
+    ],
     transport: ['Hotel Ginza','→','Shinjuku (subway)','→','Kawaguchiko (bus ~2h)','→','Return Tokyo'],
     dinner: [
       { name: 'Shabu-shabu in Ginza', type: 'Thinly sliced beef in broth — comforting after long day', price: '~$32/person', url: 'https://www.google.com/maps/search/shabu+shabu+Ginza', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.4</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.3</span></span></div>', grating: 4.4 },
       { name: 'Return Ramen in Ginza', type: 'Miso or tonkotsu ramen — warms the soul', price: '~$12/person', url: 'https://www.google.com/maps/search/ramen+Ginza', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.2</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.1</span></span></div>', grating: 4.2 },
       { name: 'Free dinner in Ginza', type: 'Explore restaurants around the hotel', price: '~$20/person', url: 'https://www.google.com/maps/search/restaurants+Ginza' },
     ],
-    note: '⚠️ Fuji visibility depends on weather — check forecast the day before. Even cloudy, the lake is worth the visit.',
+    note: 'Fuji visibility depends on weather — check the day before. Even without Fuji visible, the lake area is beautiful and relaxing. Hakone is a great alternative: traditional ryokan, onsen, and the famous torii gate reflection on Lake Ashi.',
     photos: [
       { label: 'Mount Fuji 富士山', maps: 'https://www.google.com/maps/search/?api=1&query=Mount+Fuji+Japan', web: 'https://www.google.com/maps/place/Mount+Fuji' },
       { label: 'Kawaguchiko 河口湖', maps: 'https://www.google.com/maps/search/?api=1&query=Lake+Kawaguchiko', web: 'https://www.google.com/maps/place/Lake+Kawaguchiko' },
@@ -752,16 +959,28 @@ const DAYS = [
     num: 5, date: '07/27/2026', weekday: 'MON',
     city: 'Tokyo → Kyoto', theme: 'Shinkansen Chapter', icon: '🚄',
     hotel: 'Agora Kyoto Shijo', hotelNew: true, cityChange: true, temp: '27–34°C',
-    morning: ['Breakfast at hotel in Ginza','Free morning — last shopping in Ginza','Check-out from Agora Tokyo Ginza','Transfer to Tokyo Station'],
-    afternoon: ['Board the Tokaido Shinkansen (Tokyo → Kyoto ~2h15)','Mount Fuji view from train (right side, seats A/B)','Arrival at Kyoto Station','Check-in at Agora Kyoto Shijo'],
-    night: ['Orientation walk in Gion','Hanamikoji Dori — most photogenic street in Kyoto','Shijo Street — first steps in Kyoto'],
+    morning: [
+      'Leisurely hotel breakfast',
+      'Last stroll through Tsukiji Market (5min from hotel)',
+      'Check-out and head to Tokyo Station by taxi or subway',
+    ],
+    afternoon: [
+      'Shinkansen Tokaido (Tokyo → Kyoto ~2h15) — scenic and comfortable',
+      'Watch for Mount Fuji on the right side (seats A/B)',
+      'Arrive Kyoto mid-afternoon — check-in, rest, no sightseeing today',
+    ],
+    night: [
+      'Short evening walk on Shijo Street — feel the Kyoto vibe',
+      'Casual dinner near the hotel — udon, soba, or izakaya',
+      'Early night — Kyoto is best explored fresh in the morning',
+    ],
     transport: ['Taxi/subway','→','Tokyo Station','→','Shinkansen (~2h15)','→','Kyoto Station'],
     dinner: [
       { name: 'Soba Matsuba Kyoto', type: 'Artisan soba — light and quintessential Kyoto', price: '~$18/person', url: 'https://www.google.com/maps/search/soba+Kyoto+Station', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.3</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.2</span></span></div>', grating: 4.3 },
       { name: 'Tonkatsu Katsukura Sanjo', type: 'Premium tonkatsu — great for everyone', price: '~$22/person', url: 'https://www.google.com/maps/search/Katsukura+Kyoto', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.4</span></span><a href=\"https://www.tripadvisor.com/Search?q=Katsukura+Sanjo+Kyoto\" target=\"_blank\" rel=\"noopener\" class=\"r-rating\" onclick=\"event.stopPropagation()\" style=\"text-decoration:none\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.5</span></a></div>', grating: 4.4 },
       { name: 'Obanzai casual in Gion', type: 'Home-style Kyoto cuisine — tofu, miso', price: '~$20/person', url: 'https://www.google.com/maps/search/obanzai+Kyoto', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.3</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.2</span></span></div>', grating: 4.3 },
     ],
-    note: 'Shinkansen: reserve seats in advance. Right side (Tokyo→Kyoto direction, seats A/B) for Fuji views.',
+    note: 'Reserve Shinkansen seats in advance — seats A/B on the right side for Fuji views. Travel day: resist the urge to plan too much on arrival. Kyoto is a slow city, best enjoyed unhurried.',
     photos: [
       { label: 'Shinkansen 新幹線', maps: 'https://www.google.com/maps/search/?api=1&query=JR+Central+Shinkansen', web: 'https://www.jrcentral.co.jp/en/' },
       { label: 'Gion 祇園', maps: 'https://www.google.com/maps/search/?api=1&query=Gion+District+Kyoto', web: 'https://www.google.com/maps/place/Gion+Kyoto' },
@@ -776,16 +995,29 @@ const DAYS = [
     num: 6, date: '07/28/2026', weekday: 'TUE',
     city: 'Kyoto', theme: 'Ancient Kyoto', icon: '🏯',
     hotel: 'Agora Kyoto Shijo', hotelNew: false, cityChange: false, temp: '28–35°C',
-    morning: ['Breakfast at hotel','Bus 206 to Kiyomizu-dera (before 8am)','Temple with wooden stage — iconic city view','Jishu Shrine — love stones'],
-    afternoon: ['Walk down Sannenzaka','Ninenzaka — cobblestone streets and tea houses','Yasaka Shrine at the entrance of Gion','Rest at hotel'],
-    night: ['Gion at dusk — best chance to spot maiko','Hanamikoji Dori illuminated','Kyoto backstreets and alleys'],
+    morning: [
+      'Early hotel breakfast',
+      'Bus to Kiyomizu-dera (before 9am — beat the crowds)',
+      'Wooden stage temple with iconic Kyoto views',
+      'Jishu Shrine nearby — fun love stone ritual for the kids',
+    ],
+    afternoon: [
+      'Slow walk down Sannenzaka and Ninenzaka — cobblestone streets and tea houses',
+      'Stop for matcha and wagashi (Japanese sweets) along the way',
+      'Back to hotel by 3-4pm — rest, use hotel facilities',
+    ],
+    night: [
+      'Gion at dusk — walk Hanamikoji Dori, chance to spot maiko',
+      'Dinner in Gion or Pontocho area',
+      'Relaxed evening — no late night',
+    ],
     transport: ['Bus 206/100','→','Kiyomizu','→','Gion (walk)'],
     dinner: [
       { name: 'Yakitori izakaya in Gion', type: 'Charcoal grilled chicken — intimate atmosphere', price: '~$22/person', url: 'https://www.google.com/maps/search/yakitori+izakaya+Gion+Kyoto', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.4</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.3</span></span></div>', grating: 4.4 },
       { name: 'Udon near Nishiki Market', type: 'Thick Kyoto-style udon', price: '~$14/person', url: 'https://www.google.com/maps/search/udon+Kyoto+Nishiki', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.2</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.1</span></span></div>', grating: 4.2 },
       { name: 'Kaiseki in Pontocho', type: 'Deck over the Kamo River — pure Kyoto', price: '~$45/person', url: 'https://www.google.com/maps/search/kaiseki+Pontocho+Kyoto', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.6</span></span><a href=\"https://www.tripadvisor.com/Search?q=Kaiseki+Pontocho+Kyoto\" target=\"_blank\" rel=\"noopener\" class=\"r-rating\" onclick=\"event.stopPropagation()\" style=\"text-decoration:none\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.5</span></a></div>', grating: 4.6 },
     ],
-    note: '🙏 Gion etiquette: no photos of maiko without permission. Keep voices low in alleys. Private properties.',
+    note: 'Kiyomizu before 9am is magical — quiet and beautiful. Sannenzaka is a gentle 20min walk downhill. Gion etiquette: no photos of maiko without permission, keep voices low. This day feels full at a family pace — do not add more.',
     photos: [
       { label: 'Kiyomizu-dera 清水寺', maps: 'https://www.google.com/maps/search/?api=1&query=Kiyomizu-dera+Temple+Kyoto', web: 'https://www.kiyomizudera.or.jp/en/' },
       { label: 'Hanamikoji 花見小路', maps: 'https://www.google.com/maps/search/?api=1&query=Hanamikoji+Street+Gion+Kyoto', web: 'https://www.google.com/maps/place/Hanamikoji+Street' },
@@ -800,16 +1032,29 @@ const DAYS = [
     num: 7, date: '07/29/2026', weekday: 'WED',
     city: 'Kyoto / Uji', theme: 'Matcha Spirit', icon: '🍵',
     hotel: 'Agora Kyoto Shijo', hotelNew: false, cityChange: false, temp: '27–34°C',
-    morning: ['Breakfast at hotel','JR Nara Line train to Uji (~20 min)','Uji River Bridge — peaceful river view','The matcha tea capital of Japan'],
-    afternoon: ['Byodo-in — the 10-yen coin temple, UNESCO','Nakamura Tokichi — premium matcha tea tasting','Matcha ice cream and sweets in local shops','Return to Kyoto in the late afternoon'],
-    night: ['Quiet evening in Kyoto','Nishiki Market evening (closes ~6pm — check times)','Relaxed stroll on Shijo Street'],
+    morning: [
+      'Hotel breakfast — slow start',
+      'Nishiki Market walk — the Kitchen of Kyoto, amazing snacks and produce',
+      'Free morning in Kyoto if the group prefers to rest',
+    ],
+    afternoon: [
+      'Train to Uji (~20min) — Japan matcha capital',
+      'Byodo-in Temple — UNESCO, the 10-yen coin building',
+      'Nakamura Tokichi — premium matcha tea and sweets tasting',
+      'Matcha ice cream and mochi at local shops — kids favorite',
+      'Back to Kyoto by early evening',
+    ],
+    night: [
+      'Easy dinner near hotel on Shijo Street',
+      'Quiet evening — relax and recharge',
+    ],
     transport: ['Hotel','→','Kyoto Station','→','Uji (JR ~20min)','→','Return Kyoto'],
     dinner: [
       { name: 'Izakaya in Kawaramachi', type: 'Casual and lively — great for the group', price: '~$22/person', url: 'https://www.google.com/maps/search/izakaya+Kawaramachi+Kyoto', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.1</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.0</span></span></div>', grating: 4.1 },
       { name: 'Artisan ramen in Kyoto', type: 'Artisan ramen with spices — teens love it', price: '~$14/person', url: 'https://www.google.com/maps/search/ramen+Kyoto+Station', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.3</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.2</span></span></div>', grating: 4.3 },
       { name: 'Teishoku in Shijo', type: 'Complete Japanese set meal — variety for everyone', price: '~$18/person', url: 'https://www.google.com/maps/search/teishoku+Shijo+Kyoto', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.0</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★½<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 3.9</span></span></div>', grating: 4.0 },
     ],
-    note: 'Byodo-in: arrive before 9am to avoid queues. Uji is perfect for teens — ice cream and unique experiences.',
+    note: 'Uji is a half-day trip — relaxed and very enjoyable. Perfect pace for families. Byodo-in is small and manageable. Nishiki Market in the morning is a great alternative if the group prefers to stay in Kyoto and explore slowly.',
     photos: [
       { label: 'Byodo-in 平等院', maps: 'https://www.google.com/maps/search/?api=1&query=Byodo-in+Temple+Uji', web: 'https://www.byodoin.or.jp/en/' },
       { label: 'Uji Matcha 宇治', maps: 'https://www.google.com/maps/search/?api=1&query=Uji+City+Kyoto', web: 'https://www.google.com/maps/place/Uji' },
@@ -824,16 +1069,29 @@ const DAYS = [
     num: 8, date: '07/30/2026', weekday: 'THU',
     city: 'Kyoto / Arashiyama', theme: 'Bamboo & Onsen', icon: '🎋',
     hotel: 'Agora Kyoto Shijo', hotelNew: false, cityChange: false, temp: '28–35°C',
-    morning: ['Breakfast at hotel — early start (before 8am)','Sagano/Randen train to Arashiyama','Bamboo Grove early — best light and fewer crowds','Tenryu-ji and its UNESCO Zen garden'],
-    afternoon: ['Togetsukyo Bridge — mountain views over the Oi River','Sagano Street — shops, tea, and bamboo tofu','Rickshaw ride (optional)','Return to hotel in the late afternoon'],
-    night: ['Onsen / spa at hotel or historic Funaoka Onsen','Massage or relaxation after busy days','Decompression evening for everyone'],
+    morning: [
+      'Early breakfast and head to Arashiyama (35min by train)',
+      'Bamboo Grove — early morning is essential, quieter and cooler',
+      'Tenryu-ji Zen garden — UNESCO, beautiful and peaceful',
+      'Togetsukyo Bridge — mountain views, great family photo spot',
+    ],
+    afternoon: [
+      'Back to Kyoto hotel by noon or early afternoon',
+      'Hotel rest and downtime — pool/gym/lobby or just nap',
+      'Optional: Nishiki Market or Shijo Street at leisure',
+    ],
+    night: [
+      'Onsen at hotel or nearby Funaoka Onsen (historic public bath)',
+      'Relaxed dinner near hotel — no rush',
+      'Early night — tomorrow is Osaka day trip',
+    ],
     transport: ['Hotel','→','Arashiyama (Hankyu ~35min)','→','Return Kyoto'],
     dinner: [
       { name: 'Tofu kaiseki in Sagano', type: 'Artisan tofu cuisine — very Kyoto', price: '~$25/person', url: 'https://www.google.com/maps/search/tofu+restaurant+Arashiyama', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.5</span></span><a href=\"https://www.tripadvisor.com/Search?q=Tofu+Kaiseki+Sagano+Arashiyama\" target=\"_blank\" rel=\"noopener\" class=\"r-rating\" onclick=\"event.stopPropagation()\" style=\"text-decoration:none\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.4</span></a></div>', grating: 4.5 },
       { name: 'Hot pot in Kyoto', type: 'Light shabu-shabu — perfect for spa night', price: '~$30/person', url: 'https://www.google.com/maps/search/shabu+shabu+Kyoto', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.3</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.2</span></span></div>', grating: 4.3 },
       { name: 'Tempura in Arashiyama', type: 'Light tempura with garden — peaceful setting', price: '~$28/person', url: 'https://www.google.com/maps/search/tempura+Arashiyama', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.4</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.3</span></span></div>', grating: 4.4 },
     ],
-    note: '🌿 Arrive early at the bamboo grove — after 9am it gets very crowded and hot. Funaoka Onsen accepts accompanied teens.',
+    note: 'Bamboo Grove after 9am is packed and hot in July. Go early or skip. Arashiyama is beautiful for 2-3 hours — then come back and rest. This is a great half-day that leaves the afternoon completely free.',
     photos: [
       { label: 'Bamboo Grove 竹林', maps: 'https://www.google.com/maps/search/?api=1&query=Arashiyama+Bamboo+Grove+Kyoto', web: 'https://www.google.com/maps/place/Arashiyama+Bamboo+Grove' },
       { label: 'Togetsukyo 渡月橋', maps: 'https://www.google.com/maps/search/?api=1&query=Togetsukyo+Bridge+Arashiyama', web: 'https://www.google.com/maps/place/Togetsukyo+Bridge' },
@@ -848,16 +1106,28 @@ const DAYS = [
     num: 9, date: '07/31/2026', weekday: 'FRI',
     city: 'Osaka', theme: 'Osaka Rush', icon: '🦑',
     hotel: 'Agora Kyoto Shijo', hotelNew: false, cityChange: false, temp: '29–35°C',
-    morning: ['Breakfast at hotel in Kyoto','JR Kyoto Line train to Osaka (~30 min)','Arrive at Namba or Shinsaibashi','Dotonbori — iconic canal with neon signs'],
-    afternoon: ['Shinsaibashi Shopping Street — shopping and arcades','Kuromon Ichiba Market — seafood and street food','Den Den Town — Osaka version of Akihabara','Free time to explore Osaka energy'],
-    night: ['Return to Kyoto by train (last train ~11pm)','Optional: Spa World Osaka before return'],
+    morning: [
+      'Hotel breakfast',
+      'Easy train to Osaka Namba (~30min, ¥570)',
+      'Dotonbori canal — neon signs, giant Glico Man, street food everywhere',
+    ],
+    afternoon: [
+      'Kuromon Ichiba Market — seafood stalls, street food heaven for kids',
+      'Shinsaibashi shopping street — arcades, snacks, souvenirs',
+      'Takoyaki and okonomiyaki street food tasting',
+      'Head back to Kyoto by 5-6pm — do not push it late',
+    ],
+    night: [
+      'Relaxed dinner near Kyoto hotel',
+      'Pack bags for early check-out tomorrow (Yamazaki + Shinkansen)',
+    ],
     transport: ['Kyoto','→','Osaka (JR ~30min, ~¥570)','→','Namba/Dotonbori','→','Return Kyoto'],
     dinner: [
       { name: 'Okonomiyaki Kiji in Dotonbori', type: 'Savory pancake Osaka style — must eat', price: '~$14/person', url: 'https://www.google.com/maps/search/okonomiyaki+Dotonbori', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.3</span></span><a href=\"https://www.tripadvisor.com/Search?q=Kiji+Okonomiyaki+Dotonbori\" target=\"_blank\" rel=\"noopener\" class=\"r-rating\" onclick=\"event.stopPropagation()\" style=\"text-decoration:none\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.4</span></a></div>', grating: 4.3 },
       { name: 'Takoyaki Creo-Ru Dotonbori', type: 'Octopus balls — iconic street food', price: '~$8/person', url: 'https://www.google.com/maps/search/takoyaki+Dotonbori', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.2</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.2</span></span></div>', grating: 4.2 },
       { name: 'Yakiniku Osaka Gyumon', type: 'Japanese BBQ in the heart of Namba', price: '~$28/person', url: 'https://www.google.com/maps/search/yakiniku+Namba+Osaka', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.4</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.3</span></span></div>', grating: 4.4 },
     ],
-    note: 'Osaka is street food paradise. Great to let the teens explore Dotonbori freely while adults relax at a cafe.',
+    note: 'Osaka in one day is perfect — Dotonbori + Kuromon + Shinsaibashi is enough. Do NOT try to add Den Den Town or Spa World on the same day with kids. The food alone is worth the trip: takoyaki, okonomiyaki, fresh seafood.',
     photos: [
       { label: 'Dotonbori 道頓堀', maps: 'https://www.google.com/maps/search/?api=1&query=Dotonbori+Osaka', web: 'https://www.google.com/maps/place/Dotonbori' },
       { label: 'Shinsaibashi 心斎橋', maps: 'https://www.google.com/maps/search/?api=1&query=Shinsaibashi+Shopping+Osaka', web: 'https://www.shinsaibashi.or.jp/en/' },
@@ -871,23 +1141,37 @@ const DAYS = [
   {
     num: 10, date: '08/01/2026', weekday: 'SAT',
     city: 'Yamazaki → Tokyo', theme: 'Whisky & Farewell', icon: '🥃',
-    hotel: 'Agora Tokyo Ginza', hotelNew: true, cityChange: true, temp: '28–33°C',
-    morning: ['Breakfast at hotel','Check-out from Agora Kyoto Shijo','JR train to Yamazaki station (~14 min)','Suntory Yamazaki Distillery — guided tour','Premium Japanese whisky tasting (adults)','Exclusive store — rare items available'],
-    afternoon: ['Return to Kyoto Station','Board Shinkansen Kyoto → Tokyo','Check-in at Agora Tokyo Ginza','Rest and prepare for special farewell dinner'],
-    night: ['Farewell dinner in Ginza','One of the most elegant streets in Japan','Evening walk past illuminated storefronts'],
+    hotel: 'Mitsui Garden Ginza Tsukiji', hotelNew: true, cityChange: true, temp: '28–33°C',
+    morning: [
+      'Breakfast and check-out from Kyoto hotel',
+      'Short train to Yamazaki (~14min from Kyoto Station)',
+      'Suntory Yamazaki Distillery — guided tour (book in advance!)',
+      'Whisky tasting and exclusive store — rare bottles available',
+    ],
+    afternoon: [
+      'Relaxed lunch near Yamazaki or back at Kyoto Station',
+      'Shinkansen back to Tokyo — comfortable 2h15 journey',
+      'Check-in at Mitsui Garden Ginza Tsukiji',
+      'Rest — tonight is the farewell dinner',
+    ],
+    night: [
+      'Farewell dinner in Ginza — make it special, book ahead',
+      'Last evening walk through Ginza at night',
+      'Soak it all in — last night in Japan',
+    ],
     transport: ['Kyoto Hotel','→','Yamazaki (train ~14min)','→','Kyoto Station','→','Shinkansen Tokyo'],
     dinner: [
       { name: 'Premium sushi in Ginza', type: 'Counter sushi — worthy and memorable farewell', price: '~$55/person', url: 'https://www.google.com/maps/search/sushi+restaurant+Ginza', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.7</span></span><a href=\"https://www.tripadvisor.com/Search?q=premium+sushi+Ginza+Tokyo\" target=\"_blank\" rel=\"noopener\" class=\"r-rating\" onclick=\"event.stopPropagation()\" style=\"text-decoration:none\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.6</span></a></div>', grating: 4.7 },
       { name: 'Teppanyaki Ginza', type: 'Wagyu on the griddle — spectacle and flavor', price: '~$60/person', url: 'https://www.google.com/maps/search/teppanyaki+Ginza', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.5</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.4</span></span></div>', grating: 4.5 },
       { name: 'Refined izakaya Ginza', type: 'Sashimi, tempura, sake — last Japanese night', price: '~$35/person', url: 'https://www.google.com/maps/search/izakaya+Ginza', ratings: '<div class=\"r-ratings\"><span class=\"r-rating\"><span style=\"color:#4285f4;font-size:9px;font-weight:700\">G</span> <span style=\"color:#f4c430;font-size:11px\">★★★★½</span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.4</span></span><span class=\"r-rating\"><span style=\"color:#00aa6c;font-size:9px;font-weight:700\">TA</span> <span style=\"color:#f4c430;font-size:11px\">★★★★<span style=\"color:#333\">★</span></span><span style=\"font-size:9px;color:rgba(200,180,150,0.7)\"> 4.3</span></span></div>', grating: 4.4 },
     ],
-    note: 'Yamazaki: book at advance.suntory.com. Store stock is limited — great premium gift.',
+    note: 'Book Yamazaki distillery in advance at suntory.com — tours fill up fast. The store has rare bottles you cannot find elsewhere. Great gift. Shinkansen back is comfortable — arrive in Tokyo by 4-5pm with energy for a great last dinner.',
     photos: [
       { label: 'Suntory Yamazaki 山崎', maps: 'https://www.google.com/maps/search/?api=1&query=Suntory+Yamazaki+Distillery', web: 'https://www.suntory.com/factory/yamazaki/' },
     ],
     links: [
       { label: 'Suntory Yamazaki', url: 'https://www.suntory.com/factory/yamazaki/', icon: '🥃' },
-      { label: 'Agora Tokyo Ginza', url: 'https://www.agora-ginza.com/en/', icon: '🏨' },
+      { label: 'Mitsui Garden Ginza Tsukiji', url: 'https://www.gardenhotels.co.jp/ginza-tsukiji/eng/', icon: '🏨' },
       { label: '📍 GPS — Yamazaki', url: 'https://www.google.com/maps/search/?api=1&query=Suntory+Yamazaki+Distillery', icon: '📍' },
     ],
   },
@@ -895,7 +1179,7 @@ const DAYS = [
     num: 11, date: '08/02/2026', weekday: 'SUN',
     city: 'Tokyo / Haneda', theme: 'Final Departure', icon: '✈️',
     hotel: 'Checkout', hotelNew: false, cityChange: false, temp: '28–32°C',
-    morning: ['Leisurely breakfast at hotel','Check-out from Agora Tokyo Ginza','Transfer to Haneda Airport (Keikyu Line ~25min or taxi ~30min)','Early check-in (3h in advance recommended)'],
+    morning: ['Leisurely breakfast at hotel','Check-out from Mitsui Garden Ginza Tsukiji','Transfer to Haneda Airport (Keikyu Line ~25min or taxi ~30min)','Early check-in (3h in advance recommended)'],
     afternoon: ['Tax refund at airport — purchase documents required','Explore Japanese duty free — last shopping','Board at international terminal'],
     night: ['Return flight','Sayonara, Japan 🇯🇵','Until the next adventure!'],
     transport: ['Hotel Ginza','→','Haneda Airport (Keikyu ~25min or taxi ~30min)'],
@@ -911,7 +1195,7 @@ const DAYS = [
 ];
 
 const COSTS = [
-  { cat: '🏨 Accommodation', detail: 'Agora Tokyo Ginza: 5 nights × 3 rooms × $210/room (days 1–4 and 10)', calc: '5 × 3 × $210', usd: 5*3*210 },
+  { cat: '🏨 Accommodation', detail: 'Mitsui Garden Ginza Tsukiji: 5 nights × 3 rooms × $210/room (days 1–4 and 10)', calc: '5 × 3 × $250', usd: 5*3*250 },
   { cat: '🏨 Accommodation', detail: 'Agora Kyoto Shijo: 5 nights × 3 rooms × $172/room', calc: '5 × 3 × $172', usd: 5*3*172 },
   { cat: '🍜 Lunches', detail: 'Estimated free lunch — $18/person × 6 × 10 days', calc: '$18 × 6 × 10', usd: 18*6*10 },
   { cat: '🍣 Dinners', detail: 'Estimated dinner — $30/person × 6 × 10 nights', calc: '$30 × 6 × 10', usd: 30*6*10 },
@@ -920,16 +1204,16 @@ const COSTS = [
   { cat: '🚃 Train Kyoto↔Osaka', detail: '$10/person × 6 (round trip)', calc: '$10 × 6', usd: 10*6 },
   { cat: '🚇 Local Transport', detail: '$12/person/day × 6 × 10 days', calc: '$12 × 6 × 10', usd: 12*6*10 },
   { cat: '🗻 Mt. Fuji / Kawaguchiko', detail: 'Excursion bus — $45/person × 6', calc: '$45 × 6', usd: 45*6 },
-  { cat: '🎟️ Extras / Admissions / Spa', detail: 'teamLab, temples, onsen, Suntory, etc.', calc: '$60 × 6', usd: 60*6 },
+  { cat: '🎟️ Extras / Admissions / Spa', detail: 'teamLab Borderless (Azabudai Hills), temples, onsen, Suntory, etc.', calc: '$65 × 6', usd: 65*6 },
 ];
 
 const MAP_SPOTS = [
-  { name: 'Agora Tokyo Ginza', lat: 35.6717, lng: 139.7650, type: 'hotel', color: '#c9a84c', url: 'https://www.agora-ginza.com/en/' },
+  { name: 'Mitsui Garden Ginza Tsukiji', lat: 35.6717, lng: 139.7650, type: 'hotel', color: '#c9a84c', url: 'https://www.gardenhotels.co.jp/ginza-tsukiji/eng/' },
   { name: 'Senso-ji (Asakusa)', lat: 35.7148, lng: 139.7967, type: 'sight', color: '#c0392b', url: 'https://www.senso-ji.jp/english/' },
   { name: 'Akihabara', lat: 35.7022, lng: 139.7741, type: 'sight', color: '#00d4ff', url: 'https://www.google.com/maps/place/Akihabara' },
   { name: 'Shibuya Crossing', lat: 35.6595, lng: 139.7004, type: 'sight', color: '#c0392b', url: 'https://www.google.com/maps/place/Shibuya+Crossing' },
   { name: 'Harajuku', lat: 35.6702, lng: 139.7028, type: 'sight', color: '#f4a7b9', url: 'https://www.google.com/maps/place/Harajuku' },
-  { name: 'teamLab Planets', lat: 35.6455, lng: 139.7853, type: 'sight', color: '#00d4ff', url: 'https://planets.teamlab.art/tokyo/' },
+  { name: 'teamLab Borderless (Azabudai Hills)', lat: 35.6565, lng: 139.7427, type: 'sight', color: '#00d4ff', url: 'https://www.teamlab.art/e/tokyo/' },
   { name: 'Kawaguchiko / Mt. Fuji', lat: 35.5075, lng: 138.7536, type: 'sight', color: '#3498db', url: 'https://www.google.com/maps/place/Kawaguchiko' },
   { name: 'Agora Kyoto Shijo', lat: 35.0035, lng: 135.7616, type: 'hotel', color: '#c9a84c', url: 'https://www.agorahotels.com/kyoto/' },
   { name: 'Kiyomizu-dera', lat: 34.9949, lng: 135.7851, type: 'sight', color: '#c0392b', url: 'https://www.kiyomizudera.or.jp/en/' },
@@ -940,6 +1224,41 @@ const MAP_SPOTS = [
   { name: 'Suntory Yamazaki', lat: 34.8833, lng: 135.6833, type: 'sight', color: '#c9a84c', url: 'https://www.suntory.com/factory/yamazaki/' },
   { name: 'Haneda Airport', lat: 35.5494, lng: 139.7798, type: 'transport', color: '#7f8c8d', url: 'https://www.haneda-airport.jp/inter/en/' },
 ];
+
+
+var MUST_DO = [
+  { num:1,  icon:'🚦', title:'Shibuya Crossing',       sub:'Go at dusk. See from Shibuya Sky above for the full aerial epic view.',       day:3,  url:'https://www.google.com/maps/place/Shibuya+Crossing' },
+  { num:2,  icon:'⛩️', title:'Senso-ji (Asakusa)',      sub:'Tokyo oldest temple. Kaminarimon gate + Nakamise Street snacks. Go early.',   day:2,  url:'https://www.senso-ji.jp/english/' },
+  { num:3,  icon:'🎨', title:'teamLab Borderless',       sub:'Museu de arte digital sem fronteiras — Azabudai Hills. Compre ingresso oficial: teamlab.art/e/tokyo. Adultos ¥3.800–¥4.800 | Teens ¥2.800 | Kids ¥1.500. Reserve com antecedência!', day:3, url:'https://www.teamlab.art/e/tokyo/' },
+  { num:4,  icon:'🍣', title:'Sushi Yoshitake',         sub:'3 Michelin stars omakase. Book 4+ weeks ahead via hotel concierge.',          day:1,  url:'https://sushi-yoshitake.com' },
+  { num:5,  icon:'🍱', title:'Kaiseki at Shirosaka',    sub:'Refined seasonal Japanese tasting menu in Ginza. Reserve in advance.',        day:3,  url:'https://tabelog.com/en/tokyo/A1308/A130801/13193461/' },
+  { num:6,  icon:'🍜', title:'Ramen at Ramenya Shima',  sub:'One of Tokyo best ramen. Arrive early — long lines, worth every minute.',    day:2,  url:'https://tabelog.com/en/tokyo/A1307/A130701/13240706/' },
+  { num:7,  icon:'🍢', title:'Yakitori at Torishiki',   sub:'Best yakitori in Japan. Highly competitive to book — weeks in advance.',      day:3,  url:'https://tabelog.com/en/tokyo/A1316/A131601/13004849/' },
+  { num:8,  icon:'🌿', title:'Meiji Shrine + Harajuku', sub:'Serene forest shrine then wild Takeshita pop culture. Perfect contrast.',     day:3,  url:'https://www.google.com/maps/place/Meiji+Shrine' },
+  { num:9,  icon:'✨', title:'Ginza at Night',          sub:'Luxury storefronts lit up, world-class architecture, phenomenal dining.',     day:1,  url:'https://www.google.com/maps/place/Ginza' },
+  { num:10, icon:'🗻', title:'Hakone Day Trip',         sub:'Onsen + Fuji views. Perfect escape from Tokyo. Highly recommended!',          day:4,  url:'https://www.google.com/maps/place/Hakone' },
+];
+
+function buildMustDo() {
+  var grid = document.getElementById('mustdoGrid');
+  if (!grid) return;
+  MUST_DO.forEach(function(item) {
+    var card = document.createElement('a');
+    card.href = item.url;
+    card.target = '_blank';
+    card.rel = 'noopener';
+    card.className = 'mustdo-card';
+    card.innerHTML =
+      '<div class="mustdo-num">' + item.num + '</div>' +
+      '<div class="mustdo-icon">' + item.icon + '</div>' +
+      '<div class="mustdo-body">' +
+        '<div class="mustdo-title">' + item.title + '</div>' +
+        '<div class="mustdo-sub">' + item.sub + '</div>' +
+        '<div class="mustdo-day">Day ' + item.day + '</div>' +
+      '</div>';
+    grid.appendChild(card);
+  });
+}
 
 // ── BUILD NAV ─────────────────────────────────────────────────
 function buildNav() {
@@ -961,6 +1280,24 @@ function buildNav() {
     });
     nav.appendChild(tab);
   });
+
+  const mustTab = document.createElement('div');
+  mustTab.className = 'day-tab';
+  mustTab.innerHTML = '<span style="font-size:22px">⭐</span><span class="tab-day" style="font-size:9px">Must Do</span>';
+  mustTab.addEventListener('click', () => { var _emd = document.getElementById('mustdo'); if(_emd) _emd.scrollIntoView({ behavior: 'smooth' }); });
+  nav.appendChild(mustTab);
+
+  const reservTab = document.createElement('div');
+  reservTab.className = 'day-tab';
+  reservTab.innerHTML = '<span style="font-size:22px">🎫</span><span class="tab-day" style="font-size:9px">Bookings</span>';
+  reservTab.addEventListener('click', () => document.getElementById('reservations')?.scrollIntoView({ behavior: 'smooth' }));
+  nav.appendChild(reservTab);
+
+  const chatTab = document.createElement('div');
+  chatTab.className = 'day-tab';
+  chatTab.innerHTML = '<span style="font-size:22px">🤖</span><span class="tab-day" style="font-size:9px">Chat</span>';
+  chatTab.addEventListener('click', () => document.getElementById('chatbot')?.scrollIntoView({ behavior: 'smooth' }));
+  nav.appendChild(chatTab);
 
   const costTab = document.createElement('div');
   costTab.className = 'day-tab';
@@ -1126,7 +1463,7 @@ function buildCosts() {
   const cards = [
     { icon: '💰', val: '$' + totalUsd.toLocaleString('en-US'), label: 'Estimated Total', sub: '¥' + totalJpy.toLocaleString('ja-JP'), highlight: true },
     { icon: '👤', val: '$' + perPerson.toLocaleString('en-US'), label: 'Per Person', sub: '¥' + Math.round(perPerson*RATE).toLocaleString('ja-JP') },
-    { icon: '🏨', val: '$' + (5*3*210 + 5*3*172).toLocaleString('en-US'), label: 'Accommodation', sub: '2 hotels · 10 nights' },
+    { icon: '🏨', val: '$' + (5*3*250 + 5*3*172).toLocaleString('en-US'), label: 'Accommodation', sub: '2 hotels · 10 nights' },
     { icon: '🍱', val: '$' + (18*6*10 + 30*6*10).toLocaleString('en-US'), label: 'Meals', sub: 'Lunch + Dinner' },
     { icon: '🚄', val: '$' + (95*6 + 95*6 + 10*6).toLocaleString('en-US'), label: 'Long-Distance Transport', sub: 'Shinkansen + trains' },
     { icon: '🎟️', val: '$' + (12*6*10 + 45*6 + 60*6).toLocaleString('en-US'), label: 'Local Transport + Extras', sub: 'Local + admissions' },
@@ -1184,10 +1521,535 @@ function setupControls() {
   topBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 }
 
+
+// ── RESERVATIONS / BOOKINGS TIMELINE ─────────────────────────
+var BOOKINGS = [
+  {
+    group: '✈️  PRE-DEPARTURE',
+    items: [
+      {
+        status: 'todo',
+        icon: '🎨',
+        title: 'teamLab Borderless — Ingressos',
+        detail: 'Azabudai Hills, Tokyo · 6 pessoas · Adultos ¥3.800–¥4.800 · Teens ¥2.800 · Kids ¥1.500',
+        meta: [{ icon: '📅', text: 'Reservar ASAP — agosto é alta temporada' }, { icon: '👥', text: '6 pessoas' }],
+        link: 'https://www.teamlab.art/e/tokyo/',
+        linkLabel: '→ Comprar ingresso oficial'
+      },
+      {
+        status: 'todo',
+        icon: '🚅',
+        title: 'Shinkansen — Tokyo → Kyoto (ida)',
+        detail: 'Nozomi · 2h15 · Assento reservado ¥14.370/pessoa · ~¥86.220 total (6px)',
+        meta: [{ icon: '📅', text: 'Jul 27 (sugerido)' }, { icon: '💴', text: '¥86.220 total' }],
+        link: 'https://smart-ex.jp/en/lp/app/',
+        linkLabel: '→ Reservar no Smart-EX (oficial, sem taxa)'
+      },
+      {
+        status: 'todo',
+        icon: '🚅',
+        title: 'Shinkansen — Kyoto → Tokyo (volta)',
+        detail: 'Nozomi · 2h15 · Assento reservado ¥14.370/pessoa · ~¥86.220 total (6px)',
+        meta: [{ icon: '📅', text: 'Jul 31 (sugerido)' }, { icon: '💴', text: '¥86.220 total' }],
+        link: 'https://smart-ex.jp/en/lp/app/',
+        linkLabel: '→ Reservar no Smart-EX'
+      },
+      {
+        status: 'todo',
+        icon: '🥃',
+        title: 'Kyoto Whisky Tasting',
+        detail: 'Nishijin, Kyoto · 5 whiskies single malt · 90 min · ¥14.800/pessoa · Máx 4 pessoas',
+        meta: [{ icon: '📅', text: 'Disponível Seg/Qua/Sex' }, { icon: '👥', text: 'Até 4 pessoas por sessão' }],
+        link: 'https://kyotowhiskytasting.com/',
+        linkLabel: '→ Reservar em kyotowhiskytasting.com'
+      }
+    ]
+  },
+  {
+    group: '📅  JUL 23 — CHEGADA TOKYO',
+    items: [
+      {
+        status: 'flight',
+        icon: '✈️',
+        title: 'Voo — Chegada em Tokyo (HND/NRT)',
+        detail: 'Check-in → Hotel Mitsui Garden Ginza Tsukiji',
+        meta: [{ icon: '🏨', text: 'Mitsui Garden Hotel Ginza Tsukiji' }],
+        link: null
+      }
+    ]
+  },
+  {
+    group: '🏨  JUL 23–27 — TOKYO (4 noites)',
+    items: [
+      {
+        status: 'confirmed',
+        icon: '🏨',
+        title: 'Mitsui Garden Hotel Ginza Tsukiji',
+        detail: 'Tokyo · 4 noites · 3 quartos · Check-in Jul 23 · Check-out Jul 27',
+        meta: [{ icon: '📍', text: 'Ginza, Tokyo' }, { icon: '🛏️', text: '3 quartos' }],
+        link: null
+      },
+      {
+        status: 'todo',
+        icon: '🌊',
+        title: 'Shibuya Sky — Observatory',
+        detail: 'Vista 360° aérea do cruzamento de Shibuya · Comprar com antecedência',
+        meta: [{ icon: '📅', text: 'Dia 3 (Jul 25 sugerido)' }],
+        link: 'https://shibuya-sky.jp/en/',
+        linkLabel: '→ Comprar ingresso'
+      },
+      {
+        status: 'todo',
+        icon: '🎨',
+        title: 'teamLab Borderless — Visita',
+        detail: 'Azabudai Hills · Hibiya Line → Kamiyacho Station (2 min a pé) · Escolher horário noturno',
+        meta: [{ icon: '📅', text: 'Dia 3 ou 4 (à noite)' }, { icon: '⏱️', text: '+3 horas dentro' }],
+        link: 'https://www.teamlab.art/e/tokyo/',
+        linkLabel: '→ Site oficial'
+      },
+      {
+        status: 'todo',
+        icon: '🍣',
+        title: 'Sushi Yoshitake — Omakase',
+        detail: '3 estrelas Michelin · Reservar via concierge do hotel com 4+ semanas de antecedência',
+        meta: [{ icon: '⚠️', text: 'Reservar pelo concierge do hotel' }],
+        link: 'https://sushi-yoshitake.com',
+        linkLabel: '→ sushi-yoshitake.com'
+      }
+    ]
+  },
+  {
+    group: '🚅  JUL 27 — TRANSFER TOKYO → KYOTO',
+    items: [
+      {
+        status: 'todo',
+        icon: '🚅',
+        title: 'Shinkansen Nozomi · Tokyo → Kyoto',
+        detail: 'Tokyo Station plataforma 14–19 · Chegada Kyoto Station lado Karasuma · Comprar ekiben antes de embarcar',
+        meta: [{ icon: '⏱️', text: '2h15 de viagem' }, { icon: '🗻', text: 'Assento E para vista do Fuji (lado direito)' }],
+        link: 'https://smart-ex.jp/en/lp/app/',
+        linkLabel: '→ Reservar no Smart-EX'
+      }
+    ]
+  },
+  {
+    group: '🏨  JUL 27–31 — KYOTO (4 noites)',
+    items: [
+      {
+        status: 'confirmed',
+        icon: '🏨',
+        title: 'Agora Kyoto Shijo',
+        detail: 'Kyoto · 4 noites · 3 quartos · Check-in Jul 27 · Check-out Jul 31',
+        meta: [{ icon: '📍', text: 'Shijo, Kyoto' }, { icon: '🛏️', text: '3 quartos' }],
+        link: null
+      },
+      {
+        status: 'todo',
+        icon: '🥃',
+        title: 'Kyoto Whisky Tasting — Visita',
+        detail: 'Nishijin · Próximo a Kinkakuji (Golden Pavilion) · Sessão de 90 min com sommelier',
+        meta: [{ icon: '📅', text: 'Seg, Qua ou Sex' }, { icon: '👥', text: 'Máx 4 por sessão — 2 sessões se necessário' }],
+        link: 'https://kyotowhiskytasting.com/',
+        linkLabel: '→ kyotowhiskytasting.com'
+      },
+      {
+        status: 'todo',
+        icon: '🌾',
+        title: 'Destilaria Suntory Yamazaki',
+        detail: 'Tour + degustação · 30 min de Kyoto de trem · Reservar com meses de antecedência',
+        meta: [{ icon: '⚠️', text: 'Esgota rápido — reservar ASAP' }],
+        link: 'https://www.suntory.com/factory/yamazaki/',
+        linkLabel: '→ Reservar na Suntory'
+      }
+    ]
+  },
+  {
+    group: '🚅  JUL 31 — TRANSFER KYOTO → OSAKA',
+    items: [
+      {
+        status: 'todo',
+        icon: '🚃',
+        title: 'Trem Kyoto → Osaka Namba',
+        detail: 'JR ou Hankyu · ~30 min · ~¥570/pessoa',
+        meta: [{ icon: '💴', text: '~¥3.420 total (6px)' }],
+        link: null
+      }
+    ]
+  },
+  {
+    group: '🏙️  JUL 31 – AGO 2 — OSAKA',
+    items: [
+      {
+        status: 'todo',
+        icon: '🏨',
+        title: 'Hotel Osaka — A Confirmar',
+        detail: 'Dotonbori/Namba area recomendada · 2 noites · 3 quartos',
+        meta: [{ icon: '📅', text: 'Jul 31 → Ago 2' }, { icon: '⚠️', text: 'Reservar' }],
+        link: 'https://www.booking.com/searchresults.en-gb.html?ss=Dotonbori+Osaka',
+        linkLabel: '→ Buscar hotel em Osaka'
+      }
+    ]
+  },
+  {
+    group: '✈️  AGO 2 — RETORNO',
+    items: [
+      {
+        status: 'flight',
+        icon: '✈️',
+        title: 'Voo — Partida Osaka/Kansai (KIX) ou Tokyo (NRT/HND)',
+        detail: 'Verificar aeroporto de saída conforme passagem',
+        meta: [{ icon: '📍', text: 'KIX (Kansai) se saindo de Osaka, ou trem de volta a Tokyo' }],
+        link: null
+      }
+    ]
+  }
+];
+
+function buildTimeline() {
+  var container = document.getElementById('timelineContainer');
+  if (!container) return;
+  var html = '';
+  BOOKINGS.forEach(function(group) {
+    html += '<div class="timeline-group">';
+    html += '<div class="timeline-group-label">' + group.group + '</div>';
+    group.items.forEach(function(item) {
+      var badgeClass = 'badge-' + item.status;
+      var badgeLabel = item.status === 'confirmed' ? '✓ Confirmado' : item.status === 'pending' ? '⏳ Pendente' : item.status === 'flight' ? '✈️ Voo' : '📋 Reservar';
+      var metaHtml = (item.meta || []).map(function(m) {
+        return '<div class="timeline-meta-item"><span>' + m.icon + '</span><span>' + m.text + '</span></div>';
+      }).join('');
+      var linkHtml = item.link ? '<a class="timeline-card-link" href="' + item.link + '" target="_blank" rel="noopener">' + (item.linkLabel || '→ Ver') + '</a>' : '';
+      html += '<div class="timeline-item">';
+      html += '<div class="timeline-dot-wrap"><div class="timeline-dot ' + item.status + '"></div></div>';
+      html += '<div class="timeline-card">';
+      html += '<div class="timeline-card-top"><span class="timeline-card-title">' + item.icon + ' ' + item.title + '</span><span class="timeline-card-badge ' + badgeClass + '">' + badgeLabel + '</span></div>';
+      html += '<div class="timeline-card-detail">' + item.detail + '</div>';
+      if (metaHtml) html += '<div class="timeline-card-meta">' + metaHtml + '</div>';
+      if (linkHtml) html += linkHtml;
+      html += '</div></div>';
+    });
+    html += '</div>';
+  });
+  container.innerHTML = html;
+}
+
+
+// ── FIREBASE CONFIG ────────────────────────────────────────────
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyD1t4W4pp-yeDbRjZ2dBxR67jLHOMKsIJo",
+  authDomain: "boys-japantrip-2026.firebaseapp.com",
+  projectId: "boys-japantrip-2026",
+  storageBucket: "boys-japantrip-2026.firebasestorage.app",
+  messagingSenderId: "161321284924",
+  appId: "1:161321284924:web:2eed2840b4cbcb991eda39"
+};
+const ANTHROPIC_KEY = "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";
+
+let firebaseApp = null, db = null, storage = null;
+
+function initFirebase() {
+  return new Promise((resolve) => {
+    if (db && storage) return resolve(true);
+    const sdks = [
+      'https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js',
+      'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js',
+      'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage-compat.js'
+    ];
+    let loaded = 0;
+    sdks.forEach(src => {
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = () => { loaded++; if (loaded === sdks.length) {
+        firebaseApp = firebase.initializeApp(FIREBASE_CONFIG);
+        db = firebase.firestore();
+        storage = firebase.storage();
+        resolve(true);
+      }};
+      document.head.appendChild(s);
+    });
+  });
+}
+
+// ── UPLOAD / RECEIPT ────────────────────────────────────────────
+let uploadFile = null;
+
+function openUploadModal() {
+  document.getElementById('uploadModal').classList.add('active');
+}
+function closeUploadModal() {
+  document.getElementById('uploadModal').classList.remove('active');
+  uploadFile = null;
+  document.getElementById('uploadTitle').value = '';
+  document.getElementById('uploadNotes').value = '';
+  document.getElementById('uploadDate').value = '';
+  document.getElementById('uploadPreview').style.display = 'none';
+  document.getElementById('uploadPreview').src = '';
+  document.getElementById('dropZone').querySelector('.drop-icon').textContent = '📄';
+  document.getElementById('uploadSaveBtn').disabled = false;
+  document.getElementById('uploadSaveBtn').textContent = '💾 Save to Trip';
+}
+
+function setupDropZone() {
+  const zone = document.getElementById('dropZone');
+  const input = document.getElementById('uploadFileInput');
+  if (!zone) return;
+  zone.addEventListener('click', () => input.click());
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => { e.preventDefault(); zone.classList.remove('dragover'); handleFile(e.dataTransfer.files[0]); });
+  input.addEventListener('change', () => handleFile(input.files[0]));
+}
+
+function handleFile(file) {
+  if (!file) return;
+  uploadFile = file;
+  const icon = document.getElementById('dropZone').querySelector('.drop-icon');
+  icon.textContent = file.type.includes('pdf') ? '📋' : '🖼️';
+  const zone = document.getElementById('dropZone').querySelector('div');
+  if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const prev = document.getElementById('uploadPreview');
+      prev.src = e.target.result;
+      prev.style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+  document.getElementById('dropZone').querySelector('p').textContent = file.name + ' (' + (file.size/1024).toFixed(0) + ' KB)';
+}
+
+async function saveReservation() {
+  const title = document.getElementById('uploadTitle').value.trim();
+  if (!title) { alert('Please add a title'); return; }
+  const btn = document.getElementById('uploadSaveBtn');
+  btn.disabled = true; btn.textContent = '⏳ Saving...';
+  try {
+    await initFirebase();
+    let fileUrl = null, fileName = null, fileType = null;
+    if (uploadFile) {
+      btn.textContent = '⏳ Uploading file...';
+      const ref = storage.ref('receipts/' + Date.now() + '_' + uploadFile.name);
+      await ref.put(uploadFile);
+      fileUrl = await ref.getDownloadURL();
+      fileName = uploadFile.name;
+      fileType = uploadFile.type;
+    }
+    const doc = {
+      title,
+      category: document.getElementById('uploadCategory').value,
+      date: document.getElementById('uploadDate').value,
+      notes: document.getElementById('uploadNotes').value,
+      fileUrl: fileUrl || null,
+      fileName: fileName || null,
+      fileType: fileType || null,
+      createdAt: new Date().toISOString(),
+      source: 'manual-upload'
+    };
+    btn.textContent = '⏳ Saving to Firebase...';
+    await db.collection('reservations').add(doc);
+    btn.textContent = '✅ Saved!';
+    setTimeout(() => { closeUploadModal(); loadFirebaseReservations(); }, 800);
+  } catch(e) {
+    console.error(e);
+    btn.disabled = false;
+    btn.textContent = '💾 Save to Trip';
+    alert('Error: ' + e.message);
+  }
+}
+
+async function loadFirebaseReservations() {
+  try {
+    await initFirebase();
+    const snap = await db.collection('reservations').orderBy('createdAt', 'desc').get();
+    const items = [];
+    snap.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
+    renderFirebaseReservations(items);
+  } catch(e) {
+    console.warn('Firebase load skipped:', e.message);
+  }
+}
+
+function renderFirebaseReservations(items) {
+  if (!items.length) return;
+  const container = document.getElementById('timelineContainer');
+  if (!container) return;
+  let html = '<div class="timeline-group">';
+  html += '<div class="timeline-group-label">📎 MY UPLOADED RESERVATIONS (' + items.length + ')</div>';
+  items.forEach(item => {
+    const isImage = item.fileType && item.fileType.startsWith('image/');
+    const isPdf = item.fileType && item.fileType.includes('pdf');
+    let attachHtml = '';
+    if (item.fileUrl) {
+      if (isImage) {
+        attachHtml = '<div class="timeline-card-attachments"><a href="' + item.fileUrl + '" target="_blank"><img class="attach-thumb" src="' + item.fileUrl + '" alt="' + (item.fileName||'receipt') + '"></a><a class="attach-link" href="' + item.fileUrl + '" target="_blank">🖼️ Ver imagem</a></div>';
+      } else if (isPdf) {
+        attachHtml = '<div class="timeline-card-attachments"><a class="attach-link" href="' + item.fileUrl + '" target="_blank">📋 Abrir PDF</a></div>';
+      } else {
+        attachHtml = '<div class="timeline-card-attachments"><a class="attach-link" href="' + item.fileUrl + '" target="_blank">📎 ' + (item.fileName||'arquivo') + '</a></div>';
+      }
+    }
+    html += '<div class="timeline-item">';
+    html += '<div class="timeline-dot-wrap"><div class="timeline-dot confirmed"></div></div>';
+    html += '<div class="timeline-card">';
+    html += '<div class="timeline-card-top"><span class="timeline-card-title">' + (item.category ? item.category.split(' ')[0] : '📎') + ' ' + item.title + '</span><span class="timeline-card-badge badge-confirmed">✓ Salvo</span></div>';
+    if (item.date) html += '<div class="timeline-card-detail">📅 ' + item.date + (item.notes ? ' · ' + item.notes : '') + '</div>';
+    else if (item.notes) html += '<div class="timeline-card-detail">' + item.notes + '</div>';
+    html += attachHtml;
+    html += '</div></div>';
+  });
+  html += '</div>';
+  // Prepend to container
+  container.insertAdjacentHTML('afterbegin', html);
+}
+
+// ── CHATBOT ─────────────────────────────────────────────────────
+const TRIP_CONTEXT = `Você é o assistente pessoal da viagem "3Boys Japan Trip 2026". Você conhece TODOS os detalhes abaixo e deve usar essas informações para responder perguntas, dar sugestões e ajudar o usuário.
+
+VIAGEM:
+- Datas: 23 Jul a 2 Ago 2026 (11 dias)
+- Grupo: 3 adultos + 3 adolescentes = 6 pessoas
+- Estilo: cultura, gastronomia, anime/manga, whisky, experiências únicas
+
+CIDADES E HOTÉIS:
+- Tokyo (Jul 23-27, 4 noites): Mitsui Garden Hotel Ginza Tsukiji — próximo a Tsukiji, Ginza
+- Kyoto (Jul 27-31, 4 noites): Agora Kyoto Shijo — centro de Kyoto
+- Osaka (Jul 31 - Ago 2, 2 noites): hotel ainda não reservado, área Dotonbori/Namba recomendada
+
+TRANSPORTE:
+- Shinkansen Tokyo → Kyoto: Nozomi, 2h15, ¥14.370/pessoa. Reservar no smart-ex.jp
+- Shinkansen Kyoto → Tokyo: mesmo valor e tempo
+- Kyoto → Osaka: JR ou Hankyu, ~30min, ~¥570/pessoa
+- NÃO comprar JR Pass — tickets individuais são mais baratos para esse roteiro
+- Assento E no Nozomi para ver o Monte Fuji (lado direito saindo de Tokyo)
+
+ITINERÁRIO RESUMIDO:
+Dia 1 (Jul 23 Qui): Chegada Tokyo via Haneda. Hotel Ginza. Tsukiji Outer Market (5min do hotel). Ginza à noite.
+Dia 2 (Jul 24 Sex): Senso-ji (Asakusa), Nakamise Street. Harajuku + Takeshita. Meiji Shrine.
+Dia 3 (Jul 25 Sáb): Shibuya Crossing ao entardecer. Shibuya Sky (vista aérea). teamLab Borderless à noite.
+Dia 4 (Jul 26 Dom): Hakone day trip — onsen, vista do Fuji. Retorno Tokyo à noite.
+Dia 5 (Jul 27 Seg): Shinkansen Tokyo → Kyoto. Check-in Agora Shijo. Nishiki Market. Pontocho.
+Dia 6 (Jul 28 Ter): Arashiyama — bamboo grove, Tenryu-ji, Togetsukyo bridge. Kinkakuji (Golden Pavilion). Destilaria Suntory Yamazaki (30min de trem).
+Dia 7 (Jul 29 Qua): Fushimi Inari (torii gates — ir cedo). Nijo Castle. Kyoto Whisky Tasting (Nishijin, ~¥14.800/pessoa, máx 4, seg/qua/sex).
+Dia 8 (Jul 30 Qui): Nara day trip — Todai-ji, veados livres. Volta Kyoto. Gion à noite.
+Dia 9 (Jul 31 Sex): Manhã livre Kyoto. Shinkansen/trem → Osaka. Check-in. Dotonbori, Namba.
+Dia 10 (Ago 1 Sáb): Osaka — Takoyaki, Den Den Town (anime/manga), Kuromon Market. Osaka Castle.
+Dia 11 (Ago 2 Dom): Partida.
+
+RESERVAS CONFIRMADAS:
+- Mitsui Garden Hotel Ginza Tsukiji (Tokyo)
+- Agora Kyoto Shijo (Kyoto)
+
+O QUE RESERVAR URGENTE:
+1. teamLab Borderless: teamlab.art/e/tokyo — Adultos ¥3.800-4.800, Teens ¥2.800, Kids ¥1.500 — ESGOTA RÁPIDO
+2. Shinkansen (ida e volta): smart-ex.jp
+3. Kyoto Whisky Tasting: kyotowhiskytasting.com — ¥14.800/pessoa, máx 4 por sessão
+4. Suntory Yamazaki Distillery: suntory.com/factory/yamazaki — esgota meses antes
+5. Shibuya Sky: shibuya-sky.jp
+6. Hotel Osaka: área Dotonbori/Namba, 2 noites, 3 quartos
+7. Sushi Yoshitake (opcional): 3 estrelas Michelin, via concierge do hotel
+
+CUSTOS ESTIMADOS:
+- Voos: não incluídos
+- Hotéis: ~$8.000 total (3 quartos × 10 noites × preço médio)
+- Refeições: ~$5.700 total ($95/dia × 6px × 10 dias)
+- Transporte local: ~$600 (¥93.000 — Suica cards, ônibus, metrô)
+- Shinkansen: ~$1.140 ida e volta × 6 pessoas
+- Ingressos/experiências: ~$390 (teamLab, Suntory, etc.)
+- Total estimado: ~$21.000+ (sem voos)
+
+RESTAURANTES ESPECIAIS:
+- Sushi Yoshitake (Tokyo/Ginza): 3★ Michelin omakase, ~$280/pessoa, reservar 4+ semanas via concierge
+- Shirosaka (Tokyo/Ginza): kaiseki, ~$180/pessoa
+- Torishiki (Tokyo): melhor yakitori do Japão, muito concorrido
+- Ramenya Shima (Tokyo): um dos melhores ramen, fila enorme, vale
+- Pontocho (Kyoto): rua de restaurantes ao lado do rio Kamo, ótima para qualquer noite em Kyoto
+- Dotonbori (Osaka): takoyaki, okonomiyaki, comida de rua
+
+DICAS IMPORTANTES:
+- Agosto é ALTA temporada — reservar tudo o mais rápido possível
+- Suica card: essencial para transporte público em todas as cidades
+- Clima em agosto: 28-35°C, muito úmido — levar roupas leves, hidratação
+- teamLab: usar calça/shorts (pisos espelhados), comprar antecipado pelo site oficial
+- Shinkansen: comprar ekiben (marmita) na estação antes de embarcar. Não há carrinho de comida em 2026
+- Nozomi: assento E para vista do Monte Fuji (~45 min após Tokyo)
+- JR Pass NÃO vale a pena para esse roteiro específico
+- Kyoto em agosto: muito quente e turístico — visitar templos cedo pela manhã
+
+Responda sempre em Português do Brasil, de forma amigável e útil. Se o usuário pedir para modificar a viagem, dê sugestões práticas. Se perguntar sobre custos, use os valores acima.`;
+
+let chatHistory = [];
+
+function chatKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendChat(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function sendSuggestion(el) {
+  document.getElementById('chatInput').value = el.textContent;
+  sendChat();
+}
+
+function appendMessage(role, text) {
+  const msgs = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-bubble ' + role;
+  div.innerHTML = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\*(.*?)\*/g, '<em>$1</em>');
+  msgs.appendChild(div);
+  msgs.scrollTop = msgs.scrollHeight;
+  return div;
+}
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const btn = document.getElementById('chatSendBtn');
+  const text = input.value.trim();
+  if (!text || btn.disabled) return;
+  input.value = ''; input.style.height = 'auto';
+  btn.disabled = true;
+  appendMessage('user', text);
+  chatHistory.push({ role: 'user', content: text });
+  const thinking = appendMessage('assistant thinking', '✦ pensando...');
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': ANTHROPIC_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1024,
+        system: TRIP_CONTEXT,
+        messages: chatHistory
+      })
+    });
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || 'Desculpe, não consegui responder. Tente novamente.';
+    chatHistory.push({ role: 'assistant', content: reply });
+    thinking.remove();
+    appendMessage('assistant', reply);
+  } catch(e) {
+    thinking.remove();
+    appendMessage('assistant', '⚠️ Erro de conexão. Verifique sua internet e tente novamente.');
+    chatHistory.pop();
+  }
+  btn.disabled = false;
+}
+
 // ── INIT ──────────────────────────────────────────────────────
 document.addEventListener('DOMContentLoaded', () => {
   buildNav();
   buildDays();
+  buildTimeline();
+  setupDropZone();
+  loadFirebaseReservations();
+  buildMustDo();
   buildCosts();
   setupObserver();
   setupControls();
