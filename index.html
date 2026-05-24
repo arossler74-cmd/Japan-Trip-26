@@ -636,6 +636,13 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
 .attach-link { display:inline-flex; align-items:center; gap:4px; font-family:var(--font-mono); font-size:10px; color:var(--neon); text-decoration:none; background:rgba(0,212,255,0.08); border:1px solid rgba(0,212,255,0.2); padding:4px 8px; border-radius:2px; }
 .attach-link:hover { background:rgba(0,212,255,0.18); }
 
+
+.timeline-card-actions { display:flex; gap:8px; margin-top:8px; }
+.tl-action-btn { font-family:var(--font-mono); font-size:10px; padding:4px 10px; border-radius:2px; border:none; cursor:pointer; letter-spacing:.05em; transition:all .2s; }
+.tl-action-btn.edit { background:rgba(201,168,76,0.12); color:var(--gold); border:1px solid rgba(201,168,76,0.3); }
+.tl-action-btn.edit:hover { background:rgba(201,168,76,0.25); }
+.tl-action-btn.delete { background:rgba(192,57,43,0.1); color:#e74c3c; border:1px solid rgba(192,57,43,0.3); }
+.tl-action-btn.delete:hover { background:rgba(192,57,43,0.25); }
 </style>
 </head>
 <body>
@@ -1721,31 +1728,99 @@ var BOOKINGS = [
   }
 ];
 
+// Flatten BOOKINGS into a sortable list with dateKey for merging
+function flattenBookings() {
+  var all = [];
+  // Date map for trip days
+  var dayDates = {
+    1:'2026-07-23',2:'2026-07-24',3:'2026-07-25',4:'2026-07-26',
+    5:'2026-07-27',6:'2026-07-28',7:'2026-07-29',8:'2026-07-30',
+    9:'2026-07-31',10:'2026-08-01',11:'2026-08-02'
+  };
+  BOOKINGS.forEach(function(group) {
+    group.items.forEach(function(item) {
+      // Try to get a date from the item
+      var dateKey = item.dateKey || group.dateKey || '2026-07-23';
+      all.push(Object.assign({}, item, { dateKey: dateKey, groupLabel: group.group, source: 'static' }));
+    });
+  });
+  return all;
+}
+
+function renderTimelineItem(item, fbId) {
+  var isFb = !!fbId;
+  var sent = item.sent || false;
+  var sentBadge = sent
+    ? '<span class="timeline-card-badge badge-confirmed" style="cursor:pointer" onclick="toggleSent('' + fbId + '', true)">✅ Enviado</span>'
+    : (isFb ? '<span class="timeline-card-badge badge-pending" style="cursor:pointer" onclick="toggleSent('' + fbId + '', false)">📤 Não enviado</span>' : '');
+
+  var statusClass = item.status || 'todo';
+  var badgeLabel = statusClass === 'confirmed' ? '✓ Confirmado' : statusClass === 'flight' ? '✈️ Voo' : statusClass === 'pending' ? '⏳ Pendente' : '📋 Reservar';
+  var badgeHtml = isFb ? sentBadge : '<span class="timeline-card-badge badge-' + statusClass + '">' + badgeLabel + '</span>';
+
+  var metaHtml = (item.meta || []).map(function(m) {
+    return '<div class="timeline-meta-item"><span>' + m.icon + '</span><span>' + m.text + '</span></div>';
+  }).join('');
+
+  var linkHtml = item.link ? '<a class="timeline-card-link" href="' + item.link + '" target="_blank" rel="noopener">' + (item.linkLabel || '→ Ver') + '</a>' : '';
+
+  // Attachments for Firebase items
+  var attachHtml = '';
+  if (isFb && item.fileUrl) {
+    var isImg = item.fileType && item.fileType.startsWith('image/');
+    var isPdf = item.fileType && item.fileType.includes('pdf');
+    if (isImg) {
+      attachHtml = '<div class="timeline-card-attachments"><a href="' + item.fileUrl + '" target="_blank"><img class="attach-thumb" src="' + item.fileUrl + '"></a><a class="attach-link" href="' + item.fileUrl + '" target="_blank">🖼️ Ver arquivo</a></div>';
+    } else {
+      attachHtml = '<div class="timeline-card-attachments"><a class="attach-link" href="' + item.fileUrl + '" target="_blank">' + (isPdf ? '📋' : '📎') + ' ' + (item.fileName || 'arquivo') + '</a></div>';
+    }
+  }
+
+  // Edit/delete controls for Firebase items
+  var actionsHtml = isFb ? (
+    '<div class="timeline-card-actions">' +
+    '<button class="tl-action-btn edit" onclick="editReservation('' + fbId + '')">✏️ Editar</button>' +
+    '<button class="tl-action-btn delete" onclick="deleteReservation('' + fbId + '')">🗑️ Apagar</button>' +
+    '</div>'
+  ) : '';
+
+  var icon = item.icon || (item.category ? item.category.split(' ')[0] : '📎');
+  var title = item.title || '';
+  var detail = item.detail || (item.notes ? item.notes : '');
+  if (isFb && item.date) detail = '📅 ' + item.date + (detail ? ' · ' + detail : '');
+
+  return '<div class="timeline-item" id="tlitem-' + (fbId||'') + '">' +
+    '<div class="timeline-dot-wrap"><div class="timeline-dot ' + (isFb ? (sent ? 'confirmed' : 'pending') : statusClass) + '"></div></div>' +
+    '<div class="timeline-card">' +
+    '<div class="timeline-card-top"><span class="timeline-card-title">' + icon + ' ' + title + '</span>' + badgeHtml + '</div>' +
+    (detail ? '<div class="timeline-card-detail">' + detail + '</div>' : '') +
+    (metaHtml ? '<div class="timeline-card-meta">' + metaHtml + '</div>' : '') +
+    linkHtml + attachHtml + actionsHtml +
+    '</div></div>';
+}
+
 function buildTimeline() {
   var container = document.getElementById('timelineContainer');
   if (!container) return;
   var html = '';
+  var lastGroup = '';
+  // Add dateKey to each static item for ordering
+  var dateMap = {
+    'PRE':'2026-07-01','JUL 23':'2026-07-23','JUL 23–27':'2026-07-23',
+    'JUL 27':'2026-07-27','JUL 27–31':'2026-07-27','JUL 31':'2026-07-31',
+    'JUL 31':'2026-07-31','AGO 2':'2026-08-02','OSAKA':'2026-07-31'
+  };
   BOOKINGS.forEach(function(group) {
-    html += '<div class="timeline-group">';
-    html += '<div class="timeline-group-label">' + group.group + '</div>';
+    if (group.group !== lastGroup) {
+      if (lastGroup) html += '</div>';
+      html += '<div class="timeline-group"><div class="timeline-group-label">' + group.group + '</div>';
+      lastGroup = group.group;
+    }
     group.items.forEach(function(item) {
-      var badgeClass = 'badge-' + item.status;
-      var badgeLabel = item.status === 'confirmed' ? '✓ Confirmado' : item.status === 'pending' ? '⏳ Pendente' : item.status === 'flight' ? '✈️ Voo' : '📋 Reservar';
-      var metaHtml = (item.meta || []).map(function(m) {
-        return '<div class="timeline-meta-item"><span>' + m.icon + '</span><span>' + m.text + '</span></div>';
-      }).join('');
-      var linkHtml = item.link ? '<a class="timeline-card-link" href="' + item.link + '" target="_blank" rel="noopener">' + (item.linkLabel || '→ Ver') + '</a>' : '';
-      html += '<div class="timeline-item">';
-      html += '<div class="timeline-dot-wrap"><div class="timeline-dot ' + item.status + '"></div></div>';
-      html += '<div class="timeline-card">';
-      html += '<div class="timeline-card-top"><span class="timeline-card-title">' + item.icon + ' ' + item.title + '</span><span class="timeline-card-badge ' + badgeClass + '">' + badgeLabel + '</span></div>';
-      html += '<div class="timeline-card-detail">' + item.detail + '</div>';
-      if (metaHtml) html += '<div class="timeline-card-meta">' + metaHtml + '</div>';
-      if (linkHtml) html += linkHtml;
-      html += '</div></div>';
+      html += renderTimelineItem(item, null);
     });
-    html += '</div>';
   });
+  if (lastGroup) html += '</div>';
   container.innerHTML = html;
 }
 
@@ -1793,6 +1868,7 @@ function openUploadModal() {
   document.getElementById('uploadModal').classList.add('active');
 }
 function closeUploadModal() {
+  editingFbId = null;
   document.getElementById('uploadModal').classList.remove('active');
   uploadFile = null;
   document.getElementById('uploadTitle').value = '';
@@ -1862,20 +1938,31 @@ function handleFile(file) {
 }
 
 async function extractFromFile(b64data, fileKind, mimeType) {
-  // Show AI status, hide initial buttons
-  document.getElementById('aiExtractStatus').style.display = 'block';
+  const statusEl = document.getElementById('aiExtractStatus');
+  statusEl.style.display = 'block';
+  statusEl.textContent = '✦ Claude lendo o documento completo...';
   document.getElementById('uploadInitialBtns').style.display = 'none';
   document.getElementById('uploadFields').style.display = 'none';
 
+  const prompt = `You are reading a travel document — ticket, receipt, hotel booking, flight confirmation, restaurant reservation, or similar.
+Read the ENTIRE document carefully and extract ALL relevant information.
+Return ONLY a valid JSON object with NO markdown, NO explanation, just raw JSON:
+{
+  "title": "descriptive title including venue/airline/hotel name and what it is (e.g. teamLab Borderless — 6 tickets, Jul 25)",
+  "category": "one of exactly: ✈️ Flight | 🏨 Hotel | 🎟️ Activity / Ticket | 🚅 Transport | 🍽️ Restaurant | 🥃 Experience | 📄 Other",
+  "date": "YYYY-MM-DD (reservation/event date, NOT today — empty string if not found)",
+  "notes": "confirmation code, booking reference, time, number of people, price, any important details — all in one line"
+}`;
+
   try {
-    const msgContent = fileKind === 'image'
+    const msgContent = (fileKind === 'pdf')
       ? [
-          { type: 'image', source: { type: 'base64', media_type: mimeType, data: b64data } },
-          { type: 'text', text: 'This is a travel receipt, ticket, or reservation document. Extract the following and return ONLY valid JSON, no markdown: {"title": "short descriptive title", "category": one of ["✈️ Flight","🏨 Hotel","🎟️ Activity / Ticket","🚅 Transport","🍽️ Restaurant","🥃 Experience","📄 Other"], "date": "YYYY-MM-DD or empty string", "notes": "confirmation number, time, key details in one line"}' }
+          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64data } },
+          { type: 'text', text: prompt }
         ]
       : [
-          { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: b64data } },
-          { type: 'text', text: 'This is a travel receipt, ticket, or reservation document. Extract the following and return ONLY valid JSON, no markdown: {"title": "short descriptive title", "category": one of ["✈️ Flight","🏨 Hotel","🎟️ Activity / Ticket","🚅 Transport","🍽️ Restaurant","🥃 Experience","📄 Other"], "date": "YYYY-MM-DD or empty string", "notes": "confirmation number, time, key details in one line"}' }
+          { type: 'image', source: { type: 'base64', media_type: mimeType, data: b64data } },
+          { type: 'text', text: prompt }
         ];
 
     const res = await fetch('https://api.anthropic.com/v1/messages', {
@@ -1888,117 +1975,174 @@ async function extractFromFile(b64data, fileKind, mimeType) {
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
-        max_tokens: 400,
+        max_tokens: 600,
         messages: [{ role: 'user', content: msgContent }]
       })
     });
 
     const data = await res.json();
-    const text = data.content?.[0]?.text || '{}';
-    const clean = text.replace(/```json|```/g, '').trim();
-    const parsed = JSON.parse(clean);
+    if (data.error) throw new Error(data.error.message);
+    const text = (data.content?.[0]?.text || '{}').replace(/```json|```/g, '').trim();
+    // Find JSON in response robustly
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    const parsed = jsonMatch ? JSON.parse(jsonMatch[0]) : {};
 
-    // Populate fields
     if (parsed.title) document.getElementById('uploadTitle').value = parsed.title;
     if (parsed.date) document.getElementById('uploadDate').value = parsed.date;
     if (parsed.notes) document.getElementById('uploadNotes').value = parsed.notes;
     if (parsed.category) {
       const sel = document.getElementById('uploadCategory');
       for (let i = 0; i < sel.options.length; i++) {
+        if (sel.options[i].value.includes(parsed.category.split(' ')[1] || parsed.category)) {
+          sel.selectedIndex = i; break;
+        }
+      }
+      // Try exact match too
+      for (let i = 0; i < sel.options.length; i++) {
         if (sel.options[i].value === parsed.category) { sel.selectedIndex = i; break; }
       }
     }
+    statusEl.textContent = '✅ Extraído com sucesso — revise e salve!';
+    statusEl.style.color = '#2ecc71';
   } catch(e) {
     console.warn('AI extract failed:', e);
-    // Still show fields even if extraction failed
+    statusEl.textContent = '⚠️ Não foi possível extrair automaticamente — preencha manualmente';
+    statusEl.style.color = 'var(--gold)';
   }
 
-  document.getElementById('aiExtractStatus').style.display = 'none';
+  setTimeout(() => {
+    statusEl.style.display = 'none';
+    statusEl.style.color = 'var(--neon)';
+  }, 2000);
   document.getElementById('uploadFields').style.display = 'block';
 }
 
+let editingFbId = null;
+
 async function saveReservation() {
   const title = document.getElementById('uploadTitle').value.trim();
-  if (!title) { alert('Please add a title'); return; }
+  if (!title) { alert('Por favor adicione um título'); return; }
   const btn = document.getElementById('uploadSaveBtn');
-  btn.disabled = true; btn.textContent = '⏳ Saving...';
+  btn.disabled = true; btn.textContent = '⏳ Salvando...';
   try {
     await initFirebase();
     let fileUrl = null, fileName = null, fileType = null;
     if (uploadFile) {
-      btn.textContent = '⏳ Uploading file...';
-      const ref = storage.ref('receipts/' + Date.now() + '_' + uploadFile.name);
+      btn.textContent = '⏳ Fazendo upload...';
+      const ref = storage.ref('receipts/' + Date.now() + '_' + (uploadFile.name || 'paste.png'));
       await ref.put(uploadFile);
       fileUrl = await ref.getDownloadURL();
-      fileName = uploadFile.name;
+      fileName = uploadFile.name || 'paste.png';
       fileType = uploadFile.type;
     }
-    const doc = {
+    const data = {
       title,
       category: document.getElementById('uploadCategory').value,
       date: document.getElementById('uploadDate').value,
       notes: document.getElementById('uploadNotes').value,
-      fileUrl: fileUrl || null,
-      fileName: fileName || null,
-      fileType: fileType || null,
-      createdAt: new Date().toISOString(),
-      source: 'manual-upload'
+      updatedAt: new Date().toISOString()
     };
-    btn.textContent = '⏳ Saving to Firebase...';
-    await db.collection('reservations').add(doc);
-    btn.textContent = '✅ Saved!';
-    setTimeout(() => { closeUploadModal(); loadFirebaseReservations(); }, 800);
+    if (fileUrl) { data.fileUrl = fileUrl; data.fileName = fileName; data.fileType = fileType; }
+
+    btn.textContent = '⏳ Salvando no Firebase...';
+    if (editingFbId) {
+      await db.collection('reservations').doc(editingFbId).update(data);
+    } else {
+      data.createdAt = new Date().toISOString();
+      data.sent = false;
+      await db.collection('reservations').add(data);
+    }
+    editingFbId = null;
+    btn.textContent = '✅ Salvo!';
+    setTimeout(() => { closeUploadModal(); loadFirebaseReservations(); }, 700);
   } catch(e) {
     console.error(e);
     btn.disabled = false;
     btn.textContent = '💾 Save to Trip';
-    alert('Error: ' + e.message);
+    alert('Erro: ' + e.message);
   }
 }
 
 async function loadFirebaseReservations() {
   try {
     await initFirebase();
-    const snap = await db.collection('reservations').orderBy('createdAt', 'desc').get();
+    const snap = await db.collection('reservations').orderBy('createdAt', 'asc').get();
     const items = [];
     snap.forEach(doc => items.push({ id: doc.id, ...doc.data() }));
-    renderFirebaseReservations(items);
+    injectFirebaseIntoTimeline(items);
   } catch(e) {
     console.warn('Firebase load skipped:', e.message);
   }
 }
 
-function renderFirebaseReservations(items) {
+function injectFirebaseIntoTimeline(items) {
   if (!items.length) return;
   const container = document.getElementById('timelineContainer');
   if (!container) return;
-  let html = '<div class="timeline-group">';
-  html += '<div class="timeline-group-label">📎 MY UPLOADED RESERVATIONS (' + items.length + ')</div>';
-  items.forEach(item => {
-    const isImage = item.fileType && item.fileType.startsWith('image/');
-    const isPdf = item.fileType && item.fileType.includes('pdf');
-    let attachHtml = '';
-    if (item.fileUrl) {
-      if (isImage) {
-        attachHtml = '<div class="timeline-card-attachments"><a href="' + item.fileUrl + '" target="_blank"><img class="attach-thumb" src="' + item.fileUrl + '" alt="' + (item.fileName||'receipt') + '"></a><a class="attach-link" href="' + item.fileUrl + '" target="_blank">🖼️ Ver imagem</a></div>';
-      } else if (isPdf) {
-        attachHtml = '<div class="timeline-card-attachments"><a class="attach-link" href="' + item.fileUrl + '" target="_blank">📋 Abrir PDF</a></div>';
-      } else {
-        attachHtml = '<div class="timeline-card-attachments"><a class="attach-link" href="' + item.fileUrl + '" target="_blank">📎 ' + (item.fileName||'arquivo') + '</a></div>';
-      }
+
+  // Find or create a "Minhas Reservas" group — inject after PRE-DEPARTURE group
+  let fbGroup = document.getElementById('fb-reservations-group');
+  if (!fbGroup) {
+    fbGroup = document.createElement('div');
+    fbGroup.className = 'timeline-group';
+    fbGroup.id = 'fb-reservations-group';
+    fbGroup.innerHTML = '<div class="timeline-group-label">📎 MINHAS RESERVAS SALVAS</div><div id="fb-items-container"></div>';
+    // Insert after first group (PRE-DEPARTURE)
+    const firstGroup = container.querySelector('.timeline-group');
+    if (firstGroup && firstGroup.nextSibling) {
+      container.insertBefore(fbGroup, firstGroup.nextSibling);
+    } else {
+      container.insertBefore(fbGroup, container.firstChild);
     }
-    html += '<div class="timeline-item">';
-    html += '<div class="timeline-dot-wrap"><div class="timeline-dot confirmed"></div></div>';
-    html += '<div class="timeline-card">';
-    html += '<div class="timeline-card-top"><span class="timeline-card-title">' + (item.category ? item.category.split(' ')[0] : '📎') + ' ' + item.title + '</span><span class="timeline-card-badge badge-confirmed">✓ Salvo</span></div>';
-    if (item.date) html += '<div class="timeline-card-detail">📅 ' + item.date + (item.notes ? ' · ' + item.notes : '') + '</div>';
-    else if (item.notes) html += '<div class="timeline-card-detail">' + item.notes + '</div>';
-    html += attachHtml;
-    html += '</div></div>';
+  }
+
+  const fbContainer = document.getElementById('fb-items-container');
+  if (!fbContainer) return;
+  fbContainer.innerHTML = '';
+  items.forEach(item => {
+    fbContainer.insertAdjacentHTML('beforeend', renderTimelineItem(item, item.id));
   });
-  html += '</div>';
-  // Prepend to container
-  container.insertAdjacentHTML('afterbegin', html);
+}
+
+async function toggleSent(fbId, currentSent) {
+  try {
+    await initFirebase();
+    await db.collection('reservations').doc(fbId).update({ sent: !currentSent });
+    loadFirebaseReservations();
+  } catch(e) { alert('Erro: ' + e.message); }
+}
+
+async function deleteReservation(fbId) {
+  if (!confirm('Apagar esta reserva?')) return;
+  try {
+    await initFirebase();
+    await db.collection('reservations').doc(fbId).delete();
+    const el = document.getElementById('tlitem-' + fbId);
+    if (el) el.remove();
+  } catch(e) { alert('Erro: ' + e.message); }
+}
+
+// Edit reservation — re-opens modal pre-filled
+async function editReservation(fbId) {
+  try {
+    await initFirebase();
+    const doc = await db.collection('reservations').doc(fbId).get();
+    if (!doc.exists) return;
+    const item = doc.data();
+    editingFbId = fbId;
+    openUploadModal();
+    // Show fields immediately (no file needed for edit)
+    document.getElementById('uploadFields').style.display = 'block';
+    document.getElementById('uploadInitialBtns').style.display = 'none';
+    document.getElementById('uploadTitle').value = item.title || '';
+    document.getElementById('uploadNotes').value = item.notes || '';
+    document.getElementById('uploadDate').value = item.date || '';
+    const sel = document.getElementById('uploadCategory');
+    for (let i = 0; i < sel.options.length; i++) {
+      if (sel.options[i].value === item.category) { sel.selectedIndex = i; break; }
+    }
+    document.getElementById('uploadSaveBtn').textContent = '💾 Salvar Alterações';
+  } catch(e) { alert('Erro: ' + e.message); }
 }
 
 // ── CHATBOT ─────────────────────────────────────────────────────
