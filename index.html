@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 3.3
+     Version : 3.4
      Date    : 2026-05-23
      Changes : API key via Firebase (não hardcoded),
                setup modal para API key,
@@ -839,7 +839,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v3.3 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v3.4 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -2952,42 +2952,72 @@ async function sendChat() {
   var input = document.getElementById('chatInput');
   var btn = document.getElementById('chatSendBtn');
   var text = input.value.trim();
-  if (!text || btn.disabled) return;
-  input.value=''; input.style.height='auto';
-  btn.disabled=true;
-  appendMessage('user', text);
-  chatHistory.push({ role:'user', content:text });
-  var thinking = appendMessage('assistant thinking', '✦ pensando...');
-  try {
-    // Fetch latest reservations from Firebase for context
-    var reservations = await getReservationsForContext();
-    var dynamicContext = buildDynamicContext(reservations);
+  var hasFile = (chatPendingFileB64 !== null);
+  if (!text && !hasFile) return;
+  if (btn.disabled) return;
+  input.value = ''; input.style.height = 'auto';
+  btn.disabled = true;
 
-    var res = await fetch('https://api.anthropic.com/v1/messages', {
-      method:'POST',
-      headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2048,system:dynamicContext,messages:chatHistory})
+  // ── FILE: Receipt via chat ──────────────────────────────────────────
+  if (hasFile) {
+    appendMessage('user', (text||'📎 Analisando recibo') + (chatPendingFile?' ['+chatPendingFile.name+']':''));
+    var tk = appendMessage('assistant thinking','✦ Lendo o documento...');
+    try {
+      var res0 = await getReservationsForContext();
+      var ctx0 = buildDynamicContext(res0);
+      var prompt0 = 'Leia este documento de viagem INTEIRO. Responda em Português:\n1. O que é este documento (tipo, data, local, valor, código)\n2. Como se encaixa no itinerário\n3. No final inclua SEMPRE:\nRECEIPT_DATA: {"title":"título claro","category":"✈️ Flight|🏨 Hotel|🎟️ Activity / Ticket|🚅 Transport|🍽️ Restaurant|🥃 Experience|📄 Other","date":"YYYY-MM-DD","notes":"código, horário, pessoas, valor"}\n4. Se muda itinerário (hotel, data), inclua TAMBÉM:\nITINERARY_PATCH: [{"dayNum":N,"hotel":"Nome"}]\n5. Pergunte se confirma mudanças\n\nUsuário: '+(text||'Salve e verifique o itinerário');
+      var mc;
+      if (chatPendingFileMime && chatPendingFileMime.includes('pdf')) {
+        mc = [{type:'document',source:{type:'base64',media_type:'application/pdf',data:chatPendingFileB64}},{type:'text',text:prompt0}];
+      } else {
+        mc = [{type:'image',source:{type:'base64',media_type:(chatPendingFileMime||'image/jpeg'),data:chatPendingFileB64}},{type:'text',text:prompt0}];
+      }
+      var rsp = await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2048,system:ctx0,messages:[{role:'user',content:mc}]})
+      });
+      var dat = await rsp.json();
+      if (dat.error) throw new Error(dat.error.message);
+      var rep = dat.content&&dat.content[0]?dat.content[0].text:'Erro.';
+      // Save receipt
+      var ri = rep.indexOf('RECEIPT_DATA:');
+      if (ri !== -1) {
+        try {
+          var rs=rep.slice(ri+13).trim(), js2=rs.indexOf('{');
+          if (js2!==-1){var d2=0,e2=0;for(var i=js2;i<rs.length;i++){if(rs[i]==='{')d2++;else if(rs[i]==='}'){d2--;if(d2===0){e2=i+1;break;}}}
+          if(e2>0){var rd2=JSON.parse(rs.slice(js2,e2));await saveReceiptToFirebase(rd2,chatPendingFileB64,chatPendingFileMime,chatPendingFile?chatPendingFile.name:'receipt');}}
+        } catch(pe){console.warn('receipt parse:',pe);}
+      }
+      // Display
+      var dr=rep,ci2=rep.indexOf('RECEIPT_DATA:');if(ci2!==-1)dr=rep.slice(0,ci2).trim();
+      var pp=dr.indexOf('ITINERARY_PATCH:');if(pp!==-1)dr=dr.slice(0,pp).trim();if(!dr)dr=rep;
+      tk.remove();appendMessage('assistant',dr);
+      chatHistory.push({role:'user',content:(text||'analise documento')+' ['+((chatPendingFile&&chatPendingFile.name)||'arquivo')+']'});
+      chatHistory.push({role:'assistant',content:dr});
+      saveChatHistory();extractAndApplyPatches(rep);
+    } catch(e){tk.remove();appendMessage('assistant','⚠️ Erro: '+e.message);}
+    clearChatFile();btn.disabled=false;return;
+  }
+
+  // ── TEXT: Normal chat ────────────────────────────────────────────────
+  appendMessage('user',text);chatHistory.push({role:'user',content:text});
+  var tk2=appendMessage('assistant thinking','✦ pensando...');
+  try {
+    var r2=await getReservationsForContext(),ctx2=buildDynamicContext(r2);
+    var rs2=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2048,system:ctx2,messages:chatHistory})
     });
-    var data = await res.json();
-    if (data.error) throw new Error(data.error.message);
-    var reply = data.content&&data.content[0]?data.content[0].text:'Desculpe, tente novamente.';
-    chatHistory.push({role:'assistant',content:reply});
-    saveChatHistory(); // persist to Firebase
-    thinking.remove();
-    // Remove patch block from visible chat message
-    // Remove patch from display
-    var displayReply = reply;
-    var patchStart = reply.indexOf('ITINERARY_PATCH:');
-    if (patchStart !== -1) displayReply = reply.slice(0, patchStart).trim();
-    if (!displayReply) displayReply = reply;
-    appendMessage('assistant', displayReply);
-    // Apply any itinerary patches silently
-    extractAndApplyPatches(reply);
-  } catch(e) { thinking.remove(); appendMessage('assistant','⚠️ Erro: '+e.message); chatHistory.pop(); }
+    var d3=await rs2.json();if(d3.error)throw new Error(d3.error.message);
+    var rp3=d3.content&&d3.content[0]?d3.content[0].text:'Desculpe.';
+    chatHistory.push({role:'assistant',content:rp3});saveChatHistory();
+    var dp3=rp3,pp3=rp3.indexOf('ITINERARY_PATCH:');if(pp3!==-1)dp3=rp3.slice(0,pp3).trim();if(!dp3)dp3=rp3;
+    tk2.remove();appendMessage('assistant',dp3);extractAndApplyPatches(rp3);
+  } catch(e){tk2.remove();appendMessage('assistant','⚠️ Erro: '+e.message);chatHistory.pop();}
   btn.disabled=false;
 }
 
-// Invalidate cache when new reservation is saved
+
 var _origInjectItemIntoDay = injectItemIntoDay;
 function injectItemIntoDay(item, fbId) {
   cachedReservations = null; // force refresh on next chat
