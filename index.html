@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 3.2
+     Version : 3.3
      Date    : 2026-05-23
      Changes : API key via Firebase (não hardcoded),
                setup modal para API key,
@@ -657,6 +657,10 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
 .apikey-settings-btn { position:fixed; bottom:72px; right:16px; background:var(--manga-bg); border:2px solid rgba(201,168,76,0.3); border-radius:50%; width:40px; height:40px; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:16px; z-index:100; transition:border-color .2s; }
 .apikey-settings-btn:hover { border-color:var(--gold); }
 
+
+.chat-attach-btn { background:transparent; border:none; border-right:1px solid rgba(201,168,76,0.15); color:rgba(200,180,150,0.5); padding:0 14px; cursor:pointer; font-size:18px; transition:color .2s; flex-shrink:0; }
+.chat-attach-btn:hover { color:var(--neon); }
+
 </style>
 </head>
 <body>
@@ -816,8 +820,14 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
         <div class="chat-suggestion" onclick="sendSuggestion(this)">O que reservar primeiro?</div>
       </div>
       <div class="chat-input-row">
-        <textarea class="chat-input" id="chatInput" placeholder="Pergunte sobre sua viagem..." rows="1" onkeydown="chatKeydown(event)" oninput="autoResize(this)"></textarea>
+        <button class="chat-attach-btn" onclick="triggerChatFileUpload()" title="Adicionar recibo ou ticket">📎</button>
+        <input type="file" id="chatFileInput" accept="image/*,.pdf" style="display:none" onchange="handleChatFileUpload(this)">
+        <textarea class="chat-input" id="chatInput" placeholder="Pergunte sobre a viagem ou 📎 envie um recibo..." rows="1" onkeydown="chatKeydown(event)" oninput="autoResize(this)"></textarea>
         <button class="chat-send" id="chatSendBtn" onclick="sendChat()">ENVIAR</button>
+      </div>
+      <div id="chatFilePreview" style="display:none;padding:8px 16px;border-top:1px solid rgba(201,168,76,0.1);font-family:var(--font-mono);font-size:10px;color:var(--neon);display:flex;align-items:center;gap:8px">
+        <span id="chatFilePreviewName"></span>
+        <button onclick="clearChatFile()" style="background:none;border:none;color:rgba(200,180,150,0.5);cursor:pointer;font-size:12px">✕</button>
       </div>
     </div>
   </section>
@@ -829,7 +839,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v3.2 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v3.3 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -1967,22 +1977,32 @@ async function loadItineraryFromFirebase() {
     await initFirebase();
     var snap = await db.collection('itinerary').orderBy('num').get();
     if (snap.empty) {
-      // First time — seed Firebase with default itinerary
       console.log('Seeding itinerary to Firebase...');
       await seedItineraryToFirebase();
       return;
     }
     var newDays = [];
     snap.forEach(function(doc) { newDays.push(doc.data()); });
-    if (newDays.length === 11) {
-      // Update DAYS array in place
-      newDays.forEach(function(d, i) { Object.assign(DAYS[i], d); });
+    if (newDays.length > 0) {
+      // Update DAYS in place, rerender each changed day safely
+      newDays.forEach(function(fbDay) {
+        var localDay = DAYS.find(function(d){ return d.num === fbDay.num; });
+        if (localDay) {
+          var changed = false;
+          ['hotel','city','theme','note','morning','afternoon','night','transport'].forEach(function(k){
+            if (fbDay[k] !== undefined && JSON.stringify(fbDay[k]) !== JSON.stringify(localDay[k])) {
+              localDay[k] = fbDay[k];
+              changed = true;
+            }
+          });
+          if (changed) rerenderDay(fbDay.num);
+        }
+      });
       itineraryLoaded = true;
       console.log('✅ Itinerary loaded from Firebase');
-      rebuildDays();
     }
   } catch(e) {
-    console.warn('Could not load itinerary:', e.message);
+    console.warn('Could not load itinerary from Firebase:', e.message);
   }
 }
 
@@ -2050,28 +2070,47 @@ async function applyItineraryPatches(patches) {
 }
 
 function rebuildDays() {
-  var container = document.getElementById('daysContainer');
-  if (container) { container.innerHTML = ''; buildDays(); }
+  try {
+    var container = document.getElementById('daysContainer');
+    if (container) { container.innerHTML = ''; buildDays(); loadFirebaseReservations(); }
+  } catch(e) { console.warn('rebuildDays error:', e.message); }
 }
 
 function rerenderDay(dayNum) {
-  var old = document.getElementById('day-' + dayNum);
-  if (!old) return;
-  var wasOpen = old.querySelector('.day-detail') && old.querySelector('.day-detail').style.display !== 'none';
-  // Flash gold border
-  old.style.transition = 'box-shadow 0.5s';
-  old.style.boxShadow = '0 0 0 3px var(--gold)';
-  setTimeout(function() { old.style.boxShadow = ''; }, 2500);
-  // Rebuild just the meta/hotel chip
-  var day = DAYS.find(function(d){ return d.num === dayNum; });
-  if (!day) return;
-  var metaEl = old.querySelector('.ep-meta');
-  if (metaEl) {
-    metaEl.innerHTML =
-      '<span class="meta-chip city">\uD83D\uDCCD ' + day.city + '</span>' +
-      '<span class="meta-chip temp">\uD83C\uDF21\uFE0F ' + (day.temp||'') + '</span>' +
-      '<span class="meta-chip hotel">\uD83C\uDFE8 ' + day.hotel + '</span>';
-  }
+  try {
+    var section = document.getElementById('day-' + dayNum);
+    if (!section) return;
+    var day = DAYS.find(function(d){ return d.num === dayNum; });
+    if (!day) return;
+
+    // Update hotel chip
+    var metaEl = section.querySelector('.ep-meta');
+    if (metaEl) {
+      metaEl.innerHTML =
+        '<span class="meta-chip city">📍 ' + day.city + '</span>' +
+        '<span class="meta-chip temp">🌡️ ' + (day.temp||'') + '</span>' +
+        '<span class="meta-chip hotel">🏨 ' + day.hotel + '</span>';
+    }
+
+    // Update note
+    var noteEl = section.querySelector('.block-note');
+    if (noteEl && day.note) noteEl.innerHTML = '💡 ' + day.note;
+
+    // Update day blocks (morning/afternoon/night)
+    var blocks = ['morning','afternoon','night'];
+    blocks.forEach(function(block) {
+      if (!day[block]) return;
+      var blockEl = section.querySelector('.block-' + block + ' .block-items');
+      if (blockEl) {
+        blockEl.innerHTML = day[block].map(function(i){ return '<div class="block-item">' + i + '</div>'; }).join('');
+      }
+    });
+
+    // Flash gold
+    section.style.transition = 'box-shadow 0.5s';
+    section.style.boxShadow = '0 0 0 3px var(--gold)';
+    setTimeout(function() { section.style.boxShadow = ''; }, 2500);
+  } catch(e) { console.warn('rerenderDay error:', e.message); }
 }
 
 // ── API KEY MANAGEMENT (Firebase) ─────────────────────────────
@@ -2748,6 +2787,88 @@ function extractAndApplyPatches(text) {
   return true;
 }
 
+
+// ── RECEIPT UPLOAD VIA CHAT ──────────────────────────────────────────────
+var chatPendingFile = null;
+var chatPendingFileB64 = null;
+var chatPendingFileMime = null;
+
+function triggerChatFileUpload() {
+  document.getElementById('chatFileInput').click();
+}
+
+function clearChatFile() {
+  chatPendingFile = null;
+  chatPendingFileB64 = null;
+  chatPendingFileMime = null;
+  var prev = document.getElementById('chatFilePreview');
+  if (prev) prev.style.display = 'none';
+  document.getElementById('chatFileInput').value = '';
+}
+
+function handleChatFileUpload(input) {
+  var file = input.files[0];
+  if (!file) return;
+  chatPendingFile = file;
+  chatPendingFileMime = file.type;
+  
+  var prev = document.getElementById('chatFilePreview');
+  var nameEl = document.getElementById('chatFilePreviewName');
+  if (prev && nameEl) {
+    nameEl.textContent = '📎 ' + file.name + ' (' + (file.size/1024).toFixed(0) + 'KB) — pronto para enviar';
+    prev.style.display = 'flex';
+  }
+
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    chatPendingFileB64 = e.target.result.split(',')[1];
+  };
+  reader.readAsDataURL(file);
+
+  // Auto-set placeholder
+  document.getElementById('chatInput').placeholder = 'Descreva ou envie — ex: "adicione este recibo ao itinerário"';
+}
+
+async function saveReceiptToFirebase(extractedData, fileB64, mime, fileName) {
+  try {
+    await initFirebase();
+    var fileUrl = null;
+    if (fileB64 && storage) {
+      var blob = b64ToBlob(fileB64, mime);
+      var ref = storage.ref('receipts/' + Date.now() + '_' + (fileName || 'receipt'));
+      await ref.put(blob);
+      fileUrl = await ref.getDownloadURL();
+    }
+    var docData = {
+      title: extractedData.title || 'Recibo',
+      category: extractedData.category || '📄 Other',
+      date: extractedData.date || '',
+      notes: extractedData.notes || '',
+      fileUrl: fileUrl,
+      fileName: fileName || '',
+      fileType: mime || '',
+      dayNum: extractedData.dayNum || null,
+      sent: false,
+      createdAt: new Date().toISOString()
+    };
+    var ref2 = await db.collection('reservations').add(docData);
+    injectItemIntoDay(docData, ref2.id);
+    cachedReservations = null; // invalidate cache
+    console.log('✅ Receipt saved to Firebase');
+    return docData;
+  } catch(e) {
+    console.warn('Could not save receipt:', e.message);
+    return null;
+  }
+}
+
+function b64ToBlob(b64, mime) {
+  var bytes = atob(b64);
+  var arr = new Uint8Array(bytes.length);
+  for (var i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+  return new Blob([arr], {type: mime});
+}
+
 // Cache of Firebase reservations for chat context
 var cachedReservations = null;
 
@@ -2879,7 +3000,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setupDropZone();
   loadApiKey();
   loadFirebaseReservations();
-  loadItineraryFromFirebase();
+  setTimeout(function(){ loadItineraryFromFirebase(); }, 500); // after DOM settles
   loadChatHistory();
   buildMustDo();
   buildCosts();
