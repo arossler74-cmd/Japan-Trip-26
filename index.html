@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 4.3
+     Version : 4.4
      Date    : 2026-05-23
      Changes : API key via Firebase (não hardcoded),
                setup modal para API key,
@@ -839,7 +839,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v4.3 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v4.4 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -2942,35 +2942,56 @@ async function sendChat() {
     clearChatFile();btn.disabled=false;return;
   }
 
-  // ── TEXT: Normal chat ────────────────────────────────────────────────
-  appendMessage('user',text);chatHistory.push({role:'user',content:text});
-  var tk2=appendMessage('assistant thinking','✦ pensando...');
+  // ── TEXT: Two-call approach ────────────────────────────────────────
+  appendMessage('user', text);
+  chatHistory.push({role:'user', content:text});
+  var tk2 = appendMessage('assistant thinking', '✦ pensando...');
   try {
-    var r2=await getReservationsForContext(),ctx2=buildDynamicContext(r2);
-    var rs2=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:2048,system:ctx2,messages:chatHistory})
+    var r2 = await getReservationsForContext();
+    var ctx2 = buildDynamicContext(r2);
+
+    // Call 1: Display response (clean, no patch JSON)
+    var rs2 = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001', max_tokens:800, system:ctx2, messages:chatHistory})
     });
-    var d3=await rs2.json();if(d3.error)throw new Error(d3.error.message);
-    var rp3=d3.content&&d3.content[0]?d3.content[0].text:'Desculpe.';
-    chatHistory.push({role:'assistant',content:rp3});saveChatHistory();
-    // Strip patch and code blocks from display
-    // Strip data blocks before displaying
+    var d3 = await rs2.json();
+    if (d3.error) throw new Error(d3.error.message);
+    var rp3 = d3.content && d3.content[0] ? d3.content[0].text : 'Desculpe.';
+
+    // Strip any patch data from display
     var dp3 = rp3;
-    var stripMarkers = ['ITINERARY_PATCH:', 'RECEIPT_DATA:', '\n---\n## '];
-    stripMarkers.forEach(function(m) {
-      var si = dp3.indexOf(m);
-      if (si !== -1) dp3 = dp3.slice(0, si).trim();
+    ['ITINERARY_PATCH:','RECEIPT_DATA:','```json','```'].forEach(function(m){
+      var si = dp3.indexOf(m); if (si !== -1) dp3 = dp3.slice(0, si).trim();
     });
-    // Strip trailing ``` blocks
-    var lastCb = dp3.lastIndexOf('\n```');
-    if (lastCb > dp3.length - 200) dp3 = dp3.slice(0, lastCb).trim();
-    if (!dp3 || dp3.length < 5) dp3 = '✅ Processado!';
+    if (!dp3 || dp3.length < 3) dp3 = rp3.slice(0, 500);
+
+    chatHistory.push({role:'assistant', content:dp3});
+    saveChatHistory();
     tk2.remove();
     appendMessage('assistant', dp3);
-    extractAndApplyPatches(rp3);
-  } catch(e){tk2.remove();appendMessage('assistant','⚠️ Erro: '+e.message);chatHistory.pop();}
-  btn.disabled=false;
+
+    // Call 2: Silent patch call if itinerary-related
+    var needsPatch = /hotel|atualiz|mudar|muda|transport|shinkansen|itinerar|reserv|mitsui|kyoto|osaka|tokyo|osaka/i.test(text);
+    if (needsPatch && ANTHROPIC_KEY) {
+      var patchSystemPrompt = 'Respond ONLY with a valid JSON array. No text, no markdown. Format: [{dayNum:N,hotel:X,city:Y}]. DAY MAP: 1=Jul23 2=Jul24 3=Jul25 4=Jul26 5=Jul27 6=Jul28 7=Jul29 8=Jul30 9=Jul31 10=Aug1 11=Aug2';
+      var patchMessages = [{role:'user', content:'Based on the saved reservations, output the JSON array to update the itinerary. Only JSON, nothing else.'}];
+      var rs3 = await fetch('https://api.anthropic.com/v1/messages', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-api-key':ANTHROPIC_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+        body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1024,system:patchSystemPrompt,messages:patchMessages})
+      });
+      var d4 = await rs3.json();
+      if (!d4.error && d4.content && d4.content[0]) {
+        var pt = d4.content[0].text.trim();
+        console.log('Silent patch response:', pt.slice(0,150));
+        // Wrap in ITINERARY_PATCH for extractor
+        extractAndApplyPatches('ITINERARY_PATCH: ' + pt);
+      }
+    }
+  } catch(e){ tk2.remove(); appendMessage('assistant','⚠️ Erro: '+e.message); chatHistory.pop(); }
+  btn.disabled = false;
 }
 
 
