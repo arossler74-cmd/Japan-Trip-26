@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 3.8
+     Version : 3.9
      Date    : 2026-05-23
      Changes : API key via Firebase (não hardcoded),
                setup modal para API key,
@@ -839,7 +839,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v3.8 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v3.9 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -2916,12 +2916,24 @@ async function sendChat() {
     var d3=await rs2.json();if(d3.error)throw new Error(d3.error.message);
     var rp3=d3.content&&d3.content[0]?d3.content[0].text:'Desculpe.';
     chatHistory.push({role:'assistant',content:rp3});saveChatHistory();
-    var dp3=rp3;
-    var pp3=rp3.indexOf('ITINERARY_PATCH:');if(pp3!==-1)dp3=rp3.slice(0,pp3).trim();
-    // Also strip trailing code blocks
-    var dashIdx=dp3.indexOf('\n---'); if(dashIdx!==-1) dp3=dp3.slice(0,dashIdx).trim();
-    if(!dp3)dp3=rp3;
-    tk2.remove();appendMessage('assistant',dp3);extractAndApplyPatches(rp3);
+    // Strip patch and code blocks from display
+    var dp3 = rp3;
+    var markers = ['ITINERARY_PATCH:', 'RECEIPT_DATA:'];
+    for (var mi=0; mi<markers.length; mi++) {
+      var mIdx = dp3.indexOf(markers[mi]);
+      if (mIdx !== -1) dp3 = dp3.slice(0, mIdx).trim();
+    }
+    // Strip trailing --- sections
+    var dashIdx = dp3.lastIndexOf('\n---');
+    if (dashIdx !== -1) dp3 = dp3.slice(0, dashIdx).trim();
+    // Strip any trailing ``` blocks
+    var cbIdx = dp3.lastIndexOf('\n```');
+    if (cbIdx !== -1) dp3 = dp3.slice(0, cbIdx).trim();
+    if (!dp3) dp3 = '✅ Itinerário atualizado!';
+    tk2.remove();
+    appendMessage('assistant', dp3);
+    // Apply patches with a tiny delay so message renders first
+    setTimeout(function(){ extractAndApplyPatches(rp3); }, 50);
   } catch(e){tk2.remove();appendMessage('assistant','⚠️ Erro: '+e.message);chatHistory.pop();}
   btn.disabled=false;
 }
@@ -2933,52 +2945,61 @@ function extractAndApplyPatches(text) {
   if (!text) return false;
   var patches = null;
 
-  // Strategy 1: look for ITINERARY_PATCH: [...]
+  // Strategy 1: ITINERARY_PATCH: [...]
   var marker = 'ITINERARY_PATCH:';
   var mi = text.indexOf(marker);
   if (mi !== -1) {
     var str = text.slice(mi + marker.length).trim();
+    // Find first [ or {
     var js = -1;
-    for (var i = 0; i < str.length; i++) {
-      if (str[i] === '[' || str[i] === '{') { js = i; break; }
+    for (var si = 0; si < Math.min(str.length, 20); si++) {
+      if (str[si] === '[' || str[si] === '{') { js = si; break; }
     }
     if (js !== -1) {
       str = str.slice(js);
       var depth = 0, end = 0, open = str[0], close = open === '[' ? ']' : '}';
-      for (var i = 0; i < str.length; i++) {
-        if (str[i] === open) depth++;
-        else if (str[i] === close) { depth--; if (depth === 0) { end = i+1; break; } }
+      for (var di = 0; di < str.length; di++) {
+        if (str[di] === open) depth++;
+        else if (str[di] === close) { depth--; if (depth === 0) { end = di+1; break; } }
       }
       if (end > 0) {
-        try { patches = JSON.parse(str.slice(0, end)); } catch(e) {}
+        try {
+          patches = JSON.parse(str.slice(0, end));
+          console.log('✅ Patch found via ITINERARY_PATCH:', patches.length, 'items');
+        } catch(e) { console.warn('Patch parse error:', e.message, str.slice(0,100)); }
       }
     }
   }
 
-  // Strategy 2: find any JSON array with dayNum fields
+  // Strategy 2: any [{dayNum...}] array
   if (!patches) {
-    var ai = text.indexOf('[{');
-    while (ai !== -1) {
+    var ai = 0;
+    while ((ai = text.indexOf('[{', ai)) !== -1) {
       var str2 = text.slice(ai);
       var d2 = 0, e2 = 0;
-      for (var i = 0; i < str2.length; i++) {
-        if (str2[i] === '[') d2++;
-        else if (str2[i] === ']') { d2--; if (d2 === 0) { e2 = i+1; break; } }
+      for (var i2 = 0; i2 < str2.length; i2++) {
+        if (str2[i2] === '[') d2++;
+        else if (str2[i2] === ']') { d2--; if (d2 === 0) { e2 = i2+1; break; } }
       }
       if (e2 > 0) {
         try {
           var arr = JSON.parse(str2.slice(0, e2));
-          if (arr.length > 0 && arr[0].dayNum !== undefined) { patches = arr; break; }
+          if (Array.isArray(arr) && arr.length > 0 && arr[0].dayNum !== undefined) {
+            patches = arr;
+            console.log('✅ Patch found via array scan:', patches.length, 'items');
+            break;
+          }
         } catch(e) {}
       }
-      ai = text.indexOf('[{', ai+1);
+      ai++;
     }
   }
 
-  if (!patches) return false;
+  if (!patches) {
+    console.log('No patch found in response');
+    return false;
+  }
   if (!Array.isArray(patches)) patches = [patches];
-
-  console.log('Applying patches:', JSON.stringify(patches));
   applyItineraryPatches(patches);
   return true;
 }
