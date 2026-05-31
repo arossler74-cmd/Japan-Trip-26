@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 3.5
+     Version : 3.6
      Date    : 2026-05-23
      Changes : API key via Firebase (não hardcoded),
                setup modal para API key,
@@ -839,7 +839,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v3.5 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v3.6 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -2046,26 +2046,40 @@ async function applyItineraryPatches(patches) {
   for (var pi = 0; pi < patches.length; pi++) {
     var patch = patches[pi];
     var nums = [];
-    if (patch.dayNum) nums = [patch.dayNum];
+    if (patch.dayNum !== undefined) nums = [patch.dayNum];
     else if (patch.days) nums = patch.days;
+    if (!nums.length) continue;
 
     var updates = {};
-    if (patch.hotel) updates.hotel = patch.hotel;
-    if (patch.city) updates.city = patch.city;
-    if (patch.theme) updates.theme = patch.theme;
-    if (patch.note) updates.note = patch.note;
-    if (patch.morning) updates.morning = patch.morning;
-    if (patch.afternoon) updates.afternoon = patch.afternoon;
-    if (patch.night) updates.night = patch.night;
-    if (patch.transport) updates.transport = patch.transport;
+    if (patch.hotel !== undefined) updates.hotel = patch.hotel;
+    if (patch.city !== undefined) updates.city = patch.city;
+    if (patch.theme !== undefined) updates.theme = patch.theme;
+    if (patch.note !== undefined) updates.note = patch.note;
+    if (patch.morning !== undefined) updates.morning = patch.morning;
+    if (patch.afternoon !== undefined) updates.afternoon = patch.afternoon;
+    if (patch.night !== undefined) updates.night = patch.night;
+    if (patch.transport !== undefined) updates.transport = patch.transport;
+    if (!Object.keys(updates).length) continue;
 
     for (var ni = 0; ni < nums.length; ni++) {
-      var ok = await updateItineraryDay(nums[ni], updates);
-      if (ok && changed.indexOf(nums[ni]) === -1) changed.push(nums[ni]);
+      var dn = nums[ni];
+      // Update local DAYS immediately
+      var day = DAYS.find(function(d){ return d.num === dn; });
+      if (day) {
+        Object.assign(day, updates);
+        changed.push(dn);
+      }
+      // Save to Firebase (non-blocking)
+      updateItineraryDay(dn, updates).catch(function(e){ console.warn('Firebase update failed:', e); });
     }
   }
+
   if (changed.length > 0) {
-    appendMessage('assistant', '✅ Itinerário atualizado nos dias ' + changed.join(', ') + '! As mudanças estão salvas no Firebase.');
+    // Rerender changed days after a short delay to avoid call stack issues
+    setTimeout(function() {
+      changed.forEach(function(dn){ rerenderDay(dn); });
+    }, 100);
+    appendMessage('assistant', '✅ Dias ' + changed.join(', ') + ' atualizados no itinerário e salvos no Firebase!');
   }
 }
 
@@ -2427,6 +2441,7 @@ function updateDayBadge(dayNum) {
 }
 
 function injectItemIntoDay(item, fbId) {
+  cachedReservations = null; // invalidate chat context cache
   var dayNum = item.dayNum || null;
   if (!dayNum && item.date) { var dp=item.date.split('-'); if(dp.length===3){var mdy=dp[1]+'/'+dp[2]+'/'+dp[0]; dayNum=DATE_TO_DAY[mdy]||null;} }
   if (!dayNum) dayNum = 11;
@@ -3011,18 +3026,16 @@ async function sendChat() {
     var d3=await rs2.json();if(d3.error)throw new Error(d3.error.message);
     var rp3=d3.content&&d3.content[0]?d3.content[0].text:'Desculpe.';
     chatHistory.push({role:'assistant',content:rp3});saveChatHistory();
-    var dp3=rp3,pp3=rp3.indexOf('ITINERARY_PATCH:');if(pp3!==-1)dp3=rp3.slice(0,pp3).trim();if(!dp3)dp3=rp3;
+    var dp3=rp3;
+    var pp3=rp3.indexOf('ITINERARY_PATCH:');if(pp3!==-1)dp3=rp3.slice(0,pp3).trim();
+    // Also strip trailing code blocks
+    var dashIdx=dp3.indexOf('\n---'); if(dashIdx!==-1) dp3=dp3.slice(0,dashIdx).trim();
+    if(!dp3)dp3=rp3;
     tk2.remove();appendMessage('assistant',dp3);extractAndApplyPatches(rp3);
   } catch(e){tk2.remove();appendMessage('assistant','⚠️ Erro: '+e.message);chatHistory.pop();}
   btn.disabled=false;
 }
 
-
-var _origInjectItemIntoDay = injectItemIntoDay;
-function injectItemIntoDay(item, fbId) {
-  cachedReservations = null; // force refresh on next chat
-  _origInjectItemIntoDay(item, fbId);
-}
 
 document.addEventListener('DOMContentLoaded', () => {
   buildNav();
