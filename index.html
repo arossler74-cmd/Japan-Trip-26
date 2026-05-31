@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 3.4
+     Version : 3.5
      Date    : 2026-05-23
      Changes : API key via Firebase (não hardcoded),
                setup modal para API key,
@@ -839,7 +839,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v3.4 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v3.5 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -2696,17 +2696,17 @@ function applyItineraryPatches(patches) {
     var wasOpen = section.querySelector('.day-detail.open') !== null;
 
     // Rebuild just the header meta chips
-    var hotelDot = day.hotelNew ? '<span class="hotel-new-dot"></span>' : '';
+    var hotelDot = '';
     var metaEl = section.querySelector('.ep-meta');
     if (metaEl) {
       metaEl.innerHTML =
         '<span class="meta-chip city">📍 ' + day.city + '</span>' +
         '<span class="meta-chip temp">🌡️ ' + day.temp + '</span>' +
-        '<span class="meta-chip hotel">' + hotelDot + '🏨 ' + day.hotel + '</span>';
+        '<span class="meta-chip hotel">🏨 ' + day.hotel + '</span>';
     }
 
     // Rebuild note if changed
-    if (patch && patch.note) {
+    if (day.note) {
       var noteEl = section.querySelector('.block-note');
       if (noteEl) noteEl.innerHTML = '💡 ' + day.note;
     }
