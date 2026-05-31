@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 3.9
+     Version : 4.0
      Date    : 2026-05-23
      Changes : API key via Firebase (não hardcoded),
                setup modal para API key,
@@ -839,7 +839,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v3.9 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v4.0 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -2040,46 +2040,45 @@ async function updateItineraryDay(dayNum, updates) {
   }
 }
 
-async function applyItineraryPatches(patches) {
+function applyItineraryPatches(patches) {
   if (!patches || !patches.length) return;
   var changed = [];
-  for (var pi = 0; pi < patches.length; pi++) {
-    var patch = patches[pi];
+
+  patches.forEach(function(patch) {
     var nums = [];
     if (patch.dayNum !== undefined) nums = [patch.dayNum];
     else if (patch.days) nums = patch.days;
-    if (!nums.length) continue;
+    if (!nums.length) return;
 
     var updates = {};
-    if (patch.hotel !== undefined) updates.hotel = patch.hotel;
-    if (patch.city !== undefined) updates.city = patch.city;
-    if (patch.theme !== undefined) updates.theme = patch.theme;
-    if (patch.note !== undefined) updates.note = patch.note;
-    if (patch.morning !== undefined) updates.morning = patch.morning;
-    if (patch.afternoon !== undefined) updates.afternoon = patch.afternoon;
-    if (patch.night !== undefined) updates.night = patch.night;
-    if (patch.transport !== undefined) updates.transport = patch.transport;
-    if (!Object.keys(updates).length) continue;
+    ['hotel','city','theme','note','morning','afternoon','night','transport'].forEach(function(k){
+      if (patch[k] !== undefined) updates[k] = patch[k];
+    });
+    if (!Object.keys(updates).length) return;
 
-    for (var ni = 0; ni < nums.length; ni++) {
-      var dn = nums[ni];
-      // Update local DAYS immediately
-      var day = DAYS.find(function(d){ return d.num === dn; });
-      if (day) {
-        Object.assign(day, updates);
-        changed.push(dn);
+    nums.forEach(function(dn) {
+      // Update local DAYS in-place RIGHT NOW
+      for (var i = 0; i < DAYS.length; i++) {
+        if (DAYS[i].num === dn) {
+          Object.keys(updates).forEach(function(k){ DAYS[i][k] = updates[k]; });
+          changed.push(dn);
+          console.log('Updated DAYS[' + i + '] day ' + dn + ':', updates);
+          break;
+        }
       }
-      // Save to Firebase (non-blocking)
-      updateItineraryDay(dn, updates).catch(function(e){ console.warn('Firebase update failed:', e); });
-    }
-  }
+      // Save to Firebase asynchronously
+      updateItineraryDay(dn, updates).catch(function(e){ console.warn('Firebase day ' + dn + ':', e.message); });
+    });
+  });
 
   if (changed.length > 0) {
-    // Rerender changed days after a short delay to avoid call stack issues
+    console.log('Rerendering days:', changed);
     setTimeout(function() {
-      changed.forEach(function(dn){ rerenderDay(dn); });
-    }, 100);
-    appendMessage('assistant', '✅ Dias ' + changed.join(', ') + ' atualizados no itinerário e salvos no Firebase!');
+      changed.forEach(function(dn) { rerenderDay(dn); });
+      appendMessage('assistant', '✅ Itinerário atualizado — dias ' + changed.join(', ') + ' modificados!');
+    }, 150);
+  } else {
+    console.warn('No days matched in DAYS array. Patches:', JSON.stringify(patches));
   }
 }
 
@@ -2933,7 +2932,7 @@ async function sendChat() {
     tk2.remove();
     appendMessage('assistant', dp3);
     // Apply patches with a tiny delay so message renders first
-    setTimeout(function(){ extractAndApplyPatches(rp3); }, 50);
+    extractAndApplyPatches(rp3);
   } catch(e){tk2.remove();appendMessage('assistant','⚠️ Erro: '+e.message);chatHistory.pop();}
   btn.disabled=false;
 }
