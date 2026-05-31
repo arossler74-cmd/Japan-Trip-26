@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 4.1
+     Version : 4.2
      Date    : 2026-05-23
      Changes : API key via Firebase (não hardcoded),
                setup modal para API key,
@@ -839,7 +839,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v4.1 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v4.2 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -1985,11 +1985,12 @@ async function loadItineraryFromFirebase() {
     snap.forEach(function(doc) { fbDays.push(doc.data()); });
     if (fbDays.length === 0) return;
 
-    // Overwrite DAYS array completely with Firebase data
+    // Update DAYS array in place
+    var fields = ['hotel','city','theme','note','morning','afternoon','night','transport','cityChange'];
     fbDays.forEach(function(fbDay) {
       for (var i = 0; i < DAYS.length; i++) {
         if (DAYS[i].num === fbDay.num) {
-          ['hotel','city','theme','note','morning','afternoon','night','transport','cityChange'].forEach(function(k){
+          fields.forEach(function(k){
             if (fbDay[k] !== undefined) DAYS[i][k] = fbDay[k];
           });
           break;
@@ -1997,20 +1998,70 @@ async function loadItineraryFromFirebase() {
       }
     });
 
-    // Rebuild the entire days container from scratch with updated data
-    var container = document.getElementById('daysContainer');
-    if (container) {
-      container.innerHTML = '';
-      buildDays();
-      // Reload reservations into the new day panels
-      setTimeout(function(){ loadFirebaseReservations(); }, 200);
-    }
+    // Update nav tab labels (city names may have changed)
+    fbDays.forEach(function(fbDay) {
+      var tabCity = document.querySelector('[data-day="' + fbDay.num + '"] .tab-city, #nav-day-' + fbDay.num + ' .tab-city');
+      if (tabCity && fbDay.city) tabCity.textContent = fbDay.city.split('/')[0].split('→')[0].trim();
+    });
+
+    // Rerender each day's content in place (no DOM rebuild)
+    fbDays.forEach(function(fbDay) {
+      updateDayCard(fbDay.num);
+    });
 
     itineraryLoaded = true;
     console.log('✅ Itinerary loaded from Firebase (' + fbDays.length + ' days)');
   } catch(e) {
     console.warn('Could not load itinerary:', e.message);
   }
+}
+
+// Update a day card's content without rebuilding it
+function updateDayCard(dayNum) {
+  var section = document.getElementById('day-' + dayNum);
+  if (!section) return;
+  var day = null;
+  for (var i = 0; i < DAYS.length; i++) { if (DAYS[i].num === dayNum) { day = DAYS[i]; break; } }
+  if (!day) return;
+
+  // Update hotel/city meta chips
+  var metaEl = section.querySelector('.ep-meta');
+  if (metaEl) {
+    metaEl.innerHTML =
+      '<span class="meta-chip city">📍 ' + day.city + '</span>' +
+      '<span class="meta-chip temp">🌡️ ' + (day.temp||'28-33°C') + '</span>' +
+      '<span class="meta-chip hotel">🏨 ' + day.hotel + '</span>';
+  }
+
+  // Update note
+  var noteEl = section.querySelector('.block-note');
+  if (noteEl && day.note) noteEl.innerHTML = '💡 ' + day.note;
+  if (!noteEl && day.note) {
+    var detail = section.querySelector('.day-detail');
+    if (detail) {
+      var newNote = document.createElement('div');
+      newNote.className = 'block-note';
+      newNote.innerHTML = '💡 ' + day.note;
+      detail.insertBefore(newNote, detail.firstChild);
+    }
+  }
+
+  // Update block items - find by position (morning=1st, afternoon=2nd, night=3rd)
+  var timeBlocks = section.querySelectorAll('.time-block');
+  var blockData = [day.morning, day.afternoon, day.night];
+  timeBlocks.forEach(function(block, idx) {
+    if (blockData[idx] && blockData[idx].length) {
+      var items = block.querySelectorAll('.block-item');
+      if (items.length === 0) return; // no items to update
+      var parent = items[0].parentNode;
+      parent.innerHTML = blockData[idx].map(function(t){ return '<div class="block-item">' + t + '</div>'; }).join('');
+    }
+  });
+
+  // Flash gold
+  section.style.transition = 'box-shadow 0.5s';
+  section.style.boxShadow = '0 0 0 2px var(--gold)';
+  setTimeout(function(){ section.style.boxShadow = ''; }, 1500);
 }
 
 async function seedItineraryToFirebase() {
@@ -2109,55 +2160,7 @@ function rerenderDay(dayNum) {
       return;
     }
 
-    // Full rebuild of this day's content
-    var wasOpen = section.querySelector('.day-detail') &&
-                  section.querySelector('.day-detail').style.display !== 'none';
-
-    // Update meta chips
-    var metaEl = section.querySelector('.ep-meta');
-    if (metaEl) {
-      metaEl.innerHTML =
-        '<span class="meta-chip city">📍 ' + day.city + '</span>' +
-        '<span class="meta-chip temp">🌡️ ' + (day.temp||'') + '</span>' +
-        '<span class="meta-chip hotel">🏨 ' + day.hotel + '</span>';
-    }
-
-    // Update note
-    if (day.note) {
-      var noteEl = section.querySelector('.block-note');
-      if (noteEl) noteEl.innerHTML = '💡 ' + day.note;
-    }
-
-    // Update morning/afternoon/night blocks
-    ['morning','afternoon','night'].forEach(function(block) {
-      if (!day[block] || !day[block].length) return;
-      var blockEl = section.querySelector('.block-' + block + ' .block-items');
-      if (!blockEl) {
-        // Try finding by label text
-        var allBlocks = section.querySelectorAll('.time-block');
-        allBlocks.forEach(function(b) {
-          if (b.querySelector('.block-label') &&
-              b.querySelector('.block-label').textContent.toLowerCase().includes(block.slice(0,3))) {
-            blockEl = b.querySelector('.block-items') || b;
-          }
-        });
-      }
-      if (blockEl) {
-        blockEl.innerHTML = day[block].map(function(item){
-          return '<div class="block-item">' + item + '</div>';
-        }).join('');
-      }
-    });
-
-    // Flash gold border
-    section.style.transition = 'box-shadow 0.6s';
-    section.style.boxShadow = '0 0 0 3px var(--gold)';
-    setTimeout(function() { section.style.boxShadow = ''; }, 2500);
-
-    // Update nav tab city label
-    var tab = document.querySelector('[data-day="' + dayNum + '"] .tab-city');
-    if (tab) tab.textContent = day.city.split('/')[0].split('→')[0].trim();
-
+    updateDayCard(dayNum);
     console.log('✅ Rerendered day ' + dayNum);
   } catch(e) { console.warn('rerenderDay error:', e.message); }
 }
@@ -2952,22 +2955,19 @@ async function sendChat() {
     var rp3=d3.content&&d3.content[0]?d3.content[0].text:'Desculpe.';
     chatHistory.push({role:'assistant',content:rp3});saveChatHistory();
     // Strip patch and code blocks from display
+    // Strip data blocks before displaying
     var dp3 = rp3;
-    var markers = ['ITINERARY_PATCH:', 'RECEIPT_DATA:'];
-    for (var mi=0; mi<markers.length; mi++) {
-      var mIdx = dp3.indexOf(markers[mi]);
-      if (mIdx !== -1) dp3 = dp3.slice(0, mIdx).trim();
-    }
-    // Strip trailing --- sections
-    var dashIdx = dp3.lastIndexOf('\n---');
-    if (dashIdx !== -1) dp3 = dp3.slice(0, dashIdx).trim();
-    // Strip any trailing ``` blocks
-    var cbIdx = dp3.lastIndexOf('\n```');
-    if (cbIdx !== -1) dp3 = dp3.slice(0, cbIdx).trim();
-    if (!dp3) dp3 = '✅ Itinerário atualizado!';
+    var stripMarkers = ['ITINERARY_PATCH:', 'RECEIPT_DATA:', '\n---\n## '];
+    stripMarkers.forEach(function(m) {
+      var si = dp3.indexOf(m);
+      if (si !== -1) dp3 = dp3.slice(0, si).trim();
+    });
+    // Strip trailing ``` blocks
+    var lastCb = dp3.lastIndexOf('\n```');
+    if (lastCb > dp3.length - 200) dp3 = dp3.slice(0, lastCb).trim();
+    if (!dp3 || dp3.length < 5) dp3 = '✅ Processado!';
     tk2.remove();
     appendMessage('assistant', dp3);
-    // Apply patches with a tiny delay so message renders first
     extractAndApplyPatches(rp3);
   } catch(e){tk2.remove();appendMessage('assistant','⚠️ Erro: '+e.message);chatHistory.pop();}
   btn.disabled=false;
