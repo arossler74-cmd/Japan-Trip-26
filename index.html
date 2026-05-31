@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 4.0
+     Version : 4.1
      Date    : 2026-05-23
      Changes : API key via Firebase (não hardcoded),
                setup modal para API key,
@@ -839,7 +839,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v4.0 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v4.1 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -1981,28 +1981,35 @@ async function loadItineraryFromFirebase() {
       await seedItineraryToFirebase();
       return;
     }
-    var newDays = [];
-    snap.forEach(function(doc) { newDays.push(doc.data()); });
-    if (newDays.length > 0) {
-      // Update DAYS in place, rerender each changed day safely
-      newDays.forEach(function(fbDay) {
-        var localDay = DAYS.find(function(d){ return d.num === fbDay.num; });
-        if (localDay) {
-          var changed = false;
-          ['hotel','city','theme','note','morning','afternoon','night','transport'].forEach(function(k){
-            if (fbDay[k] !== undefined && JSON.stringify(fbDay[k]) !== JSON.stringify(localDay[k])) {
-              localDay[k] = fbDay[k];
-              changed = true;
-            }
+    var fbDays = [];
+    snap.forEach(function(doc) { fbDays.push(doc.data()); });
+    if (fbDays.length === 0) return;
+
+    // Overwrite DAYS array completely with Firebase data
+    fbDays.forEach(function(fbDay) {
+      for (var i = 0; i < DAYS.length; i++) {
+        if (DAYS[i].num === fbDay.num) {
+          ['hotel','city','theme','note','morning','afternoon','night','transport','cityChange'].forEach(function(k){
+            if (fbDay[k] !== undefined) DAYS[i][k] = fbDay[k];
           });
-          if (changed) rerenderDay(fbDay.num);
+          break;
         }
-      });
-      itineraryLoaded = true;
-      console.log('✅ Itinerary loaded from Firebase');
+      }
+    });
+
+    // Rebuild the entire days container from scratch with updated data
+    var container = document.getElementById('daysContainer');
+    if (container) {
+      container.innerHTML = '';
+      buildDays();
+      // Reload reservations into the new day panels
+      setTimeout(function(){ loadFirebaseReservations(); }, 200);
     }
+
+    itineraryLoaded = true;
+    console.log('✅ Itinerary loaded from Firebase (' + fbDays.length + ' days)');
   } catch(e) {
-    console.warn('Could not load itinerary from Firebase:', e.message);
+    console.warn('Could not load itinerary:', e.message);
   }
 }
 
@@ -2092,11 +2099,21 @@ function rebuildDays() {
 function rerenderDay(dayNum) {
   try {
     var section = document.getElementById('day-' + dayNum);
-    if (!section) return;
     var day = DAYS.find(function(d){ return d.num === dayNum; });
     if (!day) return;
 
-    // Update hotel chip
+    if (!section) {
+      // Day section not found - rebuild all days
+      var container = document.getElementById('daysContainer');
+      if (container) { container.innerHTML = ''; buildDays(); loadFirebaseReservations(); }
+      return;
+    }
+
+    // Full rebuild of this day's content
+    var wasOpen = section.querySelector('.day-detail') &&
+                  section.querySelector('.day-detail').style.display !== 'none';
+
+    // Update meta chips
     var metaEl = section.querySelector('.ep-meta');
     if (metaEl) {
       metaEl.innerHTML =
@@ -2106,23 +2123,42 @@ function rerenderDay(dayNum) {
     }
 
     // Update note
-    var noteEl = section.querySelector('.block-note');
-    if (noteEl && day.note) noteEl.innerHTML = '💡 ' + day.note;
+    if (day.note) {
+      var noteEl = section.querySelector('.block-note');
+      if (noteEl) noteEl.innerHTML = '💡 ' + day.note;
+    }
 
-    // Update day blocks (morning/afternoon/night)
-    var blocks = ['morning','afternoon','night'];
-    blocks.forEach(function(block) {
-      if (!day[block]) return;
+    // Update morning/afternoon/night blocks
+    ['morning','afternoon','night'].forEach(function(block) {
+      if (!day[block] || !day[block].length) return;
       var blockEl = section.querySelector('.block-' + block + ' .block-items');
+      if (!blockEl) {
+        // Try finding by label text
+        var allBlocks = section.querySelectorAll('.time-block');
+        allBlocks.forEach(function(b) {
+          if (b.querySelector('.block-label') &&
+              b.querySelector('.block-label').textContent.toLowerCase().includes(block.slice(0,3))) {
+            blockEl = b.querySelector('.block-items') || b;
+          }
+        });
+      }
       if (blockEl) {
-        blockEl.innerHTML = day[block].map(function(i){ return '<div class="block-item">' + i + '</div>'; }).join('');
+        blockEl.innerHTML = day[block].map(function(item){
+          return '<div class="block-item">' + item + '</div>';
+        }).join('');
       }
     });
 
-    // Flash gold
-    section.style.transition = 'box-shadow 0.5s';
+    // Flash gold border
+    section.style.transition = 'box-shadow 0.6s';
     section.style.boxShadow = '0 0 0 3px var(--gold)';
     setTimeout(function() { section.style.boxShadow = ''; }, 2500);
+
+    // Update nav tab city label
+    var tab = document.querySelector('[data-day="' + dayNum + '"] .tab-city');
+    if (tab) tab.textContent = day.city.split('/')[0].split('→')[0].trim();
+
+    console.log('✅ Rerendered day ' + dayNum);
   } catch(e) { console.warn('rerenderDay error:', e.message); }
 }
 
