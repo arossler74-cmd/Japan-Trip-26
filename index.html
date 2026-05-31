@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 5.0 (Clean Dynamic Engine)
+     Version : 5.1 (Clean Dynamic Engine)
      Date    : 2026-05-31
      Changes : Full rewrite. Firebase = source of truth.
                100% dynamic rendering. Chatbot controls itinerary
@@ -809,7 +809,7 @@ body { background:var(--manga-bg); color:var(--text-main); font-family:var(--fon
 
   <footer style="text-align:center;margin-top:60px;padding:20px;">
     <p style="font-family:var(--font-display);font-size:28px;color:var(--japan-red);">3BOYS JAPAN TRIP 2026</p>
-    <p style="font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em;">v5.0 · 2026-05-31 · 一期一会</p>
+    <p style="font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em;">v5.1 · 2026-05-31 · 一期一会</p>
   </footer>
 </main>
 
@@ -957,10 +957,10 @@ async function saveDayToFirebase(dayNum) {
 
 // ── RENDER: the single render path ────────────────────────────────
 function renderApp() {
-  renderNav();
-  renderDays();
-  renderMustDo();
-  renderCosts();
+  try { renderNav(); } catch(e){ console.error('renderNav:', e); }
+  try { renderDays(); } catch(e){ console.error('renderDays:', e); }
+  try { renderMustDo(); } catch(e){ console.error('renderMustDo:', e); }
+  try { renderCosts(); } catch(e){ console.error('renderCosts:', e); }
 }
 
 function dateToShort(mmddyyyy) {
@@ -999,14 +999,18 @@ function scrollToEl(id) {
 
 function renderDays() {
   var container = document.getElementById('daysContainer');
-  if (!container) return;
+  if (!container) { console.warn('daysContainer not found'); return; }
   var html = '';
   ITINERARY.forEach(function(day) {
-    html += renderDayCard(day);
+    try { html += renderDayCard(day); }
+    catch(e){ console.error('renderDayCard day ' + day.num + ':', e); }
   });
   container.innerHTML = html;
-  // Attach reservation panels
-  ITINERARY.forEach(function(day){ renderDayReservations(day.num); });
+  console.log('✅ Rendered ' + ITINERARY.length + ' day cards');
+  // Attach reservation panels (don't let failure block render)
+  ITINERARY.forEach(function(day){
+    try { renderDayReservations(day.num); } catch(e){}
+  });
 }
 
 function listItems(arr) {
@@ -1643,17 +1647,23 @@ async function syncFromReservations() {
 }
 
 // ── INIT ──────────────────────────────────────────────────────────
-document.addEventListener('DOMContentLoaded', async function() {
-  setupControls();
-  loadLeafletAndMap();
-  // Render with defaults first (instant display)
+document.addEventListener('DOMContentLoaded', function() {
+  try { setupControls(); } catch(e){ console.error(e); }
+  // Render with defaults FIRST (instant, no async)
   ITINERARY = JSON.parse(JSON.stringify(DEFAULT_ITINERARY));
   renderApp();
-  // Then load real data from Firebase and re-render
-  await loadApiKey();
-  await loadAllData();
-  renderApp();
-  await loadChatHistory();
+  try { loadLeafletAndMap(); } catch(e){ console.error(e); }
+  // Then load Firebase data asynchronously (won't block initial render)
+  (async function() {
+    try {
+      await loadApiKey();
+      await loadAllData();
+      renderApp();
+      await loadChatHistory();
+    } catch(e) {
+      console.error('Firebase load error (app still works with defaults):', e);
+    }
+  })();
 });
 
 </script>
