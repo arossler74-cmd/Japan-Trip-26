@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 3.6
+     Version : 3.7
      Date    : 2026-05-23
      Changes : API key via Firebase (não hardcoded),
                setup modal para API key,
@@ -839,7 +839,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
   <span class="footer-kanji">東京 · 京都 · 大阪 · 富士山</span>
   <p class="footer-meta">JUL 23 → AUG 2, 2026 &nbsp;·&nbsp; 3 ADULTS + 3 TEENS</p>
   <p class="footer-meta" style="margin-top:8px;font-size:13px;color:var(--gold)">一期一会 — Once in a lifetime</p>
-  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v3.6 · 2026-05-23</p>
+  <p class="footer-meta" style="margin-top:12px;font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em">v3.7 · 2026-05-23</p>
 </footer>
 
 <script>
@@ -2129,17 +2129,26 @@ function rerenderDay(dayNum) {
 
 // ── API KEY MANAGEMENT (Firebase) ─────────────────────────────
 async function loadApiKey() {
-  try {
-    await initFirebase();
-    var doc = await db.collection('config').doc('anthropic').get();
-    if (doc.exists && doc.data().key) {
-      ANTHROPIC_KEY = doc.data().key;
-      console.log('✅ API key loaded from Firebase');
-      updateKeyStatusIndicator(true);
-      return true;
+  // Try up to 3 times with delay — Firebase SDKs load async
+  for (var attempt = 1; attempt <= 3; attempt++) {
+    try {
+      await initFirebase();
+      var docSnap = await db.collection('config').doc('anthropic').get();
+      if (docSnap.exists && docSnap.data().key) {
+        ANTHROPIC_KEY = docSnap.data().key;
+        console.log('✅ API key loaded from Firebase (attempt ' + attempt + ')');
+        updateKeyStatusIndicator(true);
+        return true;
+      } else {
+        console.log('No API key in Firebase yet (attempt ' + attempt + ')');
+        break; // Key genuinely not saved — no point retrying
+      }
+    } catch(e) {
+      console.warn('loadApiKey attempt ' + attempt + ' failed:', e.message);
+      if (attempt < 3) {
+        await new Promise(function(r){ setTimeout(r, 800 * attempt); });
+      }
     }
-  } catch(e) {
-    console.warn('Could not load API key:', e.message);
   }
   // No key found — show setup modal
   document.getElementById('apikeyModal').classList.add('active');
@@ -2189,14 +2198,21 @@ async function saveApiKey() {
     await db.collection('config').doc('anthropic').set({ key: key, updatedAt: new Date().toISOString() });
     ANTHROPIC_KEY = key;
     updateKeyStatusIndicator(true);
-    status.style.color = '#2ecc71';
-    status.textContent = '✅ API key salva e ativa!';
+    // Verify it was saved by reading back
+    var verify = await db.collection('config').doc('anthropic').get();
+    if (verify.exists && verify.data().key === key) {
+      status.style.color = '#2ecc71';
+      status.textContent = '✅ Salva e verificada no Firebase!';
+    } else {
+      status.style.color = 'var(--gold)';
+      status.textContent = '⚠️ Salva localmente — Firebase não confirmou';
+    }
     setTimeout(function() {
       document.getElementById('apikeyModal').classList.remove('active');
       document.getElementById('apikeyInput').value = '';
       status.textContent = '';
       btn.disabled = false; btn.textContent = '💾 Salvar e Ativar';
-    }, 1200);
+    }, 1500);
   } catch(e) {
     status.style.color = '#e74c3c';
     status.textContent = '❌ ' + (e.message || 'Erro ao verificar key');
