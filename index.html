@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <!-- ============================================================
      3BOYS JAPAN TRIP 2026 — Trip App
-     Version : 5.1 (Clean Dynamic Engine)
+     Version : 5.2 (Clean Dynamic Engine)
      Date    : 2026-05-31
      Changes : Full rewrite. Firebase = source of truth.
                100% dynamic rendering. Chatbot controls itinerary
@@ -279,7 +279,7 @@ body::after {
 .main-content { padding: 50px 0 40px; position: relative; z-index: 10; }
 
 .day-section {
-  margin-bottom: 32px; opacity: 0; transform: translateY(16px);
+  margin-bottom: 32px; opacity: 1; transform: none;
   transition: opacity 0.4s, transform 0.4s; scroll-margin-top: 80px;
   width: 100%;
 }
@@ -705,6 +705,7 @@ tfoot .total-row .amt-usd { font-size: 20px; color: var(--gold); }
 .tab-icon { font-size:18px; margin-top:2px; }
 .nav-section { background:rgba(201,168,76,0.03); }
 
+.day-section{opacity:1!important;transform:none!important;}
 </style>
 <style>
 :root {
@@ -809,7 +810,7 @@ body { background:var(--manga-bg); color:var(--text-main); font-family:var(--fon
 
   <footer style="text-align:center;margin-top:60px;padding:20px;">
     <p style="font-family:var(--font-display);font-size:28px;color:var(--japan-red);">3BOYS JAPAN TRIP 2026</p>
-    <p style="font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em;">v5.1 · 2026-05-31 · 一期一会</p>
+    <p style="font-family:var(--font-mono);font-size:9px;color:rgba(200,180,150,0.3);letter-spacing:.1em;">v5.2 · 2026-05-31 · 一期一会</p>
   </footer>
 </main>
 
