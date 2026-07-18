@@ -799,12 +799,12 @@ body { background:var(--manga-bg); color:var(--text-main); font-family:var(--fon
 #bottomDock { position:fixed; left:14px; right:14px; bottom:calc(12px + env(safe-area-inset-bottom,0px)); height:58px; z-index:950; display:flex; background:rgba(10,10,20,.92); backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px); border:1.5px solid rgba(201,168,76,.4); border-radius:29px; box-shadow:0 6px 24px rgba(0,0,0,.6), 0 0 18px rgba(0,212,255,.12); max-width:520px; margin:0 auto; }
 [data-theme="light"] #bottomDock { background:rgba(245,240,232,.92); }
 .dock-item { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:2px; cursor:pointer; font-family:var(--font-mono); font-size:7.5px; letter-spacing:.08em; color:rgba(216,196,160,.55); transition:color .2s; -webkit-tap-highlight-color:transparent; user-select:none; }
-.dock-item .dk-ico { font-size:17px; opacity:.6; transition:all .2s; }
+.dock-item .dk-ico { font-size:17px; opacity:.6; transition:all .25s cubic-bezier(.34,1.56,.64,1); display:flex; align-items:center; justify-content:center; width:30px; height:30px; border-radius:50%; border:3px solid transparent; }
 .dock-item:active { transform:scale(.92); }
 .dock-item.dk-active { color:var(--gold); }
-.dock-item.dk-active .dk-ico { opacity:1; filter:drop-shadow(0 0 6px rgba(201,168,76,.8)); transform:translateY(-1px); }
-.dock-circle { width:46px; height:46px; border-radius:50%; background:var(--japan-red); border:3px solid #0a0a14; display:flex; align-items:center; justify-content:center; font-size:19px; margin-top:-22px; box-shadow:0 0 14px rgba(192,57,43,.6); transition:box-shadow .2s; }
-.dock-item.dk-active .dock-circle { box-shadow:0 0 18px rgba(192,57,43,.9), 0 0 26px rgba(201,168,76,.4); }
+.dock-item.dk-active .dk-ico { opacity:1; width:46px; height:46px; background:var(--japan-red); border-color:#0a0a14; margin-top:-26px; font-size:19px; box-shadow:0 0 14px rgba(192,57,43,.7), 0 0 24px rgba(201,168,76,.3); }
+#backTopBtn { position:fixed; right:16px; bottom:calc(84px + env(safe-area-inset-bottom,0px)); width:42px; height:42px; border-radius:50%; background:rgba(10,10,20,.9); border:2px solid var(--gold); color:var(--gold); font-size:16px; cursor:pointer; z-index:930; box-shadow:0 4px 14px rgba(0,0,0,.5); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); }
+#backTopBtn:active { transform:scale(.9); }
 #dockSheet, #dockMore { position:fixed; z-index:940; opacity:0; pointer-events:none; transform:translateY(14px); transition:opacity .28s cubic-bezier(.16,1,.3,1), transform .28s cubic-bezier(.16,1,.3,1); }
 #dockSheet.open, #dockMore.open { opacity:1; pointer-events:auto; transform:none; }
 #dockSheet { left:10px; right:10px; bottom:calc(84px + env(safe-area-inset-bottom,0px)); max-width:560px; margin:0 auto; background:rgba(18,18,31,.9); backdrop-filter:blur(14px); -webkit-backdrop-filter:blur(14px); border:1.5px solid rgba(0,212,255,.35); border-radius:14px; padding:12px; max-height:56vh; overflow-y:auto; box-shadow:0 -8px 30px rgba(0,0,0,.5); }
@@ -859,7 +859,7 @@ body { background:var(--manga-bg); color:var(--text-main); font-family:var(--fon
   <video id="introVideo" src="intro.mp4" playsinline muted preload="auto"></video>
   <div class="intro-ep">EP. 00 — 三人の旅</div>
   <button class="intro-sound" id="introSound" onclick="toggleIntroSound()">🔇</button>
-  <button class="intro-skip" id="introSkip" onclick="endIntro()">PULAR ▸</button>
+  <button class="intro-skip" id="introSkip" onclick="endIntro(true)">PULAR ▸</button>
   <div id="introProgress"></div>
 </div>
 
@@ -872,6 +872,7 @@ body { background:var(--manga-bg); color:var(--text-main); font-family:var(--fon
   <div class="dm-item" onclick="closeDockLayers();scrollToEl('mapa')">🗾 MAPA</div>
   <div class="dm-item" onclick="closeDockLayers();scrollToEl('custos')">💴 CUSTOS</div>
   <div class="dm-item" onclick="toggleTheme()">☀ TEMA</div>
+  <div class="dm-item" onclick="playIntro()">🎬 VER INTRO</div>
   <div class="dm-item" onclick="closeDockLayers();window.scrollTo({top:0,behavior:'smooth'})">⬆ TOPO</div>
 </div>
 <div id="chatPanel">
@@ -884,8 +885,9 @@ body { background:var(--manga-bg); color:var(--text-main); font-family:var(--fon
   </div>
   <div id="chatPanelBody"></div>
 </div>
+<button id="backTopBtn" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Voltar ao topo">↑</button>
 <nav id="bottomDock">
-  <div class="dock-item" id="dock-days" onclick="dockTap('days')"><div class="dock-circle">📅</div><span>DIAS</span></div>
+  <div class="dock-item dk-active" id="dock-days" onclick="dockTap('days')"><span class="dk-ico">📅</span><span>DIAS</span></div>
   <div class="dock-item" id="dock-mustdo" onclick="dockTap('mustdo')"><span class="dk-ico">⭐</span><span>MUST-DO</span></div>
   <div class="dock-item" id="dock-timeline" onclick="dockTap('timeline')"><span class="dk-ico">🧭</span><span>TIMELINE</span></div>
   <div class="dock-item" id="dock-chat" onclick="dockTap('chat')"><span class="dk-ico">🤖</span><span>CHAT</span></div>
@@ -1185,14 +1187,35 @@ function setupDock() {
 }
 
 // ── v5.8: INTRO SPLASH (first visit only) ────────────────────────
-function endIntro() {
+function endIntro(markSeen) {
   var splash = document.getElementById('introSplash');
-  if (!splash || splash.dataset.done) return;
-  splash.dataset.done = '1';
-  try { localStorage.setItem('3boys_intro_seen', '1'); } catch(e) {}
+  var v = document.getElementById('introVideo');
+  if (!splash || !splash.dataset.on) return;
+  delete splash.dataset.on;
+  if (markSeen) { try { localStorage.setItem('3boys_intro_seen', '1'); } catch(e) {} }
   splash.style.transition = 'opacity .6s';
   splash.style.opacity = '0';
-  setTimeout(function() { splash.remove(); document.body.style.overflow = ''; }, 620);
+  setTimeout(function() {
+    splash.style.display = 'none';
+    splash.style.opacity = '1';
+    document.body.style.overflow = '';
+    if (v) v.pause();
+  }, 620);
+}
+function playIntro() {
+  closeDockLayers();
+  var splash = document.getElementById('introSplash');
+  var v = document.getElementById('introVideo');
+  if (!splash || !v) return;
+  splash.dataset.on = '1';
+  splash.style.display = 'block';
+  splash.style.opacity = '1';
+  document.body.style.overflow = 'hidden';
+  var s = document.getElementById('introSkip');
+  if (s) s.style.display = 'block';
+  v.currentTime = 0;
+  var pr = v.play();
+  if (pr && pr.catch) pr.catch(function() {});
 }
 function toggleIntroSound() {
   var v = document.getElementById('introVideo');
@@ -1202,24 +1225,26 @@ function toggleIntroSound() {
   if (b) b.textContent = v.muted ? '🔇' : '🔊';
 }
 function setupIntro() {
-  var seen = false;
-  try { seen = !!localStorage.getItem('3boys_intro_seen'); } catch(e) { seen = true; }
   var splash = document.getElementById('introSplash');
   var v = document.getElementById('introVideo');
-  if (seen || !splash || !v) { if (splash) splash.remove(); return; }
-  splash.style.display = 'block';
-  document.body.style.overflow = 'hidden';
-  v.addEventListener('ended', endIntro);
-  v.addEventListener('error', endIntro);
+  if (!splash || !v) return;
+  v.addEventListener('ended', function() { endIntro(true); });
+  v.addEventListener('error', function() { endIntro(false); });
   v.addEventListener('timeupdate', function() {
     var p = document.getElementById('introProgress');
     if (p && v.duration) p.style.width = (v.currentTime / v.duration * 100) + '%';
   });
+  var seen = false;
+  try { seen = !!localStorage.getItem('3boys_intro_seen'); } catch(e) { seen = true; }
+  if (seen) return;
+  splash.dataset.on = '1';
+  splash.style.display = 'block';
+  document.body.style.overflow = 'hidden';
   setTimeout(function() { var s = document.getElementById('introSkip'); if (s) s.style.display = 'block'; }, 2000);
-  // safety: if video never starts (file missing / blocked), bail out
-  setTimeout(function() { if (v.readyState < 2 && !splash.dataset.done) endIntro(); }, 5000);
+  // if the video never loads (missing file / blocked), bail WITHOUT marking as seen
+  setTimeout(function() { if (v.readyState < 2) endIntro(false); }, 5000);
   var pr = v.play();
-  if (pr && pr.catch) pr.catch(function() { endIntro(); });
+  if (pr && pr.catch) pr.catch(function() { endIntro(false); });
 }
 
 function smoothScrollToEl(el) {
