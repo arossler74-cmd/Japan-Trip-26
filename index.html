@@ -831,6 +831,18 @@ body { background:var(--manga-bg); color:var(--text-main); font-family:var(--fon
 #chatPanel { position:fixed; left:10px; right:10px; top:6vh; bottom:calc(84px + env(safe-area-inset-bottom,0px)); max-width:560px; margin:0 auto; z-index:945; background:var(--manga-bg); border:2px solid var(--japan-red); border-radius:14px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 14px 44px rgba(0,0,0,.7); opacity:0; pointer-events:none; transform:translateY(20px) scale(.98); transition:opacity .3s cubic-bezier(.16,1,.3,1), transform .3s cubic-bezier(.16,1,.3,1); }
 #chatPanel.open { opacity:1; pointer-events:auto; transform:none; }
 .cp-head { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(192,57,43,.15); border-bottom:1px solid rgba(192,57,43,.3); flex-shrink:0; }
+
+#phrasesPanel { position:fixed; left:10px; right:10px; top:6vh; bottom:calc(84px + env(safe-area-inset-bottom,0px)); max-width:560px; margin:0 auto; z-index:945; background:var(--manga-bg); border:2px solid var(--japan-red); border-radius:14px; display:flex; flex-direction:column; overflow:hidden; box-shadow:0 14px 44px rgba(0,0,0,.7); opacity:0; pointer-events:none; transform:translateY(20px) scale(.98); transition:opacity .3s cubic-bezier(.16,1,.3,1), transform .3s cubic-bezier(.16,1,.3,1); }
+#phrasesPanel.open { opacity:1; pointer-events:auto; transform:none; }
+.pp-head { display:flex; justify-content:space-between; align-items:center; padding:10px 14px; background:rgba(192,57,43,.15); border-bottom:1px solid rgba(192,57,43,.3); flex-shrink:0; }
+.pp-title { font-family:var(--font-mono); font-size:12px; letter-spacing:.08em; color:var(--text-main); }
+.pp-body { flex:1; overflow-y:auto; padding:14px; display:flex; flex-direction:column; gap:10px; -webkit-overflow-scrolling:touch; }
+.pp-card { background:rgba(201,168,76,.07); border:1px solid rgba(201,168,76,.25); border-radius:10px; padding:10px 12px; }
+.pp-pt { font-family:var(--font-mono); font-size:10px; color:var(--gold); letter-spacing:.06em; text-transform:uppercase; margin-bottom:4px; opacity:.85; }
+.pp-jp { font-size:19px; font-weight:700; color:var(--text-main); margin-bottom:2px; line-height:1.25; }
+.pp-romaji { font-size:13px; color:var(--gold); font-style:italic; margin-bottom:2px; }
+.pp-phon { font-family:var(--font-mono); font-size:11px; color:var(--text-main); opacity:.6; }
+
 .cp-title { font-family:var(--font-display); font-size:16px; letter-spacing:.08em; color:var(--japan-red); }
 #chatPanelBody { flex:1; min-height:0; display:flex; flex-direction:column; }
 #chatPanelBody .chat-wrapper { height:100% !important; border:none !important; border-radius:0 !important; flex:1; min-height:0; }
@@ -871,9 +883,31 @@ body { background:var(--manga-bg); color:var(--text-main); font-family:var(--fon
 <div id="dockMore">
   <div class="dm-item" onclick="closeDockLayers();scrollToEl('mapa')">🗾 MAPA</div>
   <div class="dm-item" onclick="closeDockLayers();scrollToEl('custos')">💴 CUSTOS</div>
+  <div class="dm-item" onclick="openPhrasesPanel()">🗣️ FRASES</div>
   <div class="dm-item" onclick="toggleTheme()">☀ TEMA</div>
   <div class="dm-item" onclick="playIntro()">🎬 VER INTRO</div>
   <div class="dm-item" onclick="closeDockLayers();window.scrollTo({top:0,behavior:'smooth'})">⬆ TOPO</div>
+</div>
+<div id="phrasesPanel">
+  <div class="pp-head">
+    <span class="pp-title">🗣️ FRASES ESSENCIAIS</span>
+    <span class="ds-close" onclick="closeDockLayers()">✕</span>
+  </div>
+  <div class="pp-body">
+<div class="pp-card"><div class="pp-pt">Bom dia</div><div class="pp-jp">Ohayou gozaimasu</div><div class="pp-phon">ô-ha-iô go-zai-más</div></div>
+<div class="pp-card"><div class="pp-pt">Olá / Boa tarde</div><div class="pp-jp">Konnichiwa</div><div class="pp-phon">kon-ni-tchi-uá</div></div>
+<div class="pp-card"><div class="pp-pt">Boa noite (ao chegar)</div><div class="pp-jp">Konbanwa</div><div class="pp-phon">kon-ban-uá</div></div>
+<div class="pp-card"><div class="pp-pt">Boa noite (para dormir)</div><div class="pp-jp">Oyasuminasai</div><div class="pp-phon">o-ia-su-mi-na-sái</div></div>
+<div class="pp-card"><div class="pp-pt">Obrigado(a)</div><div class="pp-jp">Arigatou gozaimasu</div><div class="pp-phon">a-ri-ga-tô go-zai-más</div></div>
+<div class="pp-card"><div class="pp-pt">Com licença / Desculpe</div><div class="pp-jp">Sumimasen</div><div class="pp-phon">su-mi-ma-sên</div></div>
+<div class="pp-card"><div class="pp-pt">Por favor</div><div class="pp-jp">Onegaishimasu</div><div class="pp-phon">o-ne-gai-shi-más</div></div>
+<div class="pp-card"><div class="pp-pt">Até mais / Tchau</div><div class="pp-jp">Jaa, ne</div><div class="pp-phon">jáá nê</div></div>
+<div class="pp-card"><div class="pp-pt">Não entendo</div><div class="pp-jp">Wakarimasen</div><div class="pp-phon">ua-ka-ri-ma-sên</div></div>
+<div class="pp-card"><div class="pp-pt">Você fala inglês?</div><div class="pp-jp">Eigo o hanasemasu ka?</div><div class="pp-phon">êi-go ô ha-na-se-más ka?</div></div>
+<div class="pp-card"><div class="pp-pt">A conta, por favor.</div><div class="pp-jp">Okaikei onegaishimasu</div><div class="pp-phon">o-kai-kêi o-ne-gai-shi-más</div></div>
+<div class="pp-card"><div class="pp-pt">Carta de vinhos, por favor.</div><div class="pp-jp">Wain risuto o onegaishimasu</div><div class="pp-phon">uáin ri-su-to ô o-ne-gai-shi-más</div></div>
+<div class="pp-card"><div class="pp-pt">Cardápio de bebidas, por favor.</div><div class="pp-jp">Dorinku menyū o onegaishimasu</div><div class="pp-phon">do-rin-ku me-ni-ú ô o-ne-gai-shi-más</div></div>
+  </div>
 </div>
 <div id="chatPanel">
   <div class="cp-head">
@@ -1148,10 +1182,15 @@ function renderDaySheet() {
 }
 function daySheetGo(num) { closeDockLayers(); scrollToDay(num); }
 function closeDockLayers() {
-  ['dockSheet', 'dockMore', 'chatPanel'].forEach(function(id) {
+  ['dockSheet', 'dockMore', 'chatPanel', 'phrasesPanel'].forEach(function(id) {
     var el = document.getElementById(id);
     if (el) el.classList.remove('open');
   });
+}
+function openPhrasesPanel() {
+  var wasOpen = document.getElementById('phrasesPanel').classList.contains('open');
+  closeDockLayers();
+  if (!wasOpen) document.getElementById('phrasesPanel').classList.add('open');
 }
 function setDockActive(name) {
   document.querySelectorAll('.dock-item.dk-active').forEach(function(d) { d.classList.remove('dk-active'); });
@@ -1181,7 +1220,7 @@ function setupDock() {
   var body = document.getElementById('chatPanelBody');
   if (wrapper && body) body.appendChild(wrapper);
   document.addEventListener('click', function(e) {
-    if (e.target.closest('#bottomDock') || e.target.closest('#dockSheet') || e.target.closest('#dockMore') || e.target.closest('#chatPanel') || e.target.closest('.apikey-overlay')) return;
+    if (e.target.closest('#bottomDock') || e.target.closest('#dockSheet') || e.target.closest('#dockMore') || e.target.closest('#chatPanel') || e.target.closest('#phrasesPanel') || e.target.closest('.apikey-overlay')) return;
     closeDockLayers();
   });
 }
