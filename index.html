@@ -888,14 +888,13 @@ body { background:var(--manga-bg); color:var(--text-main); font-family:var(--fon
 <div id="dockMore">
   <div class="dm-item" onclick="closeDockLayers();scrollToEl('mapa')">🗾 MAPA</div>
   <div class="dm-item" onclick="closeDockLayers();scrollToEl('custos')">💴 CUSTOS</div>
-  <div class="dm-item" onclick="openPhrasesPanel()">🗣️ FRASES</div>
   <div class="dm-item" onclick="toggleTheme()">☀ TEMA</div>
   <div class="dm-item" onclick="playIntro()">🎬 VER INTRO</div>
   <div class="dm-item" onclick="closeDockLayers();window.scrollTo({top:0,behavior:'smooth'})">⬆ TOPO</div>
 </div>
 <div id="phrasesPanel">
   <div class="pp-head">
-    <span class="pp-title">🗣️ FRASES ESSENCIAIS</span>
+    <span class="pp-title">🗣️ ESSENTIAL PHRASES</span>
     <span class="ds-close" onclick="closeDockLayers()">✕</span>
   </div>
   <div class="pp-body">
@@ -929,6 +928,7 @@ body { background:var(--manga-bg); color:var(--text-main); font-family:var(--fon
   <div class="dock-item dk-active" id="dock-days" onclick="dockTap('days')"><span class="dk-ico">📅</span><span>DIAS</span></div>
   <div class="dock-item" id="dock-mustdo" onclick="dockTap('mustdo')"><span class="dk-ico">⭐</span><span>MUST-DO</span></div>
   <div class="dock-item" id="dock-timeline" onclick="dockTap('timeline')"><span class="dk-ico">🧭</span><span>TIMELINE</span></div>
+  <div class="dock-item" id="dock-phrases" onclick="dockTap('phrases')"><span class="dk-ico">🗣️</span><span>PHRASES</span></div>
   <div class="dock-item" id="dock-chat" onclick="dockTap('chat')"><span class="dk-ico">🤖</span><span>CHAT</span></div>
   <div class="dock-item" id="dock-more" onclick="dockTap('more')"><span class="dk-ico">⋯</span><span>MAIS</span></div>
 </nav>
@@ -1192,11 +1192,6 @@ function closeDockLayers() {
     if (el) el.classList.remove('open');
   });
 }
-function openPhrasesPanel() {
-  var wasOpen = document.getElementById('phrasesPanel').classList.contains('open');
-  closeDockLayers();
-  if (!wasOpen) document.getElementById('phrasesPanel').classList.add('open');
-}
 function speakJP(btn, text) {
   if (!('speechSynthesis' in window)) { alert('Áudio não suportado neste navegador.'); return; }
   window.speechSynthesis.cancel();
@@ -1221,12 +1216,14 @@ function dockTap(what) {
   var wasOpen = {
     days: document.getElementById('dockSheet').classList.contains('open'),
     more: document.getElementById('dockMore').classList.contains('open'),
-    chat: document.getElementById('chatPanel').classList.contains('open')
+    chat: document.getElementById('chatPanel').classList.contains('open'),
+    phrases: document.getElementById('phrasesPanel').classList.contains('open')
   };
   closeDockLayers();
   if (what === 'days' && !wasOpen.days) { document.getElementById('dockSheet').classList.add('open'); setDockActive('days'); }
   else if (what === 'more' && !wasOpen.more) { document.getElementById('dockMore').classList.add('open'); }
   else if (what === 'chat' && !wasOpen.chat) { document.getElementById('chatPanel').classList.add('open'); setDockActive('chat'); }
+  else if (what === 'phrases' && !wasOpen.phrases) { document.getElementById('phrasesPanel').classList.add('open'); setDockActive('phrases'); }
   else if (what === 'mustdo') { setDockActive('mustdo'); scrollToEl('mustdo'); }
   else if (what === 'timeline') { setDockActive('timeline'); scrollToEl('timeline'); }
 }
