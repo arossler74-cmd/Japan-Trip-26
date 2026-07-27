@@ -14,6 +14,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>3Boys Japan Trip 2026</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%E2%9B%A9%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
@@ -840,6 +841,10 @@ body { background:var(--manga-bg); color:var(--text-main); font-family:var(--fon
 .pp-card { background:rgba(201,168,76,.07); border:1px solid rgba(201,168,76,.25); border-radius:10px; padding:10px 12px; }
 .pp-pt { font-family:var(--font-mono); font-size:10px; color:var(--gold); letter-spacing:.06em; text-transform:uppercase; margin-bottom:4px; opacity:.85; }
 .pp-jp { font-size:19px; font-weight:700; color:var(--text-main); margin-bottom:2px; line-height:1.25; }
+.pp-jp-row { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.pp-play { flex-shrink:0; width:30px; height:30px; border-radius:50%; border:1.5px solid rgba(201,168,76,.5); background:rgba(201,168,76,.1); color:var(--gold); font-size:14px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.pp-play:active { background:rgba(201,168,76,.3); transform:scale(.94); }
+.pp-play.speaking { background:var(--gold); color:#1a1a2e; }
 .pp-romaji { font-size:13px; color:var(--gold); font-style:italic; margin-bottom:2px; }
 .pp-phon { font-family:var(--font-mono); font-size:11px; color:var(--text-main); opacity:.6; }
 
@@ -894,19 +899,19 @@ body { background:var(--manga-bg); color:var(--text-main); font-family:var(--fon
     <span class="ds-close" onclick="closeDockLayers()">✕</span>
   </div>
   <div class="pp-body">
-<div class="pp-card"><div class="pp-pt">Bom dia</div><div class="pp-jp">Ohayou gozaimasu</div><div class="pp-phon">ô-ha-iô go-zai-más</div></div>
-<div class="pp-card"><div class="pp-pt">Olá / Boa tarde</div><div class="pp-jp">Konnichiwa</div><div class="pp-phon">kon-ni-tchi-uá</div></div>
-<div class="pp-card"><div class="pp-pt">Boa noite (ao chegar)</div><div class="pp-jp">Konbanwa</div><div class="pp-phon">kon-ban-uá</div></div>
-<div class="pp-card"><div class="pp-pt">Boa noite (para dormir)</div><div class="pp-jp">Oyasuminasai</div><div class="pp-phon">o-ia-su-mi-na-sái</div></div>
-<div class="pp-card"><div class="pp-pt">Obrigado(a)</div><div class="pp-jp">Arigatou gozaimasu</div><div class="pp-phon">a-ri-ga-tô go-zai-más</div></div>
-<div class="pp-card"><div class="pp-pt">Com licença / Desculpe</div><div class="pp-jp">Sumimasen</div><div class="pp-phon">su-mi-ma-sên</div></div>
-<div class="pp-card"><div class="pp-pt">Por favor</div><div class="pp-jp">Onegaishimasu</div><div class="pp-phon">o-ne-gai-shi-más</div></div>
-<div class="pp-card"><div class="pp-pt">Até mais / Tchau</div><div class="pp-jp">Jaa, ne</div><div class="pp-phon">jáá nê</div></div>
-<div class="pp-card"><div class="pp-pt">Não entendo</div><div class="pp-jp">Wakarimasen</div><div class="pp-phon">ua-ka-ri-ma-sên</div></div>
-<div class="pp-card"><div class="pp-pt">Você fala inglês?</div><div class="pp-jp">Eigo o hanasemasu ka?</div><div class="pp-phon">êi-go ô ha-na-se-más ka?</div></div>
-<div class="pp-card"><div class="pp-pt">A conta, por favor.</div><div class="pp-jp">Okaikei onegaishimasu</div><div class="pp-phon">o-kai-kêi o-ne-gai-shi-más</div></div>
-<div class="pp-card"><div class="pp-pt">Carta de vinhos, por favor.</div><div class="pp-jp">Wain risuto o onegaishimasu</div><div class="pp-phon">uáin ri-su-to ô o-ne-gai-shi-más</div></div>
-<div class="pp-card"><div class="pp-pt">Cardápio de bebidas, por favor.</div><div class="pp-jp">Dorinku menyū o onegaishimasu</div><div class="pp-phon">do-rin-ku me-ni-ú ô o-ne-gai-shi-más</div></div>
+<div class="pp-card"><div class="pp-pt">Good morning</div><div class="pp-jp-row"><span class="pp-jp">Ohayou gozaimasu</span><button class="pp-play" onclick="speakJP(this,'Ohayou gozaimasu')" aria-label="Play audio">🔊</button></div><div class="pp-phon">ô-ha-iô go-zai-más</div></div>
+<div class="pp-card"><div class="pp-pt">Hello / Good afternoon</div><div class="pp-jp-row"><span class="pp-jp">Konnichiwa</span><button class="pp-play" onclick="speakJP(this,'Konnichiwa')" aria-label="Play audio">🔊</button></div><div class="pp-phon">kon-ni-tchi-uá</div></div>
+<div class="pp-card"><div class="pp-pt">Good evening (arriving)</div><div class="pp-jp-row"><span class="pp-jp">Konbanwa</span><button class="pp-play" onclick="speakJP(this,'Konbanwa')" aria-label="Play audio">🔊</button></div><div class="pp-phon">kon-ban-uá</div></div>
+<div class="pp-card"><div class="pp-pt">Good night (going to sleep)</div><div class="pp-jp-row"><span class="pp-jp">Oyasuminasai</span><button class="pp-play" onclick="speakJP(this,'Oyasuminasai')" aria-label="Play audio">🔊</button></div><div class="pp-phon">o-ia-su-mi-na-sái</div></div>
+<div class="pp-card"><div class="pp-pt">Thank you</div><div class="pp-jp-row"><span class="pp-jp">Arigatou gozaimasu</span><button class="pp-play" onclick="speakJP(this,'Arigatou gozaimasu')" aria-label="Play audio">🔊</button></div><div class="pp-phon">a-ri-ga-tô go-zai-más</div></div>
+<div class="pp-card"><div class="pp-pt">Excuse me / Sorry</div><div class="pp-jp-row"><span class="pp-jp">Sumimasen</span><button class="pp-play" onclick="speakJP(this,'Sumimasen')" aria-label="Play audio">🔊</button></div><div class="pp-phon">su-mi-ma-sên</div></div>
+<div class="pp-card"><div class="pp-pt">Please</div><div class="pp-jp-row"><span class="pp-jp">Onegaishimasu</span><button class="pp-play" onclick="speakJP(this,'Onegaishimasu')" aria-label="Play audio">🔊</button></div><div class="pp-phon">o-ne-gai-shi-más</div></div>
+<div class="pp-card"><div class="pp-pt">See you / Bye</div><div class="pp-jp-row"><span class="pp-jp">Jaa, ne</span><button class="pp-play" onclick="speakJP(this,'Jaa, ne')" aria-label="Play audio">🔊</button></div><div class="pp-phon">jáá nê</div></div>
+<div class="pp-card"><div class="pp-pt">I don't understand</div><div class="pp-jp-row"><span class="pp-jp">Wakarimasen</span><button class="pp-play" onclick="speakJP(this,'Wakarimasen')" aria-label="Play audio">🔊</button></div><div class="pp-phon">ua-ka-ri-ma-sên</div></div>
+<div class="pp-card"><div class="pp-pt">Do you speak English?</div><div class="pp-jp-row"><span class="pp-jp">Eigo o hanasemasu ka?</span><button class="pp-play" onclick="speakJP(this,'Eigo o hanasemasu ka?')" aria-label="Play audio">🔊</button></div><div class="pp-phon">êi-go ô ha-na-se-más ka?</div></div>
+<div class="pp-card"><div class="pp-pt">The check, please.</div><div class="pp-jp-row"><span class="pp-jp">Okaikei onegaishimasu</span><button class="pp-play" onclick="speakJP(this,'Okaikei onegaishimasu')" aria-label="Play audio">🔊</button></div><div class="pp-phon">o-kai-kêi o-ne-gai-shi-más</div></div>
+<div class="pp-card"><div class="pp-pt">Wine list, please.</div><div class="pp-jp-row"><span class="pp-jp">Wain risuto o onegaishimasu</span><button class="pp-play" onclick="speakJP(this,'Wain risuto o onegaishimasu')" aria-label="Play audio">🔊</button></div><div class="pp-phon">uáin ri-su-to ô o-ne-gai-shi-más</div></div>
+<div class="pp-card"><div class="pp-pt">Drink menu, please.</div><div class="pp-jp-row"><span class="pp-jp">Dorinku menyū o onegaishimasu</span><button class="pp-play" onclick="speakJP(this,'Dorinku menyū o onegaishimasu')" aria-label="Play audio">🔊</button></div><div class="pp-phon">do-rin-ku me-ni-ú ô o-ne-gai-shi-más</div></div>
   </div>
 </div>
 <div id="chatPanel">
@@ -1192,6 +1197,18 @@ function openPhrasesPanel() {
   closeDockLayers();
   if (!wasOpen) document.getElementById('phrasesPanel').classList.add('open');
 }
+function speakJP(btn, text) {
+  if (!('speechSynthesis' in window)) { alert('Áudio não suportado neste navegador.'); return; }
+  window.speechSynthesis.cancel();
+  var u = new SpeechSynthesisUtterance(text);
+  u.lang = 'ja-JP';
+  u.rate = 0.85;
+  document.querySelectorAll('.pp-play.speaking').forEach(function(b) { b.classList.remove('speaking'); });
+  if (btn) btn.classList.add('speaking');
+  u.onend = function() { if (btn) btn.classList.remove('speaking'); };
+  u.onerror = function() { if (btn) btn.classList.remove('speaking'); };
+  window.speechSynthesis.speak(u);
+}
 function setDockActive(name) {
   document.querySelectorAll('.dock-item.dk-active').forEach(function(d) { d.classList.remove('dk-active'); });
   var el = document.getElementById('dock-' + name);
@@ -1254,7 +1271,9 @@ function playIntro() {
   if (s) s.style.display = 'block';
   v.currentTime = 0;
   var pr = v.play();
-  if (pr && pr.catch) pr.catch(function() {});
+  if (pr && pr.catch) pr.catch(function() { endIntro(false); });
+  // safety: if the video never actually loads/plays, don't leave a black screen stuck
+  setTimeout(function() { if (v.readyState < 2) endIntro(false); }, 4000);
 }
 function toggleIntroSound() {
   var v = document.getElementById('introVideo');
